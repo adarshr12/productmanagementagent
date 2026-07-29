@@ -1,0 +1,22 @@
+// Embeds a search query with Voyage AI (server-side only). Used at roadmap time
+// to turn the person's intake answers into a vector we can search chunks with.
+export async function embedQuery(text: string): Promise<number[]> {
+  const res = await fetch("https://api.voyageai.com/v1/embeddings", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.VOYAGE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      input: [text],
+      model: process.env.VOYAGE_MODEL || "voyage-3.5-lite",
+      input_type: "query",
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Voyage error ${res.status}: ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.data[0].embedding as number[];
+}
