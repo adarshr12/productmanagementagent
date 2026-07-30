@@ -61,7 +61,7 @@ create index chunks_document_id_idx on chunks (document_id);
 create table intake_responses (
   id                uuid primary key default gen_random_uuid(),
   experience_level  text,
-  current_role      text,
+  "current_role"    text,   -- quoted: current_role is a reserved word in Postgres
   current_domain    text,
   target_role       text,
   biggest_skill_gap text,
@@ -162,6 +162,13 @@ create policy admin_all_documents on documents
   for all to authenticated using (true) with check (true);
 create policy admin_all_chunks on chunks
   for all to authenticated using (true) with check (true);
+
+-- Security hardening (from Supabase advisor):
+-- 1) completion view respects the querying user's RLS (service role still sees all)
+-- 2) pin function search_path to prevent injection
+alter view roadmap_completion set (security_invoker = on);
+alter function set_updated_at() set search_path = public;
+alter function match_chunks(vector, int) set search_path = public;
 
 -- intake_responses, roadmaps, roadmap_steps, rate_limits:
 -- NO policies on purpose => the browser (anon) and even logged-in users get
