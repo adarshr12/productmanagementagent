@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
   "functions": {
     "api/ingest.py": {
-      "maxDuration": 60,
-      "includeFiles": ".env.production"
+      "maxDuration": 60
     }
   }
 }
