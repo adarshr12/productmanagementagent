@@ -1,13 +1,14 @@
 // SERVER ONLY. Fetches a roadmap + its steps by the public share token.
 import { getSupabaseAdmin } from "./supabaseAdmin";
 
+export type StepStatus = "todo" | "in_progress" | "done";
+
 export type RoadmapStep = {
   id: string;
   step_order: number;
   title: string;
   description: string | null;
-  is_completed: boolean;
-  completed_at: string | null;
+  status: StepStatus;
 };
 
 export type RoadmapView = {
@@ -15,6 +16,7 @@ export type RoadmapView = {
     id: string;
     title: string | null;
     content: string | null;
+    role: string | null;
     model: string | null;
     created_at: string;
     share_token: string;
@@ -28,14 +30,14 @@ export async function getRoadmapByToken(
   const supabaseAdmin = getSupabaseAdmin();
   const { data: roadmap, error } = await supabaseAdmin
     .from("roadmaps")
-    .select("id, title, content, model, created_at, share_token")
+    .select("id, title, content, role, model, created_at, share_token")
     .eq("share_token", token)
     .single();
   if (error || !roadmap) return null;
 
   const { data: steps } = await supabaseAdmin
     .from("roadmap_steps")
-    .select("id, step_order, title, description, is_completed, completed_at")
+    .select("id, step_order, title, description, status")
     .eq("roadmap_id", roadmap.id)
     .order("step_order", { ascending: true });
 

@@ -1,8 +1,9 @@
-// Makes the single LLM call to Groq that generates the roadmap.
-// Asks for a JSON object back so we can split it into trackable steps.
-export async function generateRoadmapJSON(
+// Makes a single JSON-returning call to Groq. Used for both role matching and
+// roadmap generation.
+export async function groqJSON(
   systemPrompt: string,
-  userContent: string
+  userContent: string,
+  maxTokens = 2048
 ): Promise<string> {
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -13,7 +14,7 @@ export async function generateRoadmapJSON(
     body: JSON.stringify({
       model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
       temperature: 0.4,
-      max_tokens: 2048,
+      max_tokens: maxTokens,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },

@@ -1,26 +1,27 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
-// Marks a roadmap step complete/incomplete. The share token both identifies the
-// roadmap and authorizes the change (v0: one shared link can view + tick).
+// Moves a roadmap step between Kanban columns (todo / in_progress / done).
+// The share token identifies the roadmap and authorizes the change.
 export const runtime = "nodejs";
+
+const VALID = new Set(["todo", "in_progress", "done"]);
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const shareToken = String(body?.shareToken || "");
   const stepId = String(body?.stepId || "");
-  const isCompleted = Boolean(body?.isCompleted);
+  const status = String(body?.status || "");
 
-  if (!shareToken || !stepId) {
+  if (!shareToken || !stepId || !VALID.has(status)) {
     return NextResponse.json(
-      { error: "Missing shareToken or stepId." },
+      { error: "Missing shareToken/stepId or invalid status." },
       { status: 400 }
     );
   }
 
   const supabaseAdmin = getSupabaseAdmin();
 
-  // The step must belong to the roadmap named by this share token.
   const { data: roadmap } = await supabaseAdmin
     .from("roadmaps")
     .select("id")
@@ -42,11 +43,13 @@ export async function POST(req: Request) {
     );
   }
 
+  const isDone = status === "done";
   const { error } = await supabaseAdmin
     .from("roadmap_steps")
     .update({
-      is_completed: isCompleted,
-      completed_at: isCompleted ? new Date().toISOString() : null,
+      status,
+      is_completed: isDone,
+      completed_at: isDone ? new Date().toISOString() : null,
     })
     .eq("id", stepId);
   if (error) {

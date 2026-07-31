@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { getRoadmapByToken } from "@/lib/getRoadmap";
 import ResultsClient from "./ResultsClient";
 
-// Always fetch fresh so completion state is up to date.
 export const dynamic = "force-dynamic";
 
 export default async function ResultsPage({
@@ -17,6 +16,7 @@ export default async function ResultsPage({
     <ResultsClient
       shareToken={params.shareToken}
       title={data.roadmap.title || "Your Career Roadmap"}
+      role={data.roadmap.role || ""}
       overview={data.roadmap.content || ""}
       initialSteps={data.steps}
     />
