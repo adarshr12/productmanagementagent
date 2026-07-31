@@ -29,6 +29,33 @@ import urllib.request                          # noqa: E402
 import urllib.error                            # noqa: E402
 
 
+def _load_env_files():
+    """Load KEY=VALUE pairs from a .env.production file if one is bundled.
+    Does not override variables already set in the real environment, so this is
+    a no-op when env vars are configured in the Vercel dashboard."""
+    candidates = [
+        os.path.join(os.getcwd(), ".env.production"),
+        os.path.join(os.path.dirname(__file__), ".env.production"),
+        os.path.join(os.path.dirname(__file__), "..", ".env.production"),
+    ]
+    for path in candidates:
+        try:
+            if os.path.isfile(path):
+                with open(path, "r", encoding="utf-8") as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if not line or line.startswith("#") or "=" not in line:
+                            continue
+                        key, value = line.split("=", 1)
+                        os.environ.setdefault(key.strip(), value.strip())
+                return
+        except Exception:
+            continue
+
+
+_load_env_files()
+
+
 SUPABASE_URL = (
     os.environ.get("SUPABASE_URL")
     or os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
