@@ -1,10 +1,17 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
-  title: "Career Roadmap — PM / PjM / Product Analyst / BA",
+  title: "Find your best-fit product role — career roadmaps",
   description:
-    "Get a personalized, step-by-step learning roadmap to move into Product Manager, Project Manager, Product Analyst, or Business Analyst roles in India.",
+    "Answer a few questions and get your best-fit product role (PM, AI PM, Growth, BA and more) with a match score, plus a personalized, trackable roadmap. Built for career-switchers in India.",
 };
 
 export default function RootLayout({
@@ -13,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={jakarta.variable}>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }

@@ -3,39 +3,55 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
+import { ROLE_CATALOG } from "@/lib/roles";
 import type { RoleMatch } from "@/lib/roleMatch";
 
-type Phase = "form" | "matching" | "roles" | "generating";
+type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
-export default function IntakePage() {
+export default function Home() {
   const router = useRouter();
-  const [phase, setPhase] = useState<Phase>("form");
+  const [phase, setPhase] = useState<Phase>("landing");
+  const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [matches, setMatches] = useState<RoleMatch[]>([]);
-  const [intakeId, setIntakeId] = useState<string>("");
+  const [intakeId, setIntakeId] = useState("");
   const [pickingRole, setPickingRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function update(id: string, value: string) {
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+  const total = INTAKE_QUESTIONS.length;
+  const q = INTAKE_QUESTIONS[step];
+
+  function setAnswer(id: string, value: string) {
+    setAnswers((p) => ({ ...p, [id]: value }));
   }
 
-  async function submitForm(e: React.FormEvent) {
-    e.preventDefault();
+  function next() {
     setError(null);
-    const missing = INTAKE_QUESTIONS.find(
-      (q) => q.required && !String(answers[q.id] ?? "").trim()
-    );
-    if (missing) {
-      setError(`Please answer: ${missing.label}`);
+    if (q.required && !String(answers[q.id] ?? "").trim()) {
+      setError("Please answer this to continue.");
       return;
     }
+    if (step < total - 1) setStep(step + 1);
+    else submit();
+  }
+
+  function pick(id: string, value: string) {
+    setAnswer(id, value);
+    setError(null);
+    setTimeout(() => {
+      if (step < total - 1) setStep(step + 1);
+      else submit({ ...answers, [id]: value });
+    }, 140);
+  }
+
+  async function submit(finalAnswers?: Record<string, string>) {
+    const payload = finalAnswers ?? answers;
     setPhase("matching");
     try {
       const res = await fetch("/api/role-match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ answers: payload }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Something went wrong.");
@@ -44,7 +60,7 @@ export default function IntakePage() {
       setPhase("roles");
     } catch (err: any) {
       setError(err?.message || "Something went wrong. Please try again.");
-      setPhase("form");
+      setPhase("intake");
     }
   }
 
@@ -68,165 +84,291 @@ export default function IntakePage() {
     }
   }
 
-  // ---- role results view ----
+  // ================= LANDING =================
+  if (phase === "landing") {
+    return (
+      <main>
+        <nav className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
+          <span className="text-lg font-extrabold tracking-tight">
+            <span className="text-brand-600">◆</span> ProductPath
+          </span>
+          <span className="text-xs font-medium text-muted">
+            Career transition · India
+          </span>
+        </nav>
+
+        <section className="mx-auto max-w-3xl px-5 pt-10 pb-6 text-center sm:pt-16">
+          <span className="pill bg-brand-50 text-brand-700">
+            Free · No login needed
+          </span>
+          <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+            Not sure which product role
+            <br className="hidden sm:block" /> actually fits you?
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-muted">
+            Answer a few questions about your background. We&apos;ll score{" "}
+            <strong className="text-ink">all 19 product roles</strong> for how
+            easily you can transition into each — then build you a step-by-step
+            roadmap you can track like a to-do board.
+          </p>
+          <button
+            onClick={() => setPhase("intake")}
+            className="btn-primary mt-8 px-7 py-3.5 text-base"
+          >
+            Find my best-fit role →
+          </button>
+          <p className="mt-3 text-xs text-muted">Takes about 2 minutes</p>
+
+          {/* role avatars strip */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+            {ROLE_CATALOG.slice(0, 12).map((r) => (
+              <span
+                key={r.id}
+                title={r.label}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-lg"
+              >
+                {r.emoji}
+              </span>
+            ))}
+            <span className="ml-1 text-sm font-medium text-muted">
+              +7 more
+            </span>
+          </div>
+        </section>
+
+        {/* how it works */}
+        <section className="mx-auto max-w-4xl px-5 py-12">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                icon: "📝",
+                title: "Tell us your background",
+                body: "Experience, current role, strengths, and where you want to go.",
+              },
+              {
+                icon: "🎯",
+                title: "Get every role scored",
+                body: "See your fit for AI PM, Growth PM, BA and more — best match first.",
+              },
+              {
+                icon: "🗺️",
+                title: "Follow a trackable roadmap",
+                body: "Pick a role and get a Kanban board to move from To Do to Done.",
+              },
+            ].map((s, i) => (
+              <div key={i} className="card">
+                <div className="text-2xl">{s.icon}</div>
+                <h3 className="mt-3 font-bold">{s.title}</h3>
+                <p className="mt-1 text-sm text-muted">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="mx-auto max-w-4xl px-5 pb-10 text-center text-xs text-muted">
+          Built for people moving into Product Manager, Analyst, and related roles.
+        </footer>
+      </main>
+    );
+  }
+
+  // ================= ROLE RESULTS =================
   if (phase === "roles" || phase === "generating") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-        <header className="mb-8">
-          <p className="text-sm font-semibold text-brand-600">Your best-fit roles</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
-            Which role fits you best?
+      <main className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
+        <header className="mb-7">
+          <p className="text-sm font-semibold text-brand-600">Your matches</p>
+          <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
+            Roles ranked by how well they fit you
           </h1>
-          <p className="mt-3 text-slate-600">
-            Based on your background, here&apos;s how well each product role matches —
-            higher means an easier transition. Pick one to get your roadmap.
+          <p className="mt-2 text-muted">
+            Higher score = easier transition from your background. Pick one to get
+            your roadmap.
           </p>
         </header>
 
         {error && (
-          <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </p>
         )}
 
         <div className="space-y-3">
-          {matches.map((m, i) => (
-            <div
-              key={m.id}
-              className={`card ${i === 0 ? "ring-2 ring-brand-500" : ""}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{m.label}</h3>
-                    {i === 0 && (
-                      <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700">
-                        Best match
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-xs uppercase tracking-wide text-slate-400">
-                    {m.family}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <div className="text-xl font-bold text-brand-600">{m.score}</div>
-                  <div className="text-[10px] uppercase text-slate-400">match</div>
-                </div>
-              </div>
-
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-brand-500"
-                  style={{ width: `${m.score}%` }}
-                />
-              </div>
-
-              <p className="mt-3 text-sm text-slate-600">{m.description}</p>
-              {m.reason && (
-                <p className="mt-2 text-sm italic text-slate-500">{m.reason}</p>
-              )}
-
-              <button
-                onClick={() => chooseRole(m.id)}
-                disabled={phase === "generating"}
-                className="btn-primary mt-4 w-full"
+          {matches.map((m, i) => {
+            const emoji =
+              ROLE_CATALOG.find((r) => r.id === m.id)?.emoji ?? "•";
+            return (
+              <div
+                key={m.id}
+                className={`card ${i === 0 ? "border-brand-500 ring-2 ring-brand-100" : ""}`}
               >
-                {pickingRole === m.id
-                  ? "Building your roadmap…"
-                  : `Choose ${m.label} →`}
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-50 text-2xl">
+                    {emoji}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="truncate font-bold">{m.label}</h3>
+                      {i === 0 && (
+                        <span className="pill bg-brand-600 text-white">
+                          Best match
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                      {m.family}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-2xl font-extrabold text-brand-600">
+                      {m.score}
+                    </div>
+                    <div className="text-[10px] uppercase text-slate-400">
+                      / 100
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-brand-600"
+                    style={{ width: `${m.score}%` }}
+                  />
+                </div>
+
+                <p className="mt-3 text-sm text-slate-600">{m.description}</p>
+                {m.reason && (
+                  <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm italic text-slate-600">
+                    {m.reason}
+                  </p>
+                )}
+
+                <button
+                  onClick={() => chooseRole(m.id)}
+                  disabled={phase === "generating"}
+                  className="btn-primary mt-4 w-full"
+                >
+                  {pickingRole === m.id
+                    ? "Building your roadmap…"
+                    : `Choose ${m.label} →`}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </main>
     );
   }
 
-  // ---- intake form view ----
+  // ================= CONVERSATIONAL INTAKE =================
+  const pct = Math.round(((step + (phase === "matching" ? 1 : 0)) / total) * 100);
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-      <header className="mb-8">
-        <p className="text-sm font-semibold text-brand-600">
-          Career Transition · India
-        </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
-          Find your best-fit product role
-        </h1>
-        <p className="mt-3 text-slate-600">
-          Answer a few questions about your background. We&apos;ll score every
-          product role for how well it fits you, then build a step-by-step roadmap
-          for the one you choose. Takes about two minutes.
-        </p>
-      </header>
+    <main className="mx-auto flex min-h-screen max-w-xl flex-col px-5 py-6">
+      {/* progress */}
+      <div className="mb-8">
+        <div className="mb-2 flex items-center justify-between text-xs font-medium text-muted">
+          <span>
+            Question {Math.min(step + 1, total)} of {total}
+          </span>
+          <span>{pct}%</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-brand-600 transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
 
-      <form onSubmit={submitForm} className="card space-y-6">
-        {INTAKE_QUESTIONS.map((q) => (
-          <div key={q.id}>
-            <label htmlFor={q.id} className="field-label">
-              {q.label}
-              {q.required && <span className="text-brand-600"> *</span>}
-            </label>
+      {phase === "matching" ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <div className="text-4xl">🎯</div>
+          <h2 className="mt-4 text-xl font-bold">Scoring all 19 roles for you…</h2>
+          <p className="mt-1 text-sm text-muted">
+            This takes a few seconds — please don&apos;t close the page.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col">
+          <h2 className="text-2xl font-extrabold tracking-tight">{q.label}</h2>
 
+          <div className="mt-6 space-y-3">
             {q.type === "select" ? (
-              <select
-                id={q.id}
-                className="field-input"
-                value={answers[q.id] ?? ""}
-                onChange={(e) => update(q.id, e.target.value)}
-                required={q.required}
-              >
-                <option value="" disabled>
-                  Select an option…
-                </option>
-                {q.options?.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
+              q.options?.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => pick(q.id, opt)}
+                  className={`chip ${answers[q.id] === opt ? "chip-selected" : ""}`}
+                >
+                  <span
+                    className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                      answers[q.id] === opt
+                        ? "border-brand-600 bg-brand-600 text-[10px] text-white"
+                        : "border-slate-300"
+                    }`}
+                  >
+                    {answers[q.id] === opt ? "✓" : ""}
+                  </span>
+                  {opt}
+                </button>
+              ))
             ) : q.type === "textarea" ? (
               <textarea
-                id={q.id}
-                className="field-input min-h-[90px]"
+                autoFocus
+                className="field-input min-h-[120px]"
                 placeholder={q.placeholder}
                 value={answers[q.id] ?? ""}
-                onChange={(e) => update(q.id, e.target.value)}
-                required={q.required}
+                onChange={(e) => setAnswer(q.id, e.target.value)}
               />
             ) : (
               <input
-                id={q.id}
+                autoFocus
                 type="text"
                 className="field-input"
                 placeholder={q.placeholder}
                 value={answers[q.id] ?? ""}
-                onChange={(e) => update(q.id, e.target.value)}
-                required={q.required}
+                onKeyDown={(e) => e.key === "Enter" && next()}
+                onChange={(e) => setAnswer(q.id, e.target.value)}
               />
             )}
           </div>
-        ))}
 
-        {error && (
-          <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+          {error && (
+            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          className="btn-primary w-full"
-          disabled={phase === "matching"}
-        >
-          {phase === "matching" ? "Scoring roles for you…" : "See my role matches"}
-        </button>
-        {phase === "matching" && (
-          <p className="text-center text-xs text-slate-500">
-            This takes a few seconds — please don&apos;t close the page.
-          </p>
-        )}
-      </form>
+          {/* nav: Back + (Continue/Skip for non-chip questions) */}
+          <div className="mt-auto flex items-center justify-between pt-8">
+            <button
+              onClick={() => {
+                setError(null);
+                step === 0 ? setPhase("landing") : setStep(step - 1);
+              }}
+              className="btn-ghost"
+            >
+              ← Back
+            </button>
+
+            {q.type !== "select" && (
+              <div className="flex gap-2">
+                {!q.required && (
+                  <button
+                    onClick={() => (step < total - 1 ? setStep(step + 1) : submit())}
+                    className="btn-ghost"
+                  >
+                    Skip
+                  </button>
+                )}
+                <button onClick={next} className="btn-primary">
+                  {step === total - 1 ? "See my matches" : "Continue"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
