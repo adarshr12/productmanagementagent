@@ -1,11 +1,18 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Lobster } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-jakarta",
   weight: ["400", "500", "600", "700", "800"],
+});
+
+// Decorative font for the hero keyword (from the 21st.dev "Underline Hero").
+const lobster = Lobster({
+  subsets: ["latin"],
+  variable: "--font-lobster",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={jakarta.variable}>
+    <html lang="en" className={`${jakarta.variable} ${lobster.variable}`}>
       <body className="font-sans">{children}</body>
     </html>
   );

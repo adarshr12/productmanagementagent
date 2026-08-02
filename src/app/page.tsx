@@ -88,39 +88,68 @@ export default function Home() {
   if (phase === "landing") {
     return (
       <main>
-        <nav className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
-          <span className="text-lg font-extrabold tracking-tight">
-            <span className="text-brand-600">◆</span> ProductPath
-          </span>
-          <span className="text-xs font-medium text-muted">
-            Career transition · India
-          </span>
+        {/* nav — adapted from 21st.dev "Underline Hero" (sticky, blurred) */}
+        <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5">
+            <span className="text-lg font-extrabold tracking-tight">
+              <span className="text-brand-600">◆</span> ProductPath
+            </span>
+            <span className="hidden text-xs font-medium text-muted sm:block">
+              Career transition · India
+            </span>
+          </div>
         </nav>
 
-        <section className="mx-auto max-w-3xl px-5 pt-10 pb-6 text-center sm:pt-16">
-          <span className="pill bg-brand-50 text-brand-700">
+        {/* hero — 21st.dev underline + fade-up animation, recolored to our theme */}
+        <section className="mx-auto flex max-w-3xl flex-col items-center px-5 pb-6 pt-14 text-center sm:pt-20">
+          <span className="pill animate-fade-up bg-brand-50 text-brand-700">
             Free · No login needed
           </span>
-          <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            Not sure which product role
-            <br className="hidden sm:block" /> actually fits you?
+          <h1 className="animate-fade-up mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl">
+            Which product role
+            <br className="hidden sm:block" /> truly{" "}
+            <span className="relative inline-block">
+              <span className="font-lobster font-normal text-brand-600">
+                fits
+              </span>
+              <svg
+                className="hero-underline text-accent-500"
+                viewBox="0 0 170 30"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 9C32.8203 5.34032 108.769 -0.881146 166 3.51047"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  fill="none"
+                  opacity="0.9"
+                />
+              </svg>
+            </span>{" "}
+            you?
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-muted">
+          <p className="animate-fade-up delay-1 mx-auto mt-6 max-w-xl text-lg text-muted">
             Answer a few questions about your background. We&apos;ll score{" "}
             <strong className="text-ink">all 19 product roles</strong> for how
-            easily you can transition into each — then build you a step-by-step
+            easily you can transition into each — then build a step-by-step
             roadmap you can track like a to-do board.
           </p>
-          <button
-            onClick={() => setPhase("intake")}
-            className="btn-primary mt-8 px-7 py-3.5 text-base"
-          >
-            Find my best-fit role →
-          </button>
-          <p className="mt-3 text-xs text-muted">Takes about 2 minutes</p>
+          <div className="animate-fade-up delay-2">
+            <button
+              onClick={() => setPhase("intake")}
+              className="btn-primary btn-bounce mt-8 px-8 py-4 text-base"
+            >
+              Find my best-fit role →
+            </button>
+            <p className="mt-3 text-xs text-muted">Takes about 2 minutes</p>
+          </div>
 
           {/* role avatars strip */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+          <div className="animate-fade-up delay-3 mt-12 flex flex-wrap items-center justify-center gap-2">
             {ROLE_CATALOG.slice(0, 12).map((r) => (
               <span
                 key={r.id}
@@ -130,9 +159,7 @@ export default function Home() {
                 {r.emoji}
               </span>
             ))}
-            <span className="ml-1 text-sm font-medium text-muted">
-              +7 more
-            </span>
+            <span className="ml-1 text-sm font-medium text-muted">+7 more</span>
           </div>
         </section>
 
