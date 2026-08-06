@@ -17,6 +17,13 @@ set, all orchestrated the same way and all running on **one underlying LLM** (di
 system prompt, tools, and retrieval scope — not by swapping model providers). See §4 for the full
 multi-agent architecture. The agents at launch:
 
+0. **Mentor Agent** (the front door — see §4.6) — does **not** wait for a form submission. It
+   interviews the user conversationally ("what's your current role, what are you preparing for,
+   what have you tried so far?"), diagnoses gaps against what a target role actually needs, and
+   responds the way a real mentor would: *"I can see four gaps here — start with these two, that's
+   roughly 6-8 hours, here's the best resource for it. Once that's solid, come back and we'll do
+   interview practice on it."* It sequences and hands off to the other agents below rather than
+   requiring the user to pick a tab and fill a form.
 1. **Tutor Agent** — explains any PM/BA/Scrum concept in plain language, grounded in your content,
    with citations.
 2. **Interviewer Agent** — runs the practice loop: asks a question, takes the answer, scores it
@@ -154,7 +161,7 @@ shape, only the registry in §4.2 grows.
 ### 4.2 Agent registry
 ```ts
 type AgentId =
-  | 'tutor' | 'interviewer' | 'communication_coach'
+  | 'mentor' | 'tutor' | 'interviewer' | 'communication_coach'
   | 'resume_analyzer' | 'email_drafter' | 'benchmark';
 
 type AgentConfig = {
@@ -166,6 +173,9 @@ type AgentConfig = {
 };
 
 const AGENTS: Record<AgentId, AgentConfig> = {
+  mentor:              { tools: ['search_knowledge_base', 'get_user_progress',
+                                 'create_roadmap', 'update_roadmap_item',
+                                 'delegate_to_agent'], model: 'claude-sonnet-5', ... },
   tutor:               { tools: ['search_knowledge_base'], model: 'claude-haiku-4-5', ... },
   interviewer:         { tools: ['search_knowledge_base', 'call_communication_coach',
                                  'log_interview_attempt'], model: 'claude-sonnet-5', ... },
@@ -176,8 +186,10 @@ const AGENTS: Record<AgentId, AgentConfig> = {
   benchmark:           { tools: ['search_knowledge_base'], model: 'claude-sonnet-5', ... },
 };
 ```
-Adding a 7th agent (say, a "Stakeholder Simulator" that role-plays a difficult stakeholder) means
-adding one entry here plus its system prompt — nothing else in the system needs to change.
+Adding an 8th agent (say, a "Stakeholder Simulator" that role-plays a difficult stakeholder) means
+adding one entry here plus its system prompt — nothing else in the system needs to change. The
+Mentor's `delegate_to_agent` tool takes an `AgentId` — so extending the roster automatically
+extends what the Mentor is able to route a user into, no separate wiring required.
 
 ### 4.3 Orchestrator (the one thing that never changes)
 ```
@@ -198,22 +210,55 @@ tools, so mid-evaluation it invokes the Coach's tone/clarity rubric as a sub-sco
 duplicating that judgment logic itself — one skill reused by another agent, not copy-pasted.
 
 ### 4.4 Agent selection (how a turn gets routed to an agent)
-**MVP: explicit selection.** The user picks a mode (Tutor / Interview / Resume / Email /
-Benchmark / Communication Coach) before interacting, so `agentId` is known before the request is
-even built — no intent-classification step, no risk of misrouting a message to the wrong skill.
-A single unified chatbox (where a cheap classifier call picks the agent automatically from
-free-text) is a valid v2 upgrade, traded off in §16 — it's a smoother UX at the cost of one extra
-LLM call's latency and a small misroute risk.
+**The Mentor is the default landing experience** — a new or returning user drops into the Mentor
+by default, not a tab picker. The Mentor conducts the conversation itself (§4.6) and calls
+`delegate_to_agent` when a specific skill is needed (e.g. it decides the user is ready for
+interview practice and hands off to the Interviewer, carrying context with it). Direct tabs to
+each specialist agent (Tutor / Interview / Resume / Email / Benchmark / Communication Coach)
+still exist for a user who already knows exactly what they want and doesn't need guidance — both
+paths go through the same `dispatch()` in §4.3, so "guided" vs. "direct" is just which `agentId`
+the UI starts on, not a different code path.
 
 ### 4.5 Per-agent skill summary
 | Agent | Skill | Primary tools | Model | Judgment-heavy? |
 |---|---|---|---|---|
+| Mentor | Diagnose gaps conversationally, sequence a roadmap with time estimates + resources, track progress, delegate to specialists | `search_knowledge_base`, `get_user_progress`, `create_roadmap`, `update_roadmap_item`, `delegate_to_agent` | Sonnet | Yes |
 | Tutor | Explain concepts plainly, grounded in content, with citations | `search_knowledge_base` | Haiku | No — retrieval quality matters more than model IQ |
 | Interviewer | Ask → score against fixed rubric → model answer → retry | `search_knowledge_base`, `call_communication_coach`, `log_interview_attempt` | Sonnet | Yes |
 | Communication Coach | Audit tone/clarity/conciseness/professionalism on any text or voice transcript | — (pure judgment, no retrieval needed) | Haiku | Somewhat — kept cheap since it's called frequently (standalone + as an Interviewer sub-check) |
 | Resume Analyzer | Parse resume, benchmark against role-specific best practice, structured feedback | `search_knowledge_base`, `parse_resume` | Sonnet | Yes |
 | Email Drafter | Template retrieval, or custom draft grounded in content | `search_knowledge_base` | Haiku | No |
 | Benchmark | Compare a full answer/approach vs. curated reference, gap report | `search_knowledge_base` | Sonnet | Yes |
+
+### 4.6 Mentor Agent — the guided experience in detail
+This is the direct answer to "it should feel like an expert guiding you, not a form": the Mentor
+never opens with a blank input box. It runs a **diagnostic conversation** first —
+role-appropriate questions about current experience, target role, what's already been tried — and
+only after it has enough signal does it produce guidance, delivered the way a real mentor would
+speak, e.g.:
+
+> "Based on what you've told me, I can see four gaps: stakeholder communication, prioritization
+> frameworks, a metrics-driven mindset, and interview structure (STAR method). Let's start with
+> prioritization and metrics — that's roughly 6-8 hours of focused work. Here's the best resource
+> in my library for it: [linked chunk/doc]. Once you've gone through that, come back and I'll run
+> you through interview practice on exactly those two topics."
+
+Mechanically:
+1. **Diagnose** — a short structured Q&A (stored as a `skill_assessment`, §5.11) rather than a
+   long form; each answer can prompt a natural follow-up question, same as a real conversation.
+2. **Roadmap** — `create_roadmap` writes an ordered list of `roadmap_items`, each with an estimated
+   time investment, a linked knowledge-base resource (via `search_knowledge_base`), and a
+   completion criterion (e.g. "score 7+/10 on 3 interview questions in this topic").
+3. **Guide, don't dump** — the Mentor surfaces one or two next steps at a time, not the whole
+   roadmap at once, and re-explains *why* that order matters (matches how a mentor actually
+   coaches, vs. handing over a checklist).
+4. **Delegate** — when a roadmap item is best served by a specialist (practice questions →
+   Interviewer, resume feedback → Resume Analyzer), the Mentor calls `delegate_to_agent`, which
+   starts that agent's session pre-loaded with the relevant context (topic, target role) so the
+   user never has to re-explain themselves.
+5. **Follow up** — on return visits, the Mentor opens with progress (`get_user_progress`): what's
+   done, what's next, whether it's time to reassess — closing the loop instead of resetting to a
+   blank state every session.
 
 ---
 
@@ -346,12 +391,12 @@ $$;
 
 ```sql
 create type agent_type as enum
-  ('tutor', 'interviewer', 'communication_coach', 'resume_analyzer', 'email_drafter', 'benchmark');
+  ('mentor', 'tutor', 'interviewer', 'communication_coach', 'resume_analyzer', 'email_drafter', 'benchmark');
 
 create table public.chat_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  agent_type agent_type not null default 'tutor',
+  agent_type agent_type not null default 'mentor',
   title text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -482,7 +527,54 @@ create table public.analysis_reports (
 );
 ```
 
-### 5.9 Audit log (enterprise requirement — append-only, never updated/deleted)
+### 5.9 Mentor Agent — diagnostics, roadmap, progress
+
+```sql
+create table public.skill_assessments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  target_role text not null,
+  qa_transcript jsonb not null,            -- [{question, answer}] — the diagnostic conversation
+  identified_gaps jsonb not null,          -- [{topic, severity}]
+  created_at timestamptz not null default now()
+);
+
+create type roadmap_item_status as enum ('locked', 'not_started', 'in_progress', 'completed');
+
+create table public.learning_roadmaps (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  assessment_id uuid references public.skill_assessments(id),
+  target_role text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.roadmap_items (
+  id uuid primary key default gen_random_uuid(),
+  roadmap_id uuid not null references public.learning_roadmaps(id) on delete cascade,
+  sequence_order int not null,
+  topic text not null,
+  estimated_hours numeric(4,1),
+  resource_chunk_ids uuid[] default '{}',  -- pulled via search_knowledge_base at roadmap creation
+  completion_criteria text,                -- e.g. "score 7+/10 on 3 interview questions in this topic"
+  delegate_agent agent_type,               -- which specialist agent fulfills this step, if any
+  status roadmap_item_status not null default 'not_started',
+  completed_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique (roadmap_id, sequence_order)
+);
+
+create index roadmap_items_roadmap_idx on public.roadmap_items (roadmap_id, sequence_order);
+create index learning_roadmaps_user_idx on public.learning_roadmaps (user_id, updated_at desc);
+```
+
+`get_user_progress` (a Mentor tool) reads `learning_roadmaps` + `roadmap_items` for the current
+user; `update_roadmap_item` flips status as the user completes items or as delegated agents report
+back completion (e.g. the Interviewer logging a passing score against a roadmap item's
+`completion_criteria` marks that item `completed` automatically).
+
+### 5.10 Audit log (enterprise requirement — append-only, never updated/deleted)
 
 ```sql
 create table public.audit_log (
@@ -497,7 +589,7 @@ create table public.audit_log (
 create index audit_log_actor_idx on public.audit_log (actor_user_id, created_at desc);
 ```
 
-### 5.10 RLS policy pattern (applied per-table, not shown for every table for brevity)
+### 5.11 RLS policy pattern (applied per-table, not shown for every table for brevity)
 
 ```sql
 alter table public.profiles enable row level security;
@@ -542,8 +634,10 @@ create policy "admin reads audit log" on public.audit_log
 ```
 
 Same owner-scoped pattern applies to `interview_attempts`, `email_drafts`, `analysis_reports`,
-`consent_records`, `data_subject_requests`. `interview_questions` and `email_templates` are
-public-read (authenticated), admin-write-only, same as `documents`/`chunks`.
+`consent_records`, `data_subject_requests`, `skill_assessments`, `learning_roadmaps`, and
+`roadmap_items` (scoped via its parent `learning_roadmaps.user_id`, same join pattern as
+`messages`). `interview_questions` and `email_templates` are public-read (authenticated),
+admin-write-only, same as `documents`/`chunks`.
 
 ---
 
@@ -626,10 +720,11 @@ LLM-as-judge with a fixed rubric, not free-form grading:
 
 | Method & Path | Auth | Agent / area | Purpose |
 |---|---|---|---|
-| `POST /api/agents/:agentId/message` | user | any conversational agent | Send a message to the named agent, get streamed answer + citations (one endpoint shape for all of Tutor/Interviewer/Email Drafter/Benchmark — `agentId` selects the registry entry) |
+| `POST /api/agents/:agentId/message` | user | any conversational agent | Send a message to the named agent, get streamed answer + citations (one endpoint shape for all of Mentor/Tutor/Interviewer/Email Drafter/Benchmark — `agentId` selects the registry entry; default landing experience uses `agentId=mentor`) |
 | `GET /api/agents/:agentId/sessions` | user | any | List own sessions for that agent |
 | `GET /api/agents/:agentId/sessions/:id/messages` | user | any | Session history |
 | `DELETE /api/agents/:agentId/sessions/:id` | user | any | Delete a session |
+| `GET /api/mentor/roadmap` | user | Mentor | Fetch the user's current roadmap + item statuses |
 | `GET /api/interview/questions?topic=` | user | Interviewer | Fetch a practice question |
 | `GET /api/interview/attempts` | user | Interviewer | Own attempt history |
 | `POST /api/communication/audit` | user | Communication Coach | Standalone tone/clarity audit on submitted text |
@@ -663,8 +758,13 @@ write to `documents`/`chunks`/question bank/templates also inserts an `audit_log
 
 ```
 AuthPages          — SignupForm, LoginForm, OAuthButtons
-AgentSwitcher       — top-level nav between agents (Tutor / Interview / Communication Coach /
-                       Resume / Email / Benchmark) — drives which agentId the UI talks to
+MentorHome         — the default landing screen post-login
+                       ├─ DiagnosticChat (conversational Q&A, not a form)
+                       ├─ RoadmapTimeline (sequenced steps, time estimates, resource links, status)
+                       ├─ NextStepCard (surfaces 1-2 steps at a time, not the whole roadmap at once)
+                       └─ ProgressSummary (shown on return visits — what's done, what's next)
+AgentSwitcher       — secondary nav for direct access (Tutor / Interview / Communication Coach /
+                       Resume / Email / Benchmark) — for a user who already knows what they want
 TutorChat          — MessageList, MessageBubble(with CitationChips), MessageInput, VoiceInputButton
 InterviewMode      — TopicPicker, QuestionCard, AnswerInput(text or voice), ScoreBreakdownPanel
                        (shows Interviewer + Communication Coach sub-scores), AttemptHistory
@@ -762,8 +862,8 @@ interview-practice, and resume-review tool has **no PHI in its stated scope**. T
 | LLM provider for generation/evaluation | Anthropic Claude (assumed, given this session) | Claude Haiku for Tutor/Coach/Email Drafter, Sonnet for Interviewer/Resume Analyzer/Benchmark |
 | HIPAA scope | Does this product ever touch health-related data? | Assume **no** — build to GDPR only, skip BAA/paid-plan cost, unless you say otherwise |
 | Anonymous access allowed? | Require login for all agents, or allow a limited anonymous/free trial mode | Require login (simpler RLS, matches "signup module" ask) |
-| Agent selection mechanism | Explicit UI tabs per agent (MVP default) vs. single chatbox + LLM intent classifier | Explicit tabs at launch — simpler, zero misroute risk; revisit once usage data shows whether users want one unified box |
+| Diagnostic depth | How many questions should the Mentor ask before it commits to a roadmap? | 5-7 targeted questions (role, experience level, target companies/timeline, what's been tried, self-rated confidence per topic area) — enough signal without feeling like an intake form |
 
 Once you confirm/adjust these, the next step is provisioning (new Supabase project + this schema
-as a migration) and building the orchestrator + first two agents (Tutor, Interviewer) — nothing
-gets created until you say go.
+as a migration) and building the orchestrator + first two agents (Mentor, Tutor) — nothing gets
+created until you say go.
