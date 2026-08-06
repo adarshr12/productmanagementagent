@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
 import { ROLE_CATALOG } from "@/lib/roles";
 import type { RoleMatch } from "@/lib/roleMatch";
@@ -94,9 +95,12 @@ export default function Home() {
             <span className="text-lg font-extrabold tracking-tight">
               <span className="text-brand-600">◆</span> ProductPath
             </span>
-            <span className="hidden text-xs font-medium text-muted sm:block">
-              Career transition · India
-            </span>
+            <Link
+              href="/login?next=/me"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-ink transition hover:bg-slate-100"
+            >
+              <span aria-hidden>👤</span> Log in
+            </Link>
           </div>
         </nav>
 

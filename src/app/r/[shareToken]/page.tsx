@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getRoadmapByToken } from "@/lib/getRoadmap";
 import ResultsClient from "./ResultsClient";
+import SaveBar from "./SaveBar";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +14,15 @@ export default async function ResultsPage({
   if (!data) notFound();
 
   return (
-    <ResultsClient
-      shareToken={params.shareToken}
-      title={data.roadmap.title || "Your Career Roadmap"}
-      role={data.roadmap.role || ""}
-      overview={data.roadmap.content || ""}
-      initialSteps={data.steps}
-    />
+    <div className="mx-auto max-w-5xl px-4 pt-6">
+      <SaveBar shareToken={params.shareToken} />
+      <ResultsClient
+        shareToken={params.shareToken}
+        title={data.roadmap.title || "Your Career Roadmap"}
+        role={data.roadmap.role || ""}
+        overview={data.roadmap.content || ""}
+        initialSteps={data.steps}
+      />
+    </div>
   );
 }
