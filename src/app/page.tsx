@@ -239,15 +239,13 @@ export default function Home() {
                     {emoji}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="truncate font-bold">{m.label}</h3>
-                      {i === 0 && (
-                        <span className="pill bg-brand-600 text-white">
-                          Best match
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                    <h3 className="font-bold leading-snug">{m.label}</h3>
+                    {i === 0 && (
+                      <span className="pill mt-1 inline-flex bg-brand-600 text-white">
+                        Best match
+                      </span>
+                    )}
+                    <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">
                       {m.family}
                     </p>
                   </div>
