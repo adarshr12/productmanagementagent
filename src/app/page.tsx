@@ -6,6 +6,7 @@ import Link from "next/link";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
 import { ROLE_CATALOG } from "@/lib/roles";
 import type { RoleMatch } from "@/lib/roleMatch";
+import { RoleScoreGauge } from "@/components/RoleScoreGauge";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
@@ -233,7 +234,7 @@ export default function Home() {
                 key={m.id}
                 className={`card ${i === 0 ? "border-brand-500 ring-2 ring-brand-100" : ""}`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-50 text-2xl">
                     {emoji}
                   </div>
@@ -250,21 +251,7 @@ export default function Home() {
                       {m.family}
                     </p>
                   </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-2xl font-extrabold text-brand-600">
-                      {m.score}
-                    </div>
-                    <div className="text-[10px] uppercase text-slate-400">
-                      / 100
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-brand-600"
-                    style={{ width: `${m.score}%` }}
-                  />
+                  <RoleScoreGauge score={m.score} delayMs={i * 120} />
                 </div>
 
                 <p className="mt-3 text-sm text-slate-600">{m.description}</p>
