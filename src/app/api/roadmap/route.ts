@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
 
     // retrieve grounding context for this role + background
     const chunks = await retrieveChunks(roadmapQuery(answers, role), 6);
-    const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
+    const context = chunks
+      .map((c, i) => `[${i + 1}] (Source: "${c.document_title}") ${c.content}`)
+      .join("\n\n");
 
     // ONE Groq call for the roadmap
     const systemPrompt = await loadPrompt("roadmap-system.txt");
@@ -73,6 +75,8 @@ export async function POST(req: NextRequest) {
       step_order: i,
       title: s.title,
       description: s.description,
+      estimated_time: s.estimated_time || null,
+      resource_note: s.resource_note || null,
       status: "todo",
     }));
     const { error: stepErr } = await supabaseAdmin

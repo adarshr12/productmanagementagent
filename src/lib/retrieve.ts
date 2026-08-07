@@ -5,6 +5,7 @@ export type RetrievedChunk = {
   id: string;
   content: string;
   document_id: string;
+  document_title: string;
   similarity: number;
 };
 

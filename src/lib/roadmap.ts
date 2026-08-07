@@ -2,7 +2,12 @@
 export type ParsedRoadmap = {
   title: string;
   overview: string;
-  steps: { title: string; description: string }[];
+  steps: {
+    title: string;
+    description: string;
+    estimated_time: string;
+    resource_note: string;
+  }[];
 };
 
 export function parseRoadmap(raw: string): ParsedRoadmap {
@@ -23,6 +28,8 @@ export function parseRoadmap(raw: string): ParsedRoadmap {
     .map((s: any) => ({
       title: String(s?.title || "").trim(),
       description: String(s?.description || "").trim(),
+      estimated_time: String(s?.estimated_time || "").trim(),
+      resource_note: String(s?.resource_note || "").trim(),
     }))
     .filter((s: { title: string }) => s.title.length > 0);
 

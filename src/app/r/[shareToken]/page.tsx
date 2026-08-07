@@ -22,6 +22,7 @@ export default async function ResultsPage({
         role={data.roadmap.role || ""}
         overview={data.roadmap.content || ""}
         initialSteps={data.steps}
+        startContext={data.startContext}
       />
     </div>
   );
