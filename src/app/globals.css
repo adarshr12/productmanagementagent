@@ -4,7 +4,7 @@
 
 html,
 body {
-  @apply bg-[#f8fafc] text-ink antialiased;
+  @apply bg-paper text-ink antialiased;
 }
 
 /* ---- Buttons (flat, solid, fast transitions) ---- */
@@ -13,32 +13,42 @@ body {
     text-sm font-semibold text-white transition hover:bg-brand-700
     disabled:cursor-not-allowed disabled:opacity-60;
 }
+.btn-gold {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-500 px-5 py-3
+    text-sm font-semibold text-ink transition hover:bg-accent-600
+    disabled:cursor-not-allowed disabled:opacity-60;
+}
 .btn-ghost {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200
-    bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-slate-300
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-brand-100
+    bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-brand-200
+    disabled:cursor-not-allowed disabled:opacity-40;
+}
+.btn-ghost-dark {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15
+    bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10
     disabled:cursor-not-allowed disabled:opacity-40;
 }
 
-/* ---- Option chips (big, clickable, for the conversational intake) ---- */
+/* ---- Option chips (quick-pick, always paired with free text) ---- */
 .chip {
-  @apply flex w-full items-center gap-3 rounded-xl border-2 border-slate-200 bg-white
-    px-4 py-3.5 text-left text-sm font-medium text-ink transition
-    hover:border-brand-500 hover:bg-brand-50;
+  @apply inline-flex items-center gap-2 rounded-full border-2 border-brand-100 bg-white
+    px-4 py-2 text-left text-sm font-medium text-ink transition
+    hover:border-accent-500 hover:bg-accent-50;
 }
 .chip-selected {
-  @apply border-brand-600 bg-brand-50;
+  @apply border-accent-500 bg-accent-50;
 }
 
 /* ---- Cards / inputs ---- */
 .card {
-  @apply rounded-2xl border border-slate-200 bg-white p-6 sm:p-7;
+  @apply rounded-2xl border border-brand-100 bg-white p-6 shadow-sm sm:p-7;
 }
 .field-label {
-  @apply block text-sm font-medium text-slate-700 mb-1.5;
+  @apply block text-sm font-medium text-brand-500 mb-1.5;
 }
 .field-input {
-  @apply w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm
-    outline-none transition focus:border-brand-500;
+  @apply w-full rounded-xl border-2 border-brand-100 bg-white px-4 py-3 text-sm
+    outline-none transition focus:border-accent-500;
 }
 
 /* ---- Small helpers ---- */
@@ -46,18 +56,39 @@ body {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
 }
 
-/* ---- Hero (adapted from 21st.dev "Underline Hero") ---- */
-.font-lobster {
-  font-family: var(--font-lobster), cursive;
+/* ---- Persona chat (the guided intake + mentor voice) ---- */
+.chat-shell {
+  @apply rounded-3xl border border-white/10 bg-ink text-white shadow-xl;
 }
-.hero-underline {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  top: 100%;
-  margin-top: -6px;
-  pointer-events: none;
+.chat-bubble-mentor {
+  @apply max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.07] px-4 py-3 text-sm leading-relaxed
+    text-white/90 shadow-sm;
 }
+.chat-bubble-user {
+  @apply ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-accent-500 px-4 py-3 text-sm
+    leading-relaxed text-ink shadow-sm;
+}
+.chat-avatar {
+  @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500
+    text-base font-bold text-ink;
+}
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+.typing-dot {
+  animation: typing-dot 1.1s ease-in-out infinite;
+}
+
+/* ---- Hero fade-up ---- */
 @keyframes fade-in-up {
   from {
     opacity: 0;

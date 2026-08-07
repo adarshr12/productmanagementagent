@@ -9,6 +9,8 @@ export type RoleMatch = {
   description: string;
   score: number;
   reason: string;
+  matchedStrengths: string[];
+  growthAreas: string[];
 };
 
 // A compact string of the person's background, used as the retrieval query.
@@ -67,6 +69,11 @@ export function parseMatches(raw: string): RoleMatch[] {
   const arr: any[] = Array.isArray(obj?.matches) ? obj.matches : [];
   const byId = new Map(arr.map((m) => [String(m?.id), m]));
 
+  const toPhraseList = (v: any): string[] =>
+    Array.isArray(v)
+      ? v.map((x) => String(x || "").trim()).filter(Boolean).slice(0, 3)
+      : [];
+
   const matches: RoleMatch[] = ROLE_CATALOG.map((r) => {
     const m = byId.get(r.id);
     const rawScore = Number(m?.score);
@@ -80,6 +87,8 @@ export function parseMatches(raw: string): RoleMatch[] {
       description: r.description,
       score,
       reason: String(m?.reason || "").trim(),
+      matchedStrengths: toPhraseList(m?.matched_strengths),
+      growthAreas: toPhraseList(m?.growth_areas),
     };
   });
 

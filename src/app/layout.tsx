@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Lobster } from "next/font/google";
+import { Plus_Jakarta_Sans, Fraunces } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -8,11 +8,13 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// Decorative font for the hero keyword (from the 21st.dev "Underline Hero").
-const lobster = Lobster({
+// Editorial serif for headlines — the "confident consultant brand" register,
+// paired with Jakarta Sans for body/UI text.
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-lobster",
-  weight: "400",
+  variable: "--font-fraunces",
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${lobster.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
       <body className="font-sans">{children}</body>
     </html>
   );

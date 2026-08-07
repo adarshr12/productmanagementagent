@@ -110,7 +110,7 @@ export function JourneyMap({
                 .map((p) => `L ${p.x} ${p.y}`),
             ].join(" ")}
             fill="none"
-            stroke="#2563eb"
+            stroke="#c9a24b"
             strokeWidth={5}
             strokeLinecap="round"
             strokeLinejoin="round"

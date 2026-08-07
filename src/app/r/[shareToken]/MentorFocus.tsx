@@ -87,7 +87,7 @@ export default function MentorFocus({
                     </div>
 
                     {step.resource_note && (
-                      <p className="mt-3 rounded-xl bg-brand-50 px-3 py-2.5 text-sm text-brand-900">
+                      <p className="mt-3 rounded-xl bg-accent-50 px-3 py-2.5 text-sm text-brand-600">
                         📚 {step.resource_note}
                       </p>
                     )}
