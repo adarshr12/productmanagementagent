@@ -8,6 +8,7 @@ import { ROLE_CATALOG } from "@/lib/roles";
 import type { RoleMatch } from "@/lib/roleMatch";
 import { RoleScoreGauge } from "@/components/RoleScoreGauge";
 import { ChatIntake } from "@/components/ChatIntake";
+import { MentorAvatar } from "@/components/MentorAvatar";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
@@ -74,8 +75,25 @@ export default function Home() {
     </nav>
   );
 
-  // ================= LANDING + CHAT INTAKE =================
-  if (phase === "landing" || phase === "intake") {
+  // ================= LIVE CHAT INTAKE (full width, mentor-led) =================
+  if (phase === "intake") {
+    return (
+      <main>
+        {nav}
+        <section className="bg-ink px-5 py-14 text-white sm:px-8 sm:py-20">
+          <ChatIntake questions={INTAKE_QUESTIONS} onComplete={submit} />
+          {error && (
+            <p className="mx-auto mt-3 max-w-4xl rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {error}
+            </p>
+          )}
+        </section>
+      </main>
+    );
+  }
+
+  // ================= LANDING =================
+  if (phase === "landing") {
     return (
       <main>
         {nav}
@@ -124,38 +142,21 @@ export default function Home() {
               </div>
             </div>
 
-            {/* right: the chat itself (landing) or live intake */}
+            {/* right: mentor preview */}
             <div className="lg:mt-2">
-              {phase === "intake" ? (
-                <ChatIntake questions={INTAKE_QUESTIONS} onComplete={submit} />
-              ) : (
-                <div className="chat-shell flex h-[420px] flex-col justify-center gap-4 px-6 py-6 sm:h-[480px]">
-                  <div className="flex items-start gap-2.5">
-                    <div className="chat-avatar h-7 w-7 text-sm">🎯</div>
-                    <div className="chat-bubble-mentor">
-                      Hey — welcome. What&apos;s your current job title?
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <div className="chat-bubble-user">
-                      Customer Support Executive
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <div className="chat-avatar h-7 w-7 text-sm">🎯</div>
-                    <div className="chat-bubble-mentor">
-                      Got it. That's a great base for stakeholder-facing PM
-                      roles — let's find your best fit.
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setPhase("intake")}
-                    className="btn-ghost-dark mt-2 w-fit"
-                  >
-                    Start the real conversation →
-                  </button>
-                </div>
-              )}
+              <div className="chat-shell flex h-[420px] flex-col items-center justify-center gap-5 px-6 py-6 text-center sm:h-[480px]">
+                <MentorAvatar size={112} />
+                <p className="font-display max-w-xs text-xl italic text-white/90">
+                  &ldquo;Hey — let&apos;s find out which product role
+                  actually fits you.&rdquo;
+                </p>
+                <button
+                  onClick={() => setPhase("intake")}
+                  className="btn-ghost-dark mt-1 w-fit"
+                >
+                  Start the conversation →
+                </button>
+              </div>
               {error && (
                 <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
                   {error}
