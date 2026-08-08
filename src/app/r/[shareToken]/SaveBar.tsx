@@ -40,11 +40,11 @@ export default function SaveBar({ shareToken }: { shareToken: string }) {
 
   if (state === "saved") {
     return (
-      <div className="mb-6 flex items-center justify-between rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
-        <span className="text-sm font-medium text-green-800">
+      <div className="mb-6 flex items-center justify-between rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3">
+        <span className="text-sm font-medium text-emerald-300">
           ✓ Saved to your account
         </span>
-        <Link href="/me" className="text-sm font-semibold text-green-800 underline">
+        <Link href="/me" className="text-sm font-semibold text-emerald-300 underline">
           My roadmaps
         </Link>
       </div>
@@ -52,10 +52,10 @@ export default function SaveBar({ shareToken }: { shareToken: string }) {
   }
 
   return (
-    <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="card mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-sm font-bold text-ink">Save your roadmap</p>
-        <p className="text-sm text-muted">
+        <p className="text-sm font-bold text-cream">Save your roadmap</p>
+        <p className="text-sm text-cream/60">
           Sign up to keep this and track your progress across visits.
         </p>
       </div>

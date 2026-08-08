@@ -86,7 +86,7 @@ export function JourneyMap({
           <path
             d={roadD}
             fill="none"
-            stroke="#e2e8f0"
+            stroke="rgba(255,255,255,0.12)"
             strokeWidth={14}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -95,7 +95,7 @@ export function JourneyMap({
           <path
             d={roadD}
             fill="none"
-            stroke="#ffffff"
+            stroke="rgba(255,255,255,0.35)"
             strokeWidth={2}
             strokeDasharray="8 8"
             strokeLinecap="round"
@@ -127,10 +127,10 @@ export function JourneyMap({
             transform: "translate(-50%, 10%)",
           }}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-slate-700 text-base shadow">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-cream text-base text-ink shadow">
             🧑
           </span>
-          <span className="mt-1 max-w-[110px] rounded-md bg-white/90 px-1.5 py-0.5 text-center text-[10px] font-medium text-slate-600 shadow-sm">
+          <span className="mt-1 max-w-[110px] rounded-md bg-surface-raised px-1.5 py-0.5 text-center text-[10px] font-medium text-cream/70 shadow-sm">
             {startLabel}
           </span>
         </div>
@@ -157,10 +157,10 @@ export function JourneyMap({
               <span
                 className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm shadow ${
                   isDone
-                    ? "border-emerald-600 bg-emerald-500 text-white"
+                    ? "border-emerald-500 bg-emerald-500 text-white"
                     : isCurrent
-                    ? "border-brand-600 bg-white text-brand-600"
-                    : "border-slate-300 bg-white text-slate-400"
+                    ? "border-accent-500 bg-surface text-accent-500"
+                    : "border-white/15 bg-surface text-cream/30"
                 }`}
               >
                 {isDone ? "✓" : "🚩"}
@@ -168,10 +168,10 @@ export function JourneyMap({
               <span
                 className={`mt-1 max-w-[92px] rounded-md px-1.5 py-0.5 text-center text-[10px] font-medium shadow-sm ${
                   isDone
-                    ? "bg-emerald-50 text-emerald-700"
+                    ? "bg-emerald-500/10 text-emerald-300"
                     : isCurrent
-                    ? "bg-brand-50 text-brand-700"
-                    : "bg-white/90 text-slate-500"
+                    ? "bg-accent-500/10 text-accent-500"
+                    : "bg-surface-raised text-cream/40"
                 }`}
                 style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
               >
@@ -195,16 +195,16 @@ export function JourneyMap({
               🎉
             </span>
           )}
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-accent-500 text-lg shadow">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-accent-500 text-lg shadow">
             {finishEmoji}
           </span>
-          <span className="mt-1 max-w-[120px] rounded-md bg-white/90 px-1.5 py-0.5 text-center text-[10px] font-semibold text-ink shadow-sm">
+          <span className="mt-1 max-w-[120px] rounded-md bg-surface-raised px-1.5 py-0.5 text-center text-[10px] font-semibold text-cream shadow-sm">
             {finishLabel}
           </span>
         </div>
       </div>
 
-      <p className="mt-3 text-center text-xs text-slate-500">
+      <p className="mt-3 text-center text-xs text-cream/40">
         {allDone
           ? `You've reached the top — you're ready for ${finishLabel} roles.`
           : `Clear each flag to reach ${finishLabel}.`}

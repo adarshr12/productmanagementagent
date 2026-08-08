@@ -4,9 +4,9 @@ import { useState } from "react";
 import type { RoadmapStep, StepStatus } from "@/lib/getRoadmap";
 
 const COLUMNS: { key: StepStatus; label: string; accent: string }[] = [
-  { key: "todo", label: "To Do", accent: "border-slate-300" },
+  { key: "todo", label: "To Do", accent: "border-white/20" },
   { key: "in_progress", label: "In Progress", accent: "border-amber-400" },
-  { key: "done", label: "Done", accent: "border-green-500" },
+  { key: "done", label: "Done", accent: "border-emerald-400" },
 ];
 
 export default function KanbanBoard({
@@ -32,13 +32,13 @@ export default function KanbanBoard({
                 if (s) move(s, col.key);
                 setDragId(null);
               }}
-              className="rounded-2xl bg-slate-100/70 p-3"
+              className="rounded-2xl bg-white/[0.03] p-3"
             >
               <div className="mb-3 flex items-center justify-between px-1">
-                <h2 className="text-sm font-semibold text-slate-700">
+                <h2 className="text-sm font-semibold text-cream/80">
                   {col.label}
                 </h2>
-                <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500">
+                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-cream/50">
                   {colSteps.length}
                 </span>
               </div>
@@ -52,24 +52,24 @@ export default function KanbanBoard({
                       draggable
                       onDragStart={() => setDragId(step.id)}
                       onDragEnd={() => setDragId(null)}
-                      className={`cursor-grab rounded-xl border-l-4 ${col.accent} bg-white p-3 shadow-sm active:cursor-grabbing`}
+                      className={`cursor-grab rounded-xl border-l-4 ${col.accent} bg-surface-raised p-3 shadow-sm active:cursor-grabbing`}
                     >
                       <h3
                         className={`text-sm font-semibold ${
                           step.status === "done"
-                            ? "text-slate-500 line-through"
-                            : "text-slate-900"
+                            ? "text-cream/40 line-through"
+                            : "text-cream"
                         }`}
                       >
                         {step.title}
                       </h3>
                       {step.description && (
-                        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                        <p className="mt-1 text-xs leading-relaxed text-cream/55">
                           {step.description}
                         </p>
                       )}
                       {step.estimated_time && (
-                        <span className="pill mt-2 inline-flex bg-slate-100 text-slate-500">
+                        <span className="tag mt-2 inline-flex">
                           ⏱ {step.estimated_time}
                         </span>
                       )}
@@ -79,7 +79,7 @@ export default function KanbanBoard({
                             move(step, COLUMNS[Math.max(0, idx - 1)].key)
                           }
                           disabled={idx === 0}
-                          className="rounded-md px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 disabled:opacity-30"
+                          className="rounded-md px-2 py-1 text-xs font-medium text-cream/50 hover:bg-white/5 disabled:opacity-30"
                         >
                           ◀ Back
                         </button>
@@ -91,7 +91,7 @@ export default function KanbanBoard({
                             )
                           }
                           disabled={idx === COLUMNS.length - 1}
-                          className="rounded-md px-2 py-1 text-xs font-semibold text-brand-600 hover:bg-brand-50 disabled:opacity-30"
+                          className="rounded-md px-2 py-1 text-xs font-semibold text-accent-500 hover:bg-accent-500/10 disabled:opacity-30"
                         >
                           Next ▶
                         </button>
@@ -100,7 +100,7 @@ export default function KanbanBoard({
                   );
                 })}
                 {colSteps.length === 0 && (
-                  <p className="px-1 py-6 text-center text-xs text-slate-400">
+                  <p className="px-1 py-6 text-center text-xs text-cream/30">
                     Drag steps here
                   </p>
                 )}
@@ -110,7 +110,7 @@ export default function KanbanBoard({
         })}
       </div>
 
-      <p className="mt-8 text-center text-xs text-slate-400">
+      <p className="mt-8 text-center text-xs text-cream/35">
         Drag cards between columns, or use ◀ / ▶. Bookmark this page to track your
         progress — anyone with the link can view it.
       </p>

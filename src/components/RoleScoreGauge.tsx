@@ -14,18 +14,18 @@ const STRENGTH_STYLES: Record<
 > = {
   strong: {
     label: "Strong fit",
-    badge: "bg-emerald-100 text-emerald-700",
-    stroke: "#059669",
+    badge: "border border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
+    stroke: "#34d399",
   },
   moderate: {
     label: "Moderate fit",
-    badge: "bg-amber-100 text-amber-700",
-    stroke: "#d97706",
+    badge: "border border-amber-500/25 bg-amber-500/10 text-amber-300",
+    stroke: "#f6b93b",
   },
   developing: {
     label: "Developing fit",
-    badge: "bg-slate-100 text-slate-600",
-    stroke: "#64748b",
+    badge: "border border-white/15 bg-white/[0.04] text-cream/50",
+    stroke: "#8a7f6d",
   },
 };
 
@@ -62,7 +62,7 @@ export function RoleScoreGauge({
     <div className="flex w-24 shrink-0 flex-col items-center sm:w-28">
       <svg className="h-14 w-24 sm:h-16 sm:w-28" viewBox="0 0 100 50" aria-hidden="true">
         <g fill="none" strokeWidth="9" transform="translate(50, 48)">
-          <circle className="stroke-slate-100" r={RADIUS} />
+          <circle stroke="rgba(255,255,255,0.1)" r={RADIUS} />
           <circle
             r={RADIUS}
             stroke={style.stroke}
@@ -78,7 +78,7 @@ export function RoleScoreGauge({
           />
         </g>
       </svg>
-      <div className="-mt-6 text-xl font-extrabold text-ink sm:text-2xl">
+      <div className="-mt-6 text-xl font-extrabold text-cream sm:text-2xl">
         {Math.round(clamped)}
       </div>
       <span className={`pill mt-1.5 whitespace-nowrap ${style.badge}`}>

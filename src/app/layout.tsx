@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Fraunces } from "next/font/google";
+import { Plus_Jakarta_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -17,6 +17,14 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
+// Mono for tags/labels/scores — replaces uppercase-tracking-wide sans labels
+// (a very common generic-AI-SaaS tell) with a distinct typographic register.
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500"],
+});
+
 export const metadata: Metadata = {
   title: "Find your best-fit product role — career roadmaps",
   description:
@@ -29,8 +37,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
-      <body className="font-sans">{children}</body>
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${fraunces.variable} ${mono.variable}`}
+    >
+      <body className="font-sans">
+        <div className="grain-overlay" aria-hidden="true" />
+        {children}
+      </body>
     </html>
   );
 }

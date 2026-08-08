@@ -14,6 +14,7 @@ export default async function ResultsPage({
   if (!data) notFound();
 
   return (
+    <div className="min-h-screen bg-ink">
     <div className="mx-auto max-w-5xl px-4 pt-6">
       <SaveBar shareToken={params.shareToken} />
       <ResultsClient
@@ -24,6 +25,7 @@ export default async function ResultsPage({
         initialSteps={data.steps}
         startContext={data.startContext}
       />
+    </div>
     </div>
   );
 }

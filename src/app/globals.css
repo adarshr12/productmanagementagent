@@ -4,68 +4,82 @@
 
 html,
 body {
-  @apply bg-paper text-ink antialiased;
+  @apply bg-ink text-cream antialiased;
 }
 
-/* ---- Buttons (flat, solid, fast transitions) ---- */
+/* Subtle grain — flat solid color everywhere reads sterile/synthetic. */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Buttons ---- */
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3
-    text-sm font-semibold text-white transition hover:bg-brand-700
-    disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-cream px-5 py-3
+    text-sm font-semibold text-ink transition hover:bg-white
+    disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-gold {
   @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-500 px-5 py-3
-    text-sm font-semibold text-ink transition hover:bg-accent-600
-    disabled:cursor-not-allowed disabled:opacity-60;
+    text-sm font-semibold text-ink shadow-[0_8px_24px_-8px_rgba(201,162,75,0.55)] transition
+    hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-ghost {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-brand-100
-    bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-brand-200
-    disabled:cursor-not-allowed disabled:opacity-40;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15
+    bg-white/[0.03] px-4 py-2.5 text-sm font-semibold text-cream transition hover:border-white/25
+    hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-ghost-dark {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15
-    bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10
-    disabled:cursor-not-allowed disabled:opacity-40;
+  @apply btn-ghost;
 }
 
-/* ---- Option chips (quick-pick, always paired with free text) ---- */
+/* ---- Option chips ---- */
 .chip {
-  @apply inline-flex items-center gap-2 rounded-full border-2 border-brand-100 bg-white
-    px-4 py-2 text-left text-sm font-medium text-ink transition
-    hover:border-accent-500 hover:bg-accent-50;
+  @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03]
+    px-4 py-2 text-left text-sm font-medium text-cream/90 transition
+    hover:border-accent-500 hover:bg-accent-500/10;
 }
 .chip-selected {
-  @apply border-accent-500 bg-accent-50;
+  @apply border-accent-500 bg-accent-500/10;
 }
 
 /* ---- Cards / inputs ---- */
 .card {
-  @apply rounded-2xl border border-brand-100 bg-white p-6 shadow-sm sm:p-7;
+  @apply rounded-[22px] border border-white/[0.08] bg-surface p-6 shadow-[0_20px_40px_-24px_rgba(0,0,0,0.6)] sm:p-7;
 }
 .field-label {
-  @apply block text-sm font-medium text-brand-500 mb-1.5;
+  @apply mb-1.5 block text-sm font-medium text-cream/70;
 }
 .field-input {
-  @apply w-full rounded-xl border-2 border-brand-100 bg-white px-4 py-3 text-sm
-    outline-none transition focus:border-accent-500;
+  @apply w-full rounded-xl border border-white/15 bg-white/[0.03] px-4 py-3 text-sm text-cream
+    outline-none transition placeholder:text-cream/35 focus:border-accent-500;
 }
 
 /* ---- Small helpers ---- */
 .pill {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
 }
+/* Small labels/tags — mono, lowercase, tracked out. Replaces the generic
+   ALL-CAPS-sans-label pattern with a more considered typographic register. */
+.tag {
+  @apply font-mono text-[11px] tracking-wide text-muted;
+}
 
 /* ---- Persona chat (the guided intake + mentor voice) ---- */
 .chat-shell {
-  @apply rounded-3xl border border-white/10 bg-ink text-white shadow-xl;
+  @apply rounded-3xl border border-white/10 bg-surface shadow-xl;
 }
 .chat-bubble-mentor {
-  @apply max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.07] px-4 py-3 text-sm leading-relaxed
-    text-white/90 shadow-sm;
+  @apply max-w-[85%] rounded-2xl rounded-tr-sm bg-white/[0.06] px-4 py-3 text-sm leading-relaxed
+    text-cream/90 shadow-sm;
 }
 .chat-bubble-user {
-  @apply ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-accent-500 px-4 py-3 text-sm
+  @apply max-w-[85%] rounded-2xl rounded-tl-sm bg-accent-500 px-4 py-3 text-sm
     leading-relaxed text-ink shadow-sm;
 }
 .chat-avatar {

@@ -67,41 +67,39 @@ export default function ResultsClient({
     <main className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
       <header className="mb-6">
         {role && (
-          <p className="text-sm font-semibold text-brand-600">
-            Roadmap · {role}
-          </p>
+          <p className="tag text-accent-500">roadmap · {role}</p>
         )}
-        <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
+        <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-cream sm:text-4xl">
           {title}
         </h1>
-        {overview && <p className="mt-3 max-w-2xl text-slate-600">{overview}</p>}
+        {overview && <p className="mt-3 max-w-2xl text-cream/60">{overview}</p>}
       </header>
 
       {/* progress + share */}
       <div className="card mb-6">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-sm font-medium text-cream/80">
             {done} of {steps.length} steps done
           </span>
-          <span className="text-sm font-semibold text-brand-600">{pct}%</span>
+          <span className="text-sm font-semibold text-accent-500">{pct}%</span>
         </div>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-brand-600 transition-all"
+            className="h-full rounded-full bg-accent-500 transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
         <div className="mt-4 flex items-center justify-between">
           <button
             onClick={copyLink}
-            className="text-sm font-medium text-brand-600 hover:text-brand-700"
+            className="text-sm font-medium text-accent-500 hover:text-accent-600"
           >
-            {copied ? "✓ Link copied" : "🔗 Copy shareable link"}
+            {copied ? "✓ Link copied" : "Copy shareable link"}
           </button>
           {view === "board" && (
             <button
               onClick={() => setView("mentor")}
-              className="text-sm font-medium text-slate-500 hover:text-ink"
+              className="text-sm font-medium text-cream/50 hover:text-cream"
             >
               ← Back to guidance
             </button>

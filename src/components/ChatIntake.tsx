@@ -5,8 +5,14 @@ import { gsap } from "gsap";
 import type { Question } from "@/lib/questions";
 import { MentorAvatar } from "@/components/MentorAvatar";
 
+type Turn = { id: string; from: "mentor" | "user"; text: string };
+
 const GREETING =
   "Hey — welcome. I'm going to ask a handful of quick questions so I can score you against every product role and tell you exactly why — not just guess. Answer with a tap, or just type — whatever's faster.";
+
+function uid() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 export function ChatIntake({
   questions,
@@ -17,27 +23,22 @@ export function ChatIntake({
   onComplete: (answers: Record<string, string>) => void;
   mentorPhotoSrc?: string;
 }) {
+  const [turns, setTurns] = useState<Turn[]>([]);
   const [step, setStep] = useState(-1);
-  const [displayText, setDisplayText] = useState(GREETING);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [history, setHistory] = useState<{ label: string; value: string }[]>(
-    []
-  );
   const [typing, setTyping] = useState(true);
   const [freeText, setFreeText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
-  // Fade/lift the question text in whenever it changes.
-  useEffect(() => {
-    if (!textRef.current) return;
-    gsap.fromTo(
-      textRef.current,
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-    );
-  }, [displayText]);
+  function pushMentor(text: string) {
+    setTurns((t) => [...t, { id: uid(), from: "mentor", text }]);
+  }
+  function pushUser(text: string) {
+    setTurns((t) => [...t, { id: uid(), from: "user", text }]);
+  }
 
   useEffect(() => {
     if (started.current) return;
@@ -45,17 +46,33 @@ export function ChatIntake({
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
+      pushMentor(GREETING);
+      setTyping(true);
       setTimeout(() => {
-        setTyping(true);
-        setTimeout(() => {
-          setTyping(false);
-          setStep(0);
-          setDisplayText(questions[0].label);
-        }, 900);
-      }, 300);
+        setTyping(false);
+        setStep(0);
+        pushMentor(questions[0].label);
+      }, 900);
     }, 700);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [turns, typing]);
+
+  // New turns lift in — reinforces "this is happening now," not a static log.
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const last = scrollRef.current.lastElementChild;
+    if (last) {
+      gsap.fromTo(
+        last,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }
+      );
+    }
+  }, [turns]);
 
   function advance(rawValue: string) {
     const q = questions[step];
@@ -65,7 +82,7 @@ export function ChatIntake({
       return;
     }
     setError(null);
-    setHistory((h) => [...h, { label: q.label, value: value || "Skipped" }]);
+    pushUser(value || "Skipped");
     const nextAnswers = { ...answers, [q.id]: value };
     setAnswers(nextAnswers);
     setFreeText("");
@@ -74,10 +91,13 @@ export function ChatIntake({
     if (nextStep >= questions.length) {
       setStep(nextStep);
       setTyping(true);
-      setDisplayText(
-        "Perfect — that's everything I need. Scoring you against every product role now..."
-      );
-      setTimeout(() => onComplete(nextAnswers), 900);
+      setTimeout(() => {
+        setTyping(false);
+        pushMentor(
+          "Perfect — that's everything I need. Scoring you against every product role now..."
+        );
+        setTimeout(() => onComplete(nextAnswers), 900);
+      }, 700);
       return;
     }
     setTyping(true);
@@ -85,7 +105,7 @@ export function ChatIntake({
       () => {
         setTyping(false);
         setStep(nextStep);
-        setDisplayText(questions[nextStep].label);
+        pushMentor(questions[nextStep].label);
       },
       550 + Math.random() * 300
     );
@@ -95,57 +115,48 @@ export function ChatIntake({
     step >= 0 && step < questions.length ? questions[step] : null;
 
   return (
-    <div className="chat-shell mx-auto w-full max-w-4xl px-6 py-10 sm:px-10 sm:py-14">
-      <div className="grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-12">
-        <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
-          <MentorAvatar
-            src={mentorPhotoSrc}
-            size={168}
-            speaking={typing}
-          />
-          <p className="mt-4 text-sm font-semibold text-white">
-            Your product mentor
-          </p>
-          {step >= 0 && (
-            <div className="mt-3 flex flex-wrap justify-center gap-1 sm:justify-start">
-              {questions.map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 w-1.5 rounded-full transition ${
-                    i <= step ? "bg-accent-500" : "bg-white/15"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="min-w-0">
-          <div className="min-h-[92px] sm:min-h-[110px]">
-            {typing ? (
-              <div className="flex items-center gap-1.5 py-2">
-                <span className="typing-dot h-2 w-2 rounded-full bg-accent-500" />
-                <span
-                  className="typing-dot h-2 w-2 rounded-full bg-accent-500"
-                  style={{ animationDelay: "0.15s" }}
-                />
-                <span
-                  className="typing-dot h-2 w-2 rounded-full bg-accent-500"
-                  style={{ animationDelay: "0.3s" }}
-                />
-              </div>
-            ) : (
-              <p
-                ref={textRef}
-                className="font-display text-2xl font-medium italic leading-snug text-white sm:text-3xl"
-              >
-                {displayText}
-              </p>
+    <div className="chat-shell mx-auto w-full max-w-4xl overflow-hidden">
+      <div className="grid sm:grid-cols-[1fr_auto]">
+        {/* transcript — mentor lane right-aligned, user lane left-aligned */}
+        <div className="flex min-w-0 flex-col border-b border-white/10 sm:border-b-0 sm:border-r">
+          <div
+            ref={scrollRef}
+            className="max-h-[440px] min-h-[300px] space-y-3 overflow-y-auto px-5 py-6 sm:px-8"
+          >
+            {turns.map((t) =>
+              t.from === "mentor" ? (
+                <div key={t.id} className="flex justify-end">
+                  <div className="chat-bubble-mentor font-display text-base italic">
+                    {t.text}
+                  </div>
+                </div>
+              ) : (
+                <div key={t.id} className="flex items-start justify-start gap-2">
+                  <span className="tag mt-2.5 shrink-0">you</span>
+                  <div className="chat-bubble-user">{t.text}</div>
+                </div>
+              )
             )}
+            {typing && (
+              <div className="flex justify-end">
+                <div className="chat-bubble-mentor flex items-center gap-1 py-4">
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50" />
+                  <span
+                    className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50"
+                    style={{ animationDelay: "0.15s" }}
+                  />
+                  <span
+                    className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50"
+                    style={{ animationDelay: "0.3s" }}
+                  />
+                </div>
+              </div>
+            )}
+            <div ref={endRef} />
           </div>
 
           {currentQuestion && !typing && (
-            <div className="mt-6">
+            <div className="border-t border-white/10 px-5 py-4 sm:px-8">
               {error && (
                 <p className="mb-2 text-xs text-accent-200">{error}</p>
               )}
@@ -156,8 +167,7 @@ export function ChatIntake({
                       <button
                         key={opt}
                         onClick={() => advance(opt)}
-                        className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-sm
-                          text-white/90 transition hover:border-accent-500 hover:bg-accent-500/10"
+                        className="chip"
                       >
                         {opt}
                       </button>
@@ -180,9 +190,7 @@ export function ChatIntake({
                       ? "Or type your own answer..."
                       : currentQuestion.placeholder || "Type your answer..."
                   }
-                  className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm
-                    text-white outline-none transition placeholder:text-white/35
-                    focus:border-accent-500"
+                  className="field-input flex-1"
                 />
                 <button type="submit" className="btn-gold px-4 py-2.5">
                   Send
@@ -191,7 +199,7 @@ export function ChatIntake({
                   <button
                     type="button"
                     onClick={() => advance("")}
-                    className="shrink-0 text-xs font-medium text-white/40 hover:text-white/70"
+                    className="shrink-0 text-xs font-medium text-cream/40 hover:text-cream/70"
                   >
                     Skip
                   </button>
@@ -199,20 +207,28 @@ export function ChatIntake({
               </form>
             </div>
           )}
+        </div>
 
-          {history.length > 0 && (
-            <div className="mt-8 flex flex-wrap gap-1.5 border-t border-white/10 pt-4">
-              {history.map((h, i) => (
-                <span
-                  key={i}
-                  title={h.label}
-                  className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-white/45"
-                >
-                  {h.value}
-                </span>
-              ))}
-            </div>
-          )}
+        {/* the mentor — big, persistent, on the right */}
+        <div className="flex flex-row items-center gap-4 bg-white/[0.02] px-5 py-5 sm:w-[220px] sm:flex-col sm:justify-center sm:px-6 sm:py-8">
+          <MentorAvatar src={mentorPhotoSrc} size={128} speaking={typing} />
+          <div className="sm:mt-4 sm:text-center">
+            <p className="text-sm font-semibold text-cream">
+              Your product mentor
+            </p>
+            {step >= 0 && (
+              <div className="mt-2 flex flex-wrap gap-1 sm:justify-center">
+                {questions.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 w-1.5 rounded-full transition ${
+                      i <= step ? "bg-accent-500" : "bg-white/15"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
