@@ -84,32 +84,44 @@ export function MentorAvatar3D({
 }) {
   return (
     <div
-      className="relative shrink-0 overflow-hidden rounded-full"
+      className="relative shrink-0"
       style={{ width: size, height: size }}
     >
+      {/* glow blooms beyond the circle's edge — not clipped, so it reads as
+          an orb casting light rather than a flat tinted disc */}
       <div
-        className="absolute inset-0 rounded-full"
+        className={`orb-pulse pointer-events-none absolute rounded-full ${
+          speaking ? "" : ""
+        }`}
         style={{
+          inset: -size * 0.28,
           background:
-            "radial-gradient(circle at 50% 40%, rgba(34,211,238,0.35), transparent 70%)",
+            "radial-gradient(circle, rgba(34,211,238,0.55), rgba(34,211,238,0.12) 55%, transparent 72%)",
+          filter: "blur(6px)",
+          animationDuration: speaking ? "1.3s" : "3.2s",
         }}
         aria-hidden="true"
       />
-      <Canvas
-        camera={{ position: [0, 0.15, 4.2], fov: 38 }}
-        gl={{ antialias: true, alpha: true }}
-        dpr={[1, 2]}
+      <div
+        className="relative overflow-hidden rounded-full"
+        style={{ width: size, height: size }}
       >
-        <ambientLight intensity={1.1} />
-        <hemisphereLight args={["#dfeeff", "#0a0e14", 0.9]} />
-        <directionalLight position={[1.5, 2, 2.5]} intensity={1.6} />
-        <directionalLight position={[-1.5, 0.5, 2]} intensity={0.8} />
-        <pointLight position={[0, -0.5, 2]} intensity={0.6} color="#22d3ee" />
-        <Suspense fallback={null}>
-          <Figure speaking={speaking} />
-        </Suspense>
-      </Canvas>
-      <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-accent-500/40" />
+        <Canvas
+          camera={{ position: [0, 0.15, 4.2], fov: 38 }}
+          gl={{ antialias: true, alpha: true }}
+          dpr={[1, 2]}
+        >
+          <ambientLight intensity={1.1} />
+          <hemisphereLight args={["#dfeeff", "#0a0e14", 0.9]} />
+          <directionalLight position={[1.5, 2, 2.5]} intensity={1.6} />
+          <directionalLight position={[-1.5, 0.5, 2]} intensity={0.8} />
+          <pointLight position={[0, -0.5, 2]} intensity={0.6} color="#22d3ee" />
+          <Suspense fallback={null}>
+            <Figure speaking={speaking} />
+          </Suspense>
+        </Canvas>
+        <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-accent-500/40" />
+      </div>
     </div>
   );
 }

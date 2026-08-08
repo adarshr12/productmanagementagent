@@ -14,7 +14,7 @@ export default async function ResultsPage({
   if (!data) notFound();
 
   return (
-    <div className="min-h-screen bg-ink">
+    <div className="min-h-screen">
     <div className="mx-auto max-w-5xl px-4 pt-6">
       <SaveBar shareToken={params.shareToken} />
       <ResultsClient

@@ -78,7 +78,7 @@ export default function Home() {
   // ================= LIVE CHAT INTAKE (full screen, mentor-led) =================
   if (phase === "intake") {
     return (
-      <div className="flex h-screen flex-col bg-ink">
+      <div className="flex h-screen flex-col">
         {nav}
         <div className="min-h-0 flex-1">
           <ChatIntake questions={INTAKE_QUESTIONS} onComplete={submit} />
@@ -95,7 +95,7 @@ export default function Home() {
   // ================= LANDING =================
   if (phase === "landing") {
     return (
-      <main className="min-h-screen bg-ink">
+      <main className="min-h-screen">
         {nav}
 
         <section>
@@ -219,7 +219,7 @@ export default function Home() {
   // ================= ROLE RESULTS =================
   if (phase === "roles" || phase === "generating") {
     return (
-      <main className="min-h-screen bg-ink">
+      <main className="min-h-screen">
         {nav}
         <div className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
           <header className="mb-7">
@@ -325,7 +325,7 @@ export default function Home() {
 
   // ================= MATCHING (brief transition) =================
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-ink px-5 text-center">
+    <main className="flex min-h-screen flex-col items-center justify-center px-5 text-center">
       <MentorAvatar size={96} speaking />
       <h2 className="font-display mt-6 text-2xl font-semibold text-cream">
         Scoring all 19 roles for you…

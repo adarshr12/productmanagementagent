@@ -7,6 +7,21 @@ body {
   @apply bg-ink text-cream antialiased;
 }
 
+/* Ambient background glow — flat solid color behind everything was the
+   biggest gap vs. the reference apps (which all use layered radial glow /
+   gradient-mesh backgrounds, never a flat fill). Applied as body's own
+   background (not a separate positioned layer) so it's always behind page
+   content by definition — no z-index stacking to fight with per-page
+   bg-ink wrappers. background-attachment: fixed keeps it stable on scroll. */
+body {
+  background-image:
+    radial-gradient(60% 50% at 15% 0%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(50% 45% at 100% 20%, rgba(34, 211, 238, 0.1), transparent 60%),
+    radial-gradient(70% 60% at 50% 100%, rgba(20, 60, 90, 0.25), transparent 65%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
 /* Subtle grain — flat solid color everywhere reads sterile/synthetic. */
 .grain-overlay {
   position: fixed;
@@ -21,18 +36,26 @@ body {
 /* ---- Buttons ---- */
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-xl bg-cream px-5 py-3
-    text-sm font-semibold text-ink transition hover:bg-white
+    text-sm font-semibold text-ink shadow-[0_8px_24px_-10px_rgba(255,255,255,0.35)] transition
+    hover:bg-white hover:shadow-[0_10px_30px_-8px_rgba(255,255,255,0.45)]
     disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-gold {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-500 px-5 py-3
-    text-sm font-semibold text-ink shadow-[0_8px_24px_-8px_rgba(201,162,75,0.55)] transition
-    hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-40;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3
+    text-sm font-semibold text-ink transition
+    disabled:cursor-not-allowed disabled:opacity-40;
+  background: linear-gradient(135deg, #7ee6f5 0%, #22d3ee 55%, #0891b2 100%);
+  box-shadow: 0 10px 30px -8px rgba(34, 211, 238, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+.btn-gold:hover {
+  box-shadow: 0 14px 36px -6px rgba(34, 211, 238, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transform: translateY(-1px);
 }
 .btn-ghost {
   @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15
-    bg-white/[0.03] px-4 py-2.5 text-sm font-semibold text-cream transition hover:border-white/25
-    hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40;
+    bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-cream backdrop-blur-md transition
+    hover:border-accent-500/40 hover:bg-white/[0.08]
+    disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-ghost-dark {
   @apply btn-ghost;
@@ -40,24 +63,31 @@ body {
 
 /* ---- Option chips ---- */
 .chip {
-  @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03]
-    px-4 py-2 text-left text-sm font-medium text-cream/90 transition
-    hover:border-accent-500 hover:bg-accent-500/10;
+  @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04]
+    px-4 py-2 text-left text-sm font-medium text-cream/90 backdrop-blur-md transition
+    hover:border-accent-500 hover:bg-accent-500/10 hover:shadow-[0_0_20px_-6px_rgba(34,211,238,0.6)];
 }
 .chip-selected {
-  @apply border-accent-500 bg-accent-500/10;
+  @apply border-accent-500 bg-accent-500/10 shadow-[0_0_20px_-6px_rgba(34,211,238,0.6)];
 }
 
-/* ---- Cards / inputs ---- */
+/* ---- Cards / inputs — glass, not flat fill ---- */
 .card {
-  @apply rounded-[22px] border border-white/[0.08] bg-surface p-6 shadow-[0_20px_40px_-24px_rgba(0,0,0,0.6)] sm:p-7;
+  @apply relative rounded-[22px] border border-white/10 p-6 sm:p-7;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 24px 48px -28px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 1px 0 0 rgba(255, 255, 255, 0.08) inset;
 }
 .field-label {
   @apply mb-1.5 block text-sm font-medium text-cream/70;
 }
 .field-input {
   @apply w-full rounded-xl border border-white/15 bg-white/[0.03] px-4 py-3 text-sm text-cream
-    outline-none transition placeholder:text-cream/35 focus:border-accent-500;
+    outline-none backdrop-blur-md transition placeholder:text-cream/35
+    focus:border-accent-500 focus:shadow-[0_0_0_3px_rgba(34,211,238,0.15)];
 }
 
 /* ---- Small helpers ---- */
@@ -72,15 +102,20 @@ body {
 
 /* ---- Persona chat (the guided intake + mentor voice) ---- */
 .chat-shell {
-  @apply rounded-3xl border border-white/10 bg-surface shadow-xl;
+  @apply relative rounded-3xl border border-white/10;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(16, 23, 34, 0.4));
+  backdrop-filter: blur(24px);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
 }
 .chat-bubble-mentor {
-  @apply max-w-[85%] rounded-2xl rounded-tr-sm bg-white/[0.06] px-4 py-3 text-sm leading-relaxed
-    text-cream/90 shadow-sm;
+  @apply max-w-[85%] rounded-2xl rounded-tr-sm border border-white/10 bg-white/[0.06] px-4 py-3
+    text-sm leading-relaxed text-cream/90 backdrop-blur-md;
+  box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.6), 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
 }
 .chat-bubble-user {
-  @apply max-w-[85%] rounded-2xl rounded-tl-sm bg-accent-500 px-4 py-3 text-sm
-    leading-relaxed text-ink shadow-sm;
+  @apply max-w-[85%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-ink;
+  background: linear-gradient(135deg, #7ee6f5, #22d3ee 60%, #0891b2);
+  box-shadow: 0 12px 28px -14px rgba(34, 211, 238, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 .chat-avatar {
   @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500
@@ -152,4 +187,21 @@ body {
 }
 .btn-bounce:active {
   animation: btn-bounce 0.3s cubic-bezier(0.36, 0, 0.66, -0.56);
+}
+
+/* ---- Ambient glow orb (behind avatars) — pulsing, like the voice-AI
+   reference's glowing orb, not a static tint. ---- */
+@keyframes orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.85;
+  }
+}
+.orb-pulse {
+  animation: orb-pulse 3.2s ease-in-out infinite;
 }
