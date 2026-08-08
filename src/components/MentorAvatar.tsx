@@ -2,12 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { MentorAvatar3D } from "@/components/MentorAvatar3D";
 
 /**
- * Large, prominent mentor avatar — an idle "breathing" motion at rest, and a
- * short attention pulse while the mentor is "speaking" (i.e. typing/thinking).
- * Pass `src` once a real photo is available; falls back to a hand-built
- * illustrated placeholder (no emoji-as-icon — see ui-ux-pro-max skill).
+ * The mentor's avatar. Real 3D (Three.js/WebGL) by default — a stylized
+ * figure, not a monogram or an icon — because "avatar" was read literally:
+ * something that looks like a person. Pass `src` once a real photo exists;
+ * that path renders it as a lit, animated 2D portrait instead (the 3D figure
+ * is a stand-in for "no photo yet," not the permanent design).
  */
 export function MentorAvatar({
   src,
@@ -22,6 +24,7 @@ export function MentorAvatar({
   const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!src) return;
     const ctx = gsap.context(() => {
       gsap.to(wrapRef.current, {
         y: -6,
@@ -40,10 +43,10 @@ export function MentorAvatar({
       });
     });
     return () => ctx.revert();
-  }, []);
+  }, [src]);
 
   useEffect(() => {
-    if (!speaking) return;
+    if (!src || !speaking) return;
     const tween = gsap.to(wrapRef.current, {
       scale: 1.035,
       duration: 0.32,
@@ -55,7 +58,11 @@ export function MentorAvatar({
       tween.kill();
       gsap.set(wrapRef.current, { scale: 1 });
     };
-  }, [speaking]);
+  }, [src, speaking]);
+
+  if (!src) {
+    return <MentorAvatar3D size={size} speaking={speaking} />;
+  }
 
   return (
     <div
@@ -73,47 +80,13 @@ export function MentorAvatar({
         className="relative overflow-hidden rounded-full border-[3px] border-accent-500/50 shadow-2xl"
         style={{ width: size, height: size }}
       >
-        {src ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={src}
-            alt="Your product mentor"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <PlaceholderPortrait />
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt="Your product mentor"
+          className="h-full w-full object-cover"
+        />
       </div>
     </div>
-  );
-}
-
-// Deliberately NOT a generic person-silhouette icon — that reads as a
-// default/missing-avatar placeholder, which undercuts the "real mentor"
-// feel. A monogram on a gradient is the same pattern Stripe/Notion/Linear
-// use for unset avatars, and reads as intentional rather than a fallback.
-function PlaceholderPortrait() {
-  return (
-    <svg viewBox="0 0 200 200" className="h-full w-full" aria-hidden="true">
-      <defs>
-        <linearGradient id="mentorBg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#3a3227" />
-          <stop offset="100%" stopColor="#191510" />
-        </linearGradient>
-      </defs>
-      <rect width="200" height="200" fill="url(#mentorBg)" />
-      <text
-        x="100"
-        y="128"
-        textAnchor="middle"
-        fontSize="92"
-        fontStyle="italic"
-        fontWeight="600"
-        fill="#c9a24b"
-        fontFamily="Georgia, 'Times New Roman', serif"
-      >
-        P
-      </text>
-    </svg>
   );
 }

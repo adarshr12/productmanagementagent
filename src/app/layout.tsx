@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -8,13 +8,12 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// Editorial serif for headlines — the "confident consultant brand" register,
-// paired with Jakarta Sans for body/UI text.
-const fraunces = Fraunces({
+// Geometric grotesk for headlines — the futuristic register, replacing the
+// warm literary serif that was explicitly rejected.
+const grotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-grotesk",
   weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
 });
 
 // Mono for tags/labels/scores — replaces uppercase-tracking-wide sans labels
@@ -39,7 +38,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${fraunces.variable} ${mono.variable}`}
+      className={`${jakarta.variable} ${grotesk.variable} ${mono.variable}`}
     >
       <body className="font-sans">
         <div className="grain-overlay" aria-hidden="true" />

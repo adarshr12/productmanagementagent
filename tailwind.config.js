@@ -5,29 +5,31 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["var(--font-jakarta)", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["var(--font-fraunces)", "ui-serif", "Georgia", "serif"],
+        // Futuristic register: geometric grotesk for display, replacing the
+        // warm literary-serif direction that was explicitly rejected.
+        display: ["var(--font-grotesk)", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
-        // Full commitment to one register — dark, editorial, warm — instead of
-        // switching between a light "paper" page and a dark "ink" section.
-        // Per the redesign audit: alternating light/dark sections page-to-page
-        // reads as unintentional, not as design.
-        ink: "#141110",
+        // Cool near-black + a single electric-cyan accent, replacing the warm
+        // ink/gold "coaching brand" palette that was explicitly rejected.
+        // Cyan/teal (not purple/blue-violet) deliberately avoids the
+        // "AI-gradient" cliché flagged by the design-taste skill.
+        ink: "#0a0e14",
         surface: {
-          DEFAULT: "#1e1811",
-          raised: "#28211a",
+          DEFAULT: "#101722",
+          raised: "#182234",
         },
         cream: {
-          DEFAULT: "#f2efe9",
-          dim: "#e4ddce",
+          DEFAULT: "#eaf2f7",
+          dim: "#c7d3dc",
         },
         accent: {
-          50: "#fbf3e1",
-          100: "#f5e4bd",
-          200: "#e8cb84",
-          500: "#c9a24b",
-          600: "#a9822f",
+          50: "#e6fbff",
+          100: "#bff3fb",
+          200: "#7fe6f5",
+          500: "#22d3ee",
+          600: "#0891b2",
         },
         // Kept for the few remaining light-surface contexts (admin/login).
         brand: {
@@ -39,7 +41,7 @@ module.exports = {
           700: "#191510",
         },
         paper: "#faf6ee",
-        muted: "#a89a86",
+        muted: "#8ea0ae",
       },
       transitionDuration: {
         DEFAULT: "180ms",

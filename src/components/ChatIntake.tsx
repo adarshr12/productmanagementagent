@@ -115,18 +115,17 @@ export function ChatIntake({
     step >= 0 && step < questions.length ? questions[step] : null;
 
   return (
-    <div className="chat-shell mx-auto w-full max-w-4xl overflow-hidden">
-      <div className="grid sm:grid-cols-[1fr_auto]">
-        {/* transcript — mentor lane right-aligned, user lane left-aligned */}
-        <div className="flex min-w-0 flex-col border-b border-white/10 sm:border-b-0 sm:border-r">
-          <div
-            ref={scrollRef}
-            className="max-h-[440px] min-h-[300px] space-y-3 overflow-y-auto px-5 py-6 sm:px-8"
-          >
-            {turns.map((t) =>
+    <div className="flex h-full w-full flex-col sm:grid sm:grid-cols-[1fr_auto]">
+      {/* transcript — mentor lane right-aligned, user lane left-aligned */}
+      <div className="flex min-w-0 flex-1 flex-col border-b border-white/10 sm:border-b-0 sm:border-r">
+        <div
+          ref={scrollRef}
+          className="flex-1 space-y-4 overflow-y-auto px-6 py-8 sm:px-12 sm:py-12"
+        >
+          {turns.map((t) =>
               t.from === "mentor" ? (
                 <div key={t.id} className="flex justify-end">
-                  <div className="chat-bubble-mentor font-display text-base italic">
+                  <div className="chat-bubble-mentor font-display text-lg">
                     {t.text}
                   </div>
                 </div>
@@ -209,26 +208,25 @@ export function ChatIntake({
           )}
         </div>
 
-        {/* the mentor — big, persistent, on the right */}
-        <div className="flex flex-row items-center gap-4 bg-white/[0.02] px-5 py-5 sm:w-[220px] sm:flex-col sm:justify-center sm:px-6 sm:py-8">
-          <MentorAvatar src={mentorPhotoSrc} size={128} speaking={typing} />
-          <div className="sm:mt-4 sm:text-center">
-            <p className="text-sm font-semibold text-cream">
-              Your product mentor
-            </p>
-            {step >= 0 && (
-              <div className="mt-2 flex flex-wrap gap-1 sm:justify-center">
-                {questions.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`h-1.5 w-1.5 rounded-full transition ${
-                      i <= step ? "bg-accent-500" : "bg-white/15"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+      {/* the mentor — big, persistent, on the right */}
+      <div className="flex flex-row items-center gap-4 bg-white/[0.02] px-6 py-5 sm:w-[280px] sm:flex-col sm:justify-center sm:px-6 sm:py-8">
+        <MentorAvatar src={mentorPhotoSrc} size={128} speaking={typing} />
+        <div className="sm:mt-4 sm:text-center">
+          <p className="text-sm font-semibold text-cream">
+            Your product mentor
+          </p>
+          {step >= 0 && (
+            <div className="mt-2 flex flex-wrap gap-1 sm:justify-center">
+              {questions.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 w-1.5 rounded-full transition ${
+                    i <= step ? "bg-accent-500" : "bg-white/15"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

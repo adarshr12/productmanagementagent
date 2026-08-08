@@ -75,20 +75,20 @@ export default function Home() {
     </nav>
   );
 
-  // ================= LIVE CHAT INTAKE (full width, mentor-led) =================
+  // ================= LIVE CHAT INTAKE (full screen, mentor-led) =================
   if (phase === "intake") {
     return (
-      <main className="min-h-screen bg-ink">
+      <div className="flex h-screen flex-col bg-ink">
         {nav}
-        <section className="px-5 py-14 sm:px-8 sm:py-20">
+        <div className="min-h-0 flex-1">
           <ChatIntake questions={INTAKE_QUESTIONS} onComplete={submit} />
-          {error && (
-            <p className="mx-auto mt-3 max-w-4xl rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {error}
-            </p>
-          )}
-        </section>
-      </main>
+        </div>
+        {error && (
+          <p className="mx-6 mb-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            {error}
+          </p>
+        )}
+      </div>
     );
   }
 
@@ -105,7 +105,7 @@ export default function Home() {
               <span className="animate-fade-up pill w-fit bg-white/10 text-accent-200">
                 Free · No login needed
               </span>
-              <h1 className="animate-fade-up delay-1 font-display mt-5 text-4xl font-semibold italic leading-[1.1] tracking-tight text-cream sm:text-5xl lg:text-[3.4rem]">
+              <h1 className="animate-fade-up delay-1 font-display mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-cream sm:text-5xl lg:text-[3.4rem]">
                 Which product role
                 <br className="hidden sm:block" /> actually fits{" "}
                 <span className="text-accent-500">you</span>?
@@ -144,7 +144,7 @@ export default function Home() {
             <div className="lg:mt-2">
               <div className="chat-shell flex h-[420px] flex-col items-center justify-center gap-5 px-6 py-6 text-center sm:h-[480px]">
                 <MentorAvatar size={112} />
-                <p className="font-display max-w-xs text-xl italic text-cream/90">
+                <p className="font-display max-w-xs text-xl text-cream/90">
                   &ldquo;Hey — let&apos;s find out which product role
                   actually fits you.&rdquo;
                 </p>
