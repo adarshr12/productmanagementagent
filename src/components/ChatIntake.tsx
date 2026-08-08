@@ -115,12 +115,12 @@ export function ChatIntake({
     step >= 0 && step < questions.length ? questions[step] : null;
 
   return (
-    <div className="flex h-full w-full flex-col sm:grid sm:grid-cols-[1fr_auto]">
+    <div className="flex h-full min-h-0 w-full flex-col sm:grid sm:grid-cols-[1fr_auto]">
       {/* transcript — mentor lane right-aligned, user lane left-aligned */}
-      <div className="flex min-w-0 flex-1 flex-col border-b border-white/10 sm:border-b-0 sm:border-r">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-white/10 sm:border-b-0 sm:border-r">
         <div
           ref={scrollRef}
-          className="flex-1 space-y-4 overflow-y-auto px-6 py-8 sm:px-12 sm:py-12"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-8 sm:px-12 sm:py-12"
         >
           {turns.map((t) =>
               t.from === "mentor" ? (
