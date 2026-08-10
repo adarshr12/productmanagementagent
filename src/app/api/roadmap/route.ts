@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { retrieveChunks } from "@/lib/retrieve";
 import { groqJSON } from "@/lib/groq";
-import { loadPrompt } from "@/lib/prompts";
+import { getAgentConfig } from "@/lib/agentConfig";
 import { getRole } from "@/lib/roles";
 import { buildRoadmapUserContent, roadmapQuery } from "@/lib/roleMatch";
 import { parseRoadmap } from "@/lib/roadmap";
@@ -40,16 +40,20 @@ export async function POST(req: NextRequest) {
     }
     const answers: Record<string, string> = (intake.answers as any) ?? {};
 
-    // retrieve grounding context for this role + background
-    const chunks = await retrieveChunks(roadmapQuery(answers, role), 6);
+    const agent = await getAgentConfig("roadmap");
+
+    // retrieve grounding context for this role + background, only while
+    // this agent's knowledge-base toggle is on
+    const chunks = agent.useKnowledgeBase
+      ? await retrieveChunks(roadmapQuery(answers, role), 6)
+      : [];
     const context = chunks
       .map((c, i) => `[${i + 1}] (Source: "${c.document_title}") ${c.content}`)
       .join("\n\n");
 
     // ONE Groq call for the roadmap
-    const systemPrompt = await loadPrompt("roadmap-system.txt");
     const raw = await groqJSON(
-      systemPrompt,
+      agent.systemPrompt,
       buildRoadmapUserContent(answers, role, context)
     );
     const roadmap = parseRoadmap(raw);

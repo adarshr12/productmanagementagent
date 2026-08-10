@@ -26,12 +26,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md items-center px-4">
-      <div className="w-full">
-        <h1 className="mb-1 text-2xl font-bold">Admin sign in</h1>
-        <p className="mb-6 text-sm text-slate-600">
-          This area is for the site owner only.
-        </p>
+    <main className="flex min-h-screen items-center justify-center px-5">
+      <div className="w-full max-w-md">
+        <p className="tag mb-2 text-accent-500">site owner only</p>
+        <h1 className="font-display mb-6 text-2xl font-semibold text-cream">
+          Admin sign in
+        </h1>
         <form onSubmit={handleLogin} className="card space-y-4">
           <div>
             <label className="field-label" htmlFor="email">
@@ -60,11 +60,11 @@ export default function AdminLoginPage() {
             />
           </div>
           {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-200">
               {error}
             </p>
           )}
-          <button type="submit" className="btn-primary w-full" disabled={loading}>
+          <button type="submit" className="btn-gold w-full py-3" disabled={loading}>
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>

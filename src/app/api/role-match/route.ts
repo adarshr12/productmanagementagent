@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { retrieveChunks } from "@/lib/retrieve";
 import { groqJSON } from "@/lib/groq";
-import { loadPrompt } from "@/lib/prompts";
+import { getAgentConfig } from "@/lib/agentConfig";
 import { checkAndRecordRateLimit, clientIdentifier } from "@/lib/rateLimit";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
 import {
@@ -54,13 +54,17 @@ export async function POST(req: NextRequest) {
       .single();
     if (intakeErr) throw new Error(`Saving intake failed: ${intakeErr.message}`);
 
-    // retrieve grounding context, then score the roles
-    const chunks = await retrieveChunks(backgroundQuery(answers), 6);
+    const agent = await getAgentConfig("role_match");
+
+    // retrieve grounding context only while this agent's knowledge-base
+    // toggle is on (off by default until the admin has collated documents)
+    const chunks = agent.useKnowledgeBase
+      ? await retrieveChunks(backgroundQuery(answers), 6)
+      : [];
     const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
 
-    const systemPrompt = await loadPrompt("role-match-system.txt");
     const raw = await groqJSON(
-      systemPrompt,
+      agent.systemPrompt,
       buildRoleMatchUserContent(answers, context),
       3000
     );

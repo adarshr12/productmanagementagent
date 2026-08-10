@@ -42,62 +42,79 @@ export default function CompletionsPage() {
   const overall = summarize(rows);
 
   if (!ready) {
-    return <main className="p-10 text-sm text-slate-500">Loading…</main>;
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p className="tag">loading…</p>
+      </main>
+    );
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Completion rates</h1>
-        <Link href="/admin" className="text-sm font-medium text-brand-600">
-          ← Back to knowledge base
-        </Link>
-      </div>
-
-      {/* headline metric — this is the core success metric */}
-      <div className="mb-8 grid grid-cols-3 gap-4">
-        <Stat label="Roadmaps" value={String(rows.length)} />
-        <Stat
-          label="Steps completed"
-          value={`${overall.completed} / ${overall.total}`}
-        />
-        <Stat label="Overall completion" value={`${overall.pct}%`} />
-      </div>
-
-      {rows.length === 0 ? (
-        <p className="text-sm text-slate-500">No roadmaps generated yet.</p>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Roadmap</th>
-                <th className="px-4 py-2 font-medium">Created</th>
-                <th className="px-4 py-2 font-medium">Progress</th>
-                <th className="px-4 py-2 font-medium">%</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {rows.map((r) => (
-                <tr key={r.roadmap_id}>
-                  <td className="px-4 py-2 font-medium">
-                    {r.title || "(untitled)"}
-                  </td>
-                  <td className="px-4 py-2 text-slate-500">
-                    {new Date(r.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2">
-                    {r.completed_steps} / {r.total_steps}
-                  </td>
-                  <td className="px-4 py-2 font-semibold">
-                    {r.completion_pct ?? 0}%
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <main className="min-h-screen">
+      <nav className="border-b border-white/[0.08] bg-ink/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
+          <span className="font-display text-lg font-semibold tracking-tight text-cream">
+            <span className="text-accent-500">◆</span> Admin
+          </span>
+          <Link
+            href="/admin"
+            className="text-sm font-medium text-cream/70 transition hover:text-cream"
+          >
+            ← Back
+          </Link>
         </div>
-      )}
+      </nav>
+
+      <div className="mx-auto max-w-4xl px-5 py-10">
+        <p className="tag mb-2 text-accent-500">success metric</p>
+        <h1 className="font-display mb-8 text-2xl font-semibold text-cream">
+          Completion rates
+        </h1>
+
+        <div className="mb-8 grid grid-cols-3 gap-4">
+          <Stat label="Roadmaps" value={String(rows.length)} />
+          <Stat
+            label="Steps completed"
+            value={`${overall.completed} / ${overall.total}`}
+          />
+          <Stat label="Overall completion" value={`${overall.pct}%`} />
+        </div>
+
+        {rows.length === 0 ? (
+          <p className="text-sm text-cream/45">No roadmaps generated yet.</p>
+        ) : (
+          <div className="card overflow-x-auto p-0">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-cream/45">
+                  <th className="px-5 py-3 font-medium">Roadmap</th>
+                  <th className="px-5 py-3 font-medium">Created</th>
+                  <th className="px-5 py-3 font-medium">Progress</th>
+                  <th className="px-5 py-3 font-medium">%</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.06]">
+                {rows.map((r) => (
+                  <tr key={r.roadmap_id}>
+                    <td className="px-5 py-3 font-medium text-cream">
+                      {r.title || "(untitled)"}
+                    </td>
+                    <td className="px-5 py-3 text-cream/55">
+                      {new Date(r.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-3 text-cream/70">
+                      {r.completed_steps} / {r.total_steps}
+                    </td>
+                    <td className="px-5 py-3 font-semibold text-accent-500">
+                      {r.completion_pct ?? 0}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
@@ -105,10 +122,10 @@ export default function CompletionsPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card">
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {label}
+      <div className="tag">{label}</div>
+      <div className="font-display mt-1 text-2xl font-semibold text-cream">
+        {value}
       </div>
-      <div className="mt-1 text-2xl font-bold">{value}</div>
     </div>
   );
 }
