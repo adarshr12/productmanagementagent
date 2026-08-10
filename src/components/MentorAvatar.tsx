@@ -2,14 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { MentorAvatar3D } from "@/components/MentorAvatar3D";
+import { MentorAvatarIllustrated } from "@/components/MentorAvatarIllustrated";
 
 /**
- * The mentor's avatar. Real 3D (Three.js/WebGL) by default — a stylized
- * figure, not a monogram or an icon — because "avatar" was read literally:
- * something that looks like a person. Pass `src` once a real photo exists;
- * that path renders it as a lit, animated 2D portrait instead (the 3D figure
- * is a stand-in for "no photo yet," not the permanent design).
+ * The mentor's avatar. An illustrated vector portrait by default — a face
+ * with real features (hair, eyes, nose, mouth, shoulders), not a monogram or
+ * an abstract shape. Pass `src` once a real photo exists; that path renders
+ * it as a lit, animated 2D portrait instead.
  */
 export function MentorAvatar({
   src,
@@ -61,7 +60,7 @@ export function MentorAvatar({
   }, [src, speaking]);
 
   if (!src) {
-    return <MentorAvatar3D size={size} speaking={speaking} />;
+    return <MentorAvatarIllustrated size={size} speaking={speaking} />;
   }
 
   return (

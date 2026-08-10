@@ -11,14 +11,11 @@
     "eval": "node evals/run-evals.mjs"
   },
   "dependencies": {
-    "@react-three/drei": "^9.114.3",
-    "@react-three/fiber": "^8.17.10",
     "@supabase/supabase-js": "^2.45.0",
     "gsap": "^3.15.0",
     "next": "14.2.35",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "three": "^0.169.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
