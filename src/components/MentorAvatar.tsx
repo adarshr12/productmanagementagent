@@ -3,19 +3,25 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { MentorAvatarIllustrated } from "@/components/MentorAvatarIllustrated";
+import { MentorAvatarModel } from "@/components/MentorAvatarModel";
+
+/** Rigged GLB avatar used everywhere the mentor's face appears. Swap this
+ * path (or pass `model` explicitly) to change the mentor's look. */
+const DEFAULT_MODEL = "/avatars/mentor-2.glb";
 
 /**
- * The mentor's avatar. An illustrated vector portrait by default — a face
- * with real features (hair, eyes, nose, mouth, shoulders), not a monogram or
- * an abstract shape. Pass `src` once a real photo exists; that path renders
- * it as a lit, animated 2D portrait instead.
+ * The mentor's avatar. Renders the real rigged 3D head by default. Pass
+ * `model={undefined}` together with `src` to fall back to a flat photo, or
+ * both undefined to fall back to the illustrated vector portrait.
  */
 export function MentorAvatar({
   src,
+  model = DEFAULT_MODEL,
   size = 200,
   speaking = false,
 }: {
   src?: string;
+  model?: string;
   size?: number;
   speaking?: boolean;
 }) {
@@ -23,7 +29,7 @@ export function MentorAvatar({
   const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!src) return;
+    if (model || !src) return;
     const ctx = gsap.context(() => {
       gsap.to(wrapRef.current, {
         y: -6,
@@ -42,10 +48,10 @@ export function MentorAvatar({
       });
     });
     return () => ctx.revert();
-  }, [src]);
+  }, [model, src]);
 
   useEffect(() => {
-    if (!src || !speaking) return;
+    if (model || !src || !speaking) return;
     const tween = gsap.to(wrapRef.current, {
       scale: 1.035,
       duration: 0.32,
@@ -57,7 +63,11 @@ export function MentorAvatar({
       tween.kill();
       gsap.set(wrapRef.current, { scale: 1 });
     };
-  }, [src, speaking]);
+  }, [model, src, speaking]);
+
+  if (model) {
+    return <MentorAvatarModel src={model} size={size} speaking={speaking} />;
+  }
 
   if (!src) {
     return <MentorAvatarIllustrated size={size} speaking={speaking} />;
