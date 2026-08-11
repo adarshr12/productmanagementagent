@@ -1,27 +1,47 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
+import { SkeletonUtils } from "three-stdlib";
 import { gsap } from "gsap";
 import * as THREE from "three";
 
+const CAMERA_FOV = 30;
+const CAMERA_Z = 1.85;
+
 /**
- * Loads a real rigged full-body GLB avatar and frames just the head/shoulders,
- * like a portrait crop. These exports have no facial blendshapes, so "speaking"
- * is a subtle head/shoulder animation rather than lip sync.
+ * Loads a real rigged full-body GLB avatar and frames chest-up — head,
+ * shoulders, and hands — like someone sitting across a video call, not a
+ * profile-picture crop. These exports have no facial blendshapes, so
+ * "speaking" is conveyed through head/hand motion rather than lip sync.
  */
 function Figure({ src, speaking }: { src: string; speaking: boolean }) {
-  const { scene } = useGLTF(src);
+  const { scene: cached } = useGLTF(src);
+  // useGLTF caches and reuses the same Object3D graph by URL. Cloning (with
+  // bone bindings intact) is required so multiple instances of the same
+  // model don't fight over one shared skeleton — reparenting the raw cached
+  // scene into a second instance silently empties the first.
+  const scene = useMemo(() => SkeletonUtils.clone(cached), [cached]);
   const outer = useRef<THREE.Group>(null);
   const inner = useRef<THREE.Group>(null);
   const headBone = useRef<THREE.Object3D | null>(null);
   const neckBone = useRef<THREE.Object3D | null>(null);
+  const leftArm = useRef<THREE.Object3D | null>(null);
+  const rightArm = useRef<THREE.Object3D | null>(null);
   const framed = useRef(false);
 
   useEffect(() => {
     headBone.current = scene.getObjectByName("Head") || null;
     neckBone.current = scene.getObjectByName("Neck") || null;
+    leftArm.current = scene.getObjectByName("LeftArm") || null;
+    rightArm.current = scene.getObjectByName("RightArm") || null;
+
+    // Bring the arms out of the T-pose bind into a relaxed, open gesture —
+    // elbows down, hands raised toward the chest, like someone mid-explanation.
+    if (leftArm.current) leftArm.current.rotation.z = 1.4;
+    if (rightArm.current) rightArm.current.rotation.z = -1.4;
+
     scene.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
         obj.castShadow = false;
@@ -33,17 +53,26 @@ function Figure({ src, speaking }: { src: string; speaking: boolean }) {
     framed.current = false;
   }, [scene]);
 
-  // Frame the shot on the head regardless of each model's exact bind pose /
-  // scale — read the head bone's actual world position after the first
-  // matrix update instead of hardcoding an offset per model.
+  // Frame the shot chest-up regardless of each model's exact bind pose /
+  // scale — read the head and chest bones' actual world positions after the
+  // first matrix update instead of hardcoding an offset per model.
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
     if (!framed.current && headBone.current && inner.current) {
       inner.current.updateMatrixWorld(true);
-      const headWorld = new THREE.Vector3();
-      headBone.current.getWorldPosition(headWorld);
-      inner.current.position.set(-headWorld.x, -headWorld.y - 0.07, -headWorld.z);
+      const head = new THREE.Vector3();
+      headBone.current.getWorldPosition(head);
+      const chest = new THREE.Vector3();
+      const chestBone =
+        scene.getObjectByName("Spine1") || scene.getObjectByName("Spine");
+      if (chestBone) chestBone.getWorldPosition(chest);
+      else chest.set(head.x, head.y - 0.45, head.z);
+
+      const topY = head.y + 0.17;
+      const bottomY = chest.y - 0.32;
+      const centerY = (topY + bottomY) / 2;
+      inner.current.position.set(-head.x, -centerY, 0);
       framed.current = true;
     }
 
@@ -57,19 +86,50 @@ function Figure({ src, speaking }: { src: string; speaking: boolean }) {
     if (outer.current) {
       outer.current.position.y = Math.sin(t * 1.1) * 0.006;
     }
+    if (leftArm.current) {
+      leftArm.current.rotation.x = Math.sin(t * 0.8) * 0.02;
+    }
+    if (rightArm.current) {
+      rightArm.current.rotation.x = Math.sin(t * 0.8 + 1) * 0.02;
+    }
   });
 
   useEffect(() => {
-    if (!headBone.current || !speaking) return;
-    const tween = gsap.to(headBone.current.rotation, {
-      z: 0.025,
-      duration: 0.18,
-      yoyo: true,
-      repeat: -1,
-      ease: "sine.inOut",
-    });
+    if (!headBone.current) return;
+    if (!speaking) return;
+    const tweens = [
+      gsap.to(headBone.current.rotation, {
+        z: 0.025,
+        duration: 0.18,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+      }),
+    ];
+    if (leftArm.current) {
+      tweens.push(
+        gsap.to(leftArm.current.rotation, {
+          z: "+=0.08",
+          duration: 0.5,
+          yoyo: true,
+          repeat: -1,
+          ease: "sine.inOut",
+        })
+      );
+    }
+    if (rightArm.current) {
+      tweens.push(
+        gsap.to(rightArm.current.rotation, {
+          z: "-=0.08",
+          duration: 0.46,
+          yoyo: true,
+          repeat: -1,
+          ease: "sine.inOut",
+        })
+      );
+    }
     return () => {
-      tween.kill();
+      tweens.forEach((tw) => tw.kill());
     };
   }, [speaking]);
 
@@ -91,25 +151,28 @@ export function MentorAvatarModel({
   size?: number;
   speaking?: boolean;
 }) {
+  const width = size;
+  const height = Math.round(size * 1.18);
+
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className="relative shrink-0" style={{ width, height }}>
       <div
-        className="orb-pulse pointer-events-none absolute rounded-full"
+        className="orb-pulse pointer-events-none absolute rounded-2xl"
         style={{
-          inset: -size * 0.28,
+          inset: -size * 0.16,
           background:
-            "radial-gradient(circle, rgba(34,211,238,0.55), rgba(34,211,238,0.12) 55%, transparent 72%)",
-          filter: "blur(6px)",
+            "radial-gradient(circle, rgba(34,211,238,0.4), rgba(34,211,238,0.08) 55%, transparent 72%)",
+          filter: "blur(10px)",
           animationDuration: speaking ? "1.3s" : "3.2s",
         }}
         aria-hidden="true"
       />
       <div
-        className="relative overflow-hidden rounded-full bg-[#0d131c]"
-        style={{ width: size, height: size }}
+        className="relative overflow-hidden rounded-2xl border border-accent-500/30 bg-[#0d131c] shadow-2xl"
+        style={{ width, height }}
       >
         <Canvas
-          camera={{ position: [0, 0, 0.62], fov: 26 }}
+          camera={{ position: [0, 0, CAMERA_Z], fov: CAMERA_FOV }}
           gl={{ antialias: true, alpha: true }}
           dpr={[1, 2]}
         >
@@ -122,7 +185,13 @@ export function MentorAvatarModel({
             <Figure src={src} speaking={speaking} />
           </Suspense>
         </Canvas>
-        <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-accent-500/40" />
+        <div
+          className="pointer-events-none absolute inset-0 rounded-2xl"
+          style={{
+            boxShadow: "inset 0 0 40px 10px rgba(13,19,28,0.55)",
+          }}
+          aria-hidden="true"
+        />
       </div>
     </div>
   );
