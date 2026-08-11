@@ -4,6 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabaseClient";
 
+// Supabase's client surfaces a raw, sometimes-empty message straight from the
+// auth server (a real server error can arrive as "{}", which read as blank
+// noise rather than a real error). Map the cases people actually hit to
+// something that tells them what to do next.
+function friendlyAuthError(error: { message?: string; status?: number }): string {
+  const message = (error.message || "").trim();
+  if (/invalid login credentials/i.test(message)) {
+    return "That email or password isn't right. Double-check and try again.";
+  }
+  if (/email not confirmed/i.test(message)) {
+    return "This account's email hasn't been confirmed yet.";
+  }
+  if (error.status && error.status >= 500) {
+    return "Something went wrong on the sign-in service (not your credentials). Please try again in a moment.";
+  }
+  if (!message || message === "{}") {
+    return "Sign-in failed for an unexpected reason. Please try again in a moment.";
+  }
+  return message;
+}
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -15,14 +36,21 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const supabase = createBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const supabase = createBrowserClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setError(friendlyAuthError(error));
+        return;
+      }
+      router.push("/admin");
+    } catch {
+      setError(
+        "Couldn't reach the sign-in service. Check your connection and try again."
+      );
+    } finally {
+      setLoading(false);
     }
-    router.push("/admin");
   }
 
   return (
