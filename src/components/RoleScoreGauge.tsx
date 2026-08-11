@@ -8,6 +8,11 @@ function getStrength(score: number): Strength {
   return "developing";
 }
 
+// SVG `stroke` can't take a Tailwind class, so these are that same
+// palette's actual hex values (emerald-400, amber-400) rather than a
+// hand-picked color that quietly drifts from the badge next to it. The
+// "developing" stroke uses the same white-at-opacity convention as the
+// rest of the app's neutral borders/fills instead of a leftover warm gray.
 const STRENGTH_STYLES: Record<
   Strength,
   { label: string; badge: string; stroke: string }
@@ -20,12 +25,12 @@ const STRENGTH_STYLES: Record<
   moderate: {
     label: "Moderate fit",
     badge: "border border-amber-500/25 bg-amber-500/10 text-amber-300",
-    stroke: "#f6b93b",
+    stroke: "#fbbf24",
   },
   developing: {
     label: "Developing fit",
     badge: "border border-white/15 bg-white/[0.04] text-cream/50",
-    stroke: "#8a7f6d",
+    stroke: "rgba(255,255,255,0.35)",
   },
 };
 

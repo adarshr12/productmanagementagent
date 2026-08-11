@@ -233,7 +233,7 @@ export function JourneyMap({
           <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-cream text-ink shadow">
             <PinIcon />
           </span>
-          <span className="mt-1.5 max-w-[130px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-medium text-cream/70 shadow-sm">
+          <span className="mt-1.5 max-w-[130px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-medium text-cream/70 shadow-glass-sm">
             {startLabel}
           </span>
         </div>
@@ -260,7 +260,7 @@ export function JourneyMap({
                 {isDone ? <CheckIcon /> : i + 1}
               </span>
               <span
-                className={`mt-1.5 max-w-[150px] rounded-md px-2 py-1 text-center text-[11px] font-medium leading-snug shadow-sm ${
+                className={`mt-1.5 max-w-[150px] rounded-md px-2 py-1 text-center text-[11px] font-medium leading-snug shadow-glass-sm ${
                   isDone
                     ? "bg-emerald-500/10 text-emerald-300"
                     : isCurrent
@@ -288,7 +288,7 @@ export function JourneyMap({
           <span className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-ink bg-accent-500 text-ink shadow-[0_0_20px_rgba(34,211,238,0.6)]">
             <TargetIcon />
           </span>
-          <span className="mt-1.5 max-w-[140px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-semibold text-cream shadow-sm">
+          <span className="mt-1.5 max-w-[140px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-semibold text-cream shadow-glass-sm">
             {finishLabel}
           </span>
         </div>
@@ -296,7 +296,7 @@ export function JourneyMap({
 
       <p className="mt-3 text-center text-xs text-cream/40">
         {allDone
-          ? `You've reached the end — you're ready for ${finishLabel} roles.`
+          ? `You've reached the end, you're ready for ${finishLabel} roles.`
           : `Scroll to drive the road to ${finishLabel}.`}
       </p>
     </div>

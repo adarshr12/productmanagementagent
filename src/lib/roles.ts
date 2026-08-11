@@ -18,7 +18,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "🌱",
     family: "PM ladder",
     description:
-      "Entry-level PM role. You learn the craft supporting a senior PM — writing specs, talking to users, and shipping small features. A common first step into product.",
+      "Entry-level PM role: you learn the craft supporting a senior PM, writing specs, talking to users, and shipping small features. A common first step into product.",
   },
   {
     id: "pm_generalist",
@@ -51,7 +51,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "🤖",
     family: "Specialization",
     description:
-      "Builds products powered by AI/ML — defining use cases, data needs, model behaviour, evaluation, and guardrails.",
+      "Builds products powered by AI/ML: defining use cases, data needs, model behaviour, evaluation, and guardrails.",
   },
   {
     id: "technical_pm",
@@ -67,7 +67,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "📊",
     family: "Specialization",
     description:
-      "Owns data products — pipelines, analytics, dashboards, and the data that powers other products and decisions.",
+      "Owns data products: pipelines, analytics, dashboards, and the data that powers other products and decisions.",
   },
   {
     id: "growth_pm",
@@ -99,7 +99,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "🏢",
     family: "Specialization",
     description:
-      "Builds products for business/enterprise customers — complex requirements, integrations, and close work with sales.",
+      "Builds products for business/enterprise customers: complex requirements, integrations, and close work with sales.",
   },
   {
     id: "b2c_pm",
@@ -115,7 +115,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "🛒",
     family: "Specialization",
     description:
-      "Owns online shopping experiences — catalog, search, checkout, payments, and conversion.",
+      "Owns online shopping experiences: catalog, search, checkout, payments, and conversion.",
   },
   // ---- Adjacent roles ----
   {
@@ -124,7 +124,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "📋",
     family: "Adjacent role",
     description:
-      "Owns and prioritises the backlog in Agile/Scrum teams — the bridge between stakeholders and engineering.",
+      "Owns and prioritises the backlog in Agile/Scrum teams, the bridge between stakeholders and engineering.",
   },
   {
     id: "product_analyst",
@@ -132,7 +132,7 @@ export const ROLE_CATALOG: Role[] = [
     emoji: "🔎",
     family: "Adjacent role",
     description:
-      "Uses data to inform product decisions — metrics, dashboards, A/B tests, and insights. A strong on-ramp to PM.",
+      "Uses data to inform product decisions: metrics, dashboards, A/B tests, and insights. A strong on-ramp to PM.",
   },
   {
     id: "project_manager",

@@ -31,17 +31,13 @@ module.exports = {
           500: "#22d3ee",
           600: "#0891b2",
         },
-        // Kept for the few remaining light-surface contexts (admin/login).
-        brand: {
-          50: "#f2efe9",
-          100: "#e4ddce",
-          200: "#c9bda2",
-          500: "#48423a",
-          600: "#2a251f",
-          700: "#191510",
-        },
-        paper: "#faf6ee",
-        muted: "#8ea0ae",
+      },
+      // One radius scale, used deliberately: xl for controls (buttons,
+      // inputs, chips), 2xl for surfaces (cards, chat bubbles, the roadmap
+      // shell). Overriding 2xl here instead of reaching for an arbitrary
+      // rounded-[22px] value keeps every "surface" corner in lockstep.
+      borderRadius: {
+        "2xl": "22px",
       },
       transitionDuration: {
         DEFAULT: "180ms",

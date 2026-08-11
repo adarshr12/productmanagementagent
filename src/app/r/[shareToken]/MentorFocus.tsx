@@ -46,16 +46,16 @@ export default function MentorFocus({
             You've cleared the whole roadmap.
           </h2>
           <p className="mt-1 text-sm text-cream/60">
-            Every step is done — take a look at the full board any time to revisit
-            what you covered.
+            Every step is done. Take a look at the full board any time to
+            revisit what you covered.
           </p>
         </div>
       ) : (
         <>
           <p className="mb-4 text-sm font-medium text-cream/70">
             {completed.length === 0
-              ? `I can see ${remaining.length} things standing between you and this role. Let's not look at all of them at once — start with these ${focus.length}:`
-              : `Nice progress — ${completed.length} down. Here's what to focus on next:`}
+              ? `I can see ${remaining.length} things standing between you and this role. Let's not look at all of them at once, start with these ${focus.length}:`
+              : `Nice progress, ${completed.length} down. Here's what to focus on next:`}
           </p>
 
           <div className="space-y-4">

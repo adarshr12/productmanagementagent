@@ -9,7 +9,7 @@ import { useMediaQuery } from "@/lib/useMediaQuery";
 type Turn = { id: string; from: "mentor" | "user"; text: string };
 
 const GREETING =
-  "Hey — welcome. I'm going to ask a handful of quick questions so I can score you against every product role and tell you exactly why — not just guess. Answer with a tap, or just type — whatever's faster.";
+  "Hey, welcome. I'm going to ask a handful of quick questions so I can score you against every product role and tell you exactly why, not just guess. Answer with a tap, or just type, whatever's faster.";
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -63,9 +63,10 @@ export function ChatIntake({
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turns, typing]);
 
-  // New turns lift in — reinforces "this is happening now," not a static log.
+  // New turns lift in, reinforces "this is happening now," not a static log.
   useEffect(() => {
     if (!scrollRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const last = scrollRef.current.lastElementChild;
     if (last) {
       gsap.fromTo(
@@ -80,7 +81,7 @@ export function ChatIntake({
     const q = questions[step];
     const value = rawValue.trim();
     if (!value && q.required) {
-      setError("Go ahead and answer this one — even a short answer helps.");
+      setError("Go ahead and answer this one, even a short answer helps.");
       return;
     }
     setError(null);
@@ -96,7 +97,7 @@ export function ChatIntake({
       setTimeout(() => {
         setTyping(false);
         pushMentor(
-          "Perfect — that's everything I need. Scoring you against every product role now..."
+          "Perfect, that's everything I need. Scoring you against every product role now..."
         );
         setTimeout(() => onComplete(nextAnswers), 900);
       }, 700);
@@ -123,6 +124,8 @@ export function ChatIntake({
         <div
           ref={scrollRef}
           className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-8 sm:px-12 sm:py-12"
+          aria-live="polite"
+          aria-relevant="additions"
         >
           {turns.map((t) =>
               t.from === "mentor" ? (
@@ -139,7 +142,7 @@ export function ChatIntake({
               )
             )}
             {typing && (
-              <div className="flex justify-end">
+              <div className="flex justify-end" role="status" aria-label="Your mentor is typing">
                 <div className="chat-bubble-mentor flex items-center gap-1 py-4">
                   <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50" />
                   <span
@@ -222,16 +225,25 @@ export function ChatIntake({
             Your product mentor
           </p>
           {step >= 0 && (
-            <div className="mt-2 flex flex-wrap gap-1 sm:justify-center">
-              {questions.map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 w-1.5 rounded-full transition ${
-                    i <= step ? "bg-accent-500" : "bg-white/15"
-                  }`}
-                />
-              ))}
-            </div>
+            <>
+              <p className="mt-1.5 text-xs font-medium text-cream/45">
+                Question {Math.min(step + 1, questions.length)} of{" "}
+                {questions.length}
+              </p>
+              <div
+                className="mt-2 flex flex-wrap gap-1 sm:justify-center"
+                aria-hidden="true"
+              >
+                {questions.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 w-1.5 rounded-full transition ${
+                      i <= step ? "bg-accent-500" : "bg-white/15"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

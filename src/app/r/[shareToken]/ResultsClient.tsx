@@ -64,7 +64,7 @@ export default function ResultsClient({
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+    <main className="py-10 sm:py-14">
       <header className="mb-6">
         {role && (
           <p className="tag text-accent-500">roadmap · {role}</p>

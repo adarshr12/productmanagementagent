@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -24,10 +24,45 @@ const mono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const title = "ProductPath: find your best-fit product role";
+const description =
+  "Talk to an AI mentor for two minutes and get every product role (PM, AI PM, Growth, BA and more) scored for how well it fits your background, plus a personalized, trackable roadmap.";
+
 export const metadata: Metadata = {
-  title: "Find your best-fit product role — career roadmaps",
-  description:
-    "Answer a few questions and get your best-fit product role (PM, AI PM, Growth, BA and more) with a match score, plus a personalized, trackable roadmap. Built for career-switchers in India.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: title,
+    template: "%s · ProductPath",
+  },
+  description,
+  keywords: [
+    "product manager career change",
+    "product management roadmap",
+    "become a product manager",
+    "AI product manager",
+    "career transition to product management",
+  ],
+  authors: [{ name: "ProductPath" }],
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "ProductPath",
+    title,
+    description,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title,
+    description,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0e14",
 };
 
 export default function RootLayout({

@@ -165,6 +165,11 @@ export function MentorAvatarModel({
 
   useGSAP(
     (_ctx, contextSafe) => {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      if (reduceMotion) return;
+
       // Entrance: rise and settle instead of just appearing.
       gsap.from(root.current, {
         opacity: 0,

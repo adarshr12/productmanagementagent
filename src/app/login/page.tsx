@@ -65,15 +65,15 @@ export default function LoginPage() {
       <div className="w-full">
         <Link
           href="/"
-          className="mb-6 inline-block text-lg font-extrabold tracking-tight"
+          className="font-display mb-6 inline-block text-lg font-semibold tracking-tight text-cream"
         >
-          <span className="text-brand-600">◆</span> ProductPath
+          <span className="text-accent-500">◆</span> ProductPath
         </Link>
         <div className="card">
-          <h1 className="text-2xl font-extrabold">
+          <h1 className="font-display text-2xl font-semibold text-cream">
             {mode === "signin" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-cream/60">
             Save your roadmaps and track your progress.
           </p>
 
@@ -81,12 +81,12 @@ export default function LoginPage() {
             onClick={google}
             className="btn-ghost mt-6 w-full justify-center py-3"
           >
-            <span className="text-base">🇬</span> Continue with Google
+            Continue with Google
           </button>
 
-          <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-            <div className="h-px flex-1 bg-slate-200" /> or{" "}
-            <div className="h-px flex-1 bg-slate-200" />
+          <div className="my-5 flex items-center gap-3 text-xs text-cream/30">
+            <div className="h-px flex-1 bg-white/10" /> or{" "}
+            <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <form onSubmit={emailAuth} className="space-y-4">
@@ -118,12 +118,12 @@ export default function LoginPage() {
               />
             </div>
             {error && (
-              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="alert-error">
                 {error}
               </p>
             )}
             {message && (
-              <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">
+              <p className="alert-success">
                 {message}
               </p>
             )}
@@ -140,7 +140,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-muted">
+          <p className="mt-5 text-center text-sm text-cream/60">
             {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
             <button
               onClick={() => {
@@ -148,7 +148,7 @@ export default function LoginPage() {
                 setError(null);
                 setMessage(null);
               }}
-              className="font-semibold text-brand-600"
+              className="font-semibold text-accent-500"
             >
               {mode === "signin" ? "Create an account" : "Sign in"}
             </button>

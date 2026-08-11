@@ -52,7 +52,7 @@ export default function KanbanBoard({
                       draggable
                       onDragStart={() => setDragId(step.id)}
                       onDragEnd={() => setDragId(null)}
-                      className={`cursor-grab rounded-xl border-l-4 ${col.accent} bg-surface-raised p-3 shadow-sm active:cursor-grabbing`}
+                      className={`cursor-grab rounded-xl border-l-4 ${col.accent} bg-surface-raised p-3 shadow-glass-sm active:cursor-grabbing`}
                     >
                       <h3
                         className={`text-sm font-semibold ${
@@ -111,8 +111,8 @@ export default function KanbanBoard({
       </div>
 
       <p className="mt-8 text-center text-xs text-cream/35">
-        Drag cards between columns, or use ◀ / ▶. Bookmark this page to track your
-        progress — anyone with the link can view it.
+        Drag cards between columns, or use ◀ / ▶. Bookmark this page to track
+        your progress, anyone with the link can view it.
       </p>
     </>
   );

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
 import { ROLE_CATALOG } from "@/lib/roles";
 import type { RoleMatch } from "@/lib/roleMatch";
 import { RoleScoreGauge } from "@/components/RoleScoreGauge";
 import { ChatIntake } from "@/components/ChatIntake";
 import { MentorAvatar } from "@/components/MentorAvatar";
+import { SiteNav } from "@/components/SiteNav";
+import { Reveal } from "@/components/Reveal";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
@@ -59,21 +60,7 @@ export default function Home() {
     }
   }
 
-  const nav = (
-    <nav className="border-b border-white/[0.08] bg-ink/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <span className="font-display text-lg font-semibold tracking-tight text-cream">
-          <span className="text-accent-500">◆</span> ProductPath
-        </span>
-        <Link
-          href="/login?next=/me"
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-cream/80 transition hover:bg-white/5 hover:text-cream"
-        >
-          Log in
-        </Link>
-      </div>
-    </nav>
-  );
+  const nav = <SiteNav />;
 
   // ================= LIVE CHAT INTAKE (full screen, mentor-led) =================
   if (phase === "intake") {
@@ -84,7 +71,7 @@ export default function Home() {
           <ChatIntake questions={INTAKE_QUESTIONS} onComplete={submit} />
         </div>
         {error && (
-          <p className="mx-6 mb-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <p className="alert-error mx-6 mb-4">
             {error}
           </p>
         )}
@@ -145,17 +132,11 @@ export default function Home() {
             <div className="flex flex-col items-center gap-5 pt-4 text-center lg:pt-0">
               <MentorAvatar size={320} />
               <p className="font-display -mt-6 max-w-xs text-xl text-cream/90">
-                &ldquo;Hey — let&apos;s find out which product role
+                &ldquo;Hey, let&apos;s find out which product role
                 actually fits you.&rdquo;
               </p>
-              <button
-                onClick={() => setPhase("intake")}
-                className="btn-ghost w-fit"
-              >
-                Start the conversation →
-              </button>
               {error && (
-                <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                <p className="alert-error mt-3">
                   {error}
                 </p>
               )}
@@ -167,40 +148,44 @@ export default function Home() {
         <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
           <p className="tag mb-8">how it works</p>
           <div className="grid gap-6 lg:grid-cols-12 lg:gap-4">
-            <div className="lg:col-span-7">
-              <div className="card h-full border-accent-500/25">
+            <Reveal className="lg:col-span-7">
+              <div className="card flex h-full flex-col justify-center border-accent-500/25">
                 <p className="tag mb-3">01</p>
                 <h3 className="font-display text-2xl font-semibold text-cream">
                   Talk it through
                 </h3>
                 <p className="mt-2 max-w-md text-sm text-cream/60">
-                  A real conversation, not a form — your mentor asks, you
+                  A real conversation, not a form. Your mentor asks, you
                   answer in your own words, and every past answer stays
                   visible as you go.
                 </p>
               </div>
-            </div>
+            </Reveal>
             <div className="flex flex-col gap-6 lg:col-span-5">
-              <div className="card">
-                <p className="tag mb-3">02</p>
-                <h3 className="font-display text-lg font-semibold text-cream">
-                  Get every role scored
-                </h3>
-                <p className="mt-1 text-sm text-cream/60">
-                  See your fit for AI PM, Growth PM, BA and more, with the
-                  specific reasons why.
-                </p>
-              </div>
-              <div className="card">
-                <p className="tag mb-3">03</p>
-                <h3 className="font-display text-lg font-semibold text-cream">
-                  Follow a trackable roadmap
-                </h3>
-                <p className="mt-1 text-sm text-cream/60">
-                  Pick a role and get a guided path from where you are to
-                  where you&apos;re going.
-                </p>
-              </div>
+              <Reveal delayMs={120}>
+                <div className="card">
+                  <p className="tag mb-3">02</p>
+                  <h3 className="font-display text-lg font-semibold text-cream">
+                    Get every role scored
+                  </h3>
+                  <p className="mt-1 text-sm text-cream/60">
+                    See your fit for AI PM, Growth PM, BA and more, with the
+                    specific reasons why.
+                  </p>
+                </div>
+              </Reveal>
+              <Reveal delayMs={240}>
+                <div className="card">
+                  <p className="tag mb-3">03</p>
+                  <h3 className="font-display text-lg font-semibold text-cream">
+                    Follow a trackable roadmap
+                  </h3>
+                  <p className="mt-1 text-sm text-cream/60">
+                    Pick a role and get a guided path from where you are to
+                    where you&apos;re going.
+                  </p>
+                </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -220,8 +205,8 @@ export default function Home() {
     return (
       <main className="min-h-screen">
         {nav}
-        <div className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
-          <header className="mb-7">
+        <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+          <header className="mb-7 max-w-2xl">
             <p className="tag text-accent-500">your matches</p>
             <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-cream">
               Roles ranked by how well they fit you
@@ -233,20 +218,20 @@ export default function Home() {
           </header>
 
           {error && (
-            <p className="mb-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <p className="alert-error mb-4">
               {error}
             </p>
           )}
 
-          <div className="space-y-3">
+          <div className="grid gap-4 lg:grid-cols-2">
             {matches.map((m, i) => {
               const emoji =
                 ROLE_CATALOG.find((r) => r.id === m.id)?.emoji ?? "•";
               return (
                 <div
                   key={m.id}
-                  className={`card ${
-                    i === 0 ? "border-accent-500/60" : ""
+                  className={`card flex flex-col transition duration-200 hover:-translate-y-1 hover:border-accent-500/40 hover:shadow-[0_20px_50px_-20px_rgba(34,211,238,0.35)] ${
+                    i === 0 ? "border-accent-500/60 lg:col-span-2" : ""
                   }`}
                 >
                   <div className="flex items-start gap-4">
@@ -330,7 +315,7 @@ export default function Home() {
         Scoring all 19 roles for you…
       </h2>
       <p className="mt-1 text-sm text-cream/50">
-        This takes a few seconds — please don&apos;t close the page.
+        This takes a few seconds. Please don&apos;t close the page.
       </p>
     </main>
   );

@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-cream/55">
             Each place the app calls the model is its own agent, with its own
-            system prompt and its own knowledge-base toggle. Edit and save —
+            system prompt and its own knowledge-base toggle. Edit and save,
             changes apply on the next request, no deploy needed.
           </p>
           <div className="mt-6">

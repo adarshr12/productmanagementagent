@@ -93,7 +93,7 @@ export function KnowledgeBasePanel() {
         source_type: sourceType,
         content_base64: base64,
       });
-      setMessage(`Indexed "${title || file.name}" — ${data.chunk_count} chunks.`);
+      setMessage(`Indexed "${title || file.name}", ${data.chunk_count} chunks.`);
       setTitle("");
       setFile(null);
       const input = document.getElementById("file") as HTMLInputElement | null;
@@ -130,7 +130,7 @@ export function KnowledgeBasePanel() {
         source_type: "txt",
         content_base64: base64,
       });
-      setMessage(`Indexed "${title.trim()}" — ${data.chunk_count} chunks.`);
+      setMessage(`Indexed "${title.trim()}", ${data.chunk_count} chunks.`);
       setTitle("");
       setPasteText("");
       await loadDocs();
@@ -163,7 +163,7 @@ export function KnowledgeBasePanel() {
                 id="title"
                 type="text"
                 className="field-input"
-                placeholder="e.g. Breaking into Product Management — Guide"
+                placeholder="e.g. Breaking into Product Management, Guide"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -195,7 +195,7 @@ export function KnowledgeBasePanel() {
                 id="paste-title"
                 type="text"
                 className="field-input"
-                placeholder="e.g. Notes from mentor call — RACI framework"
+                placeholder="e.g. Notes from mentor call, RACI framework"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -283,7 +283,7 @@ function TabButton({
 function Feedback({ error, message }: { error: string | null; message: string | null }) {
   if (error) {
     return (
-      <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p>
+      <p className="alert-error">{error}</p>
     );
   }
   if (message) {

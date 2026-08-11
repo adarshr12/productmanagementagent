@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
             />
           </div>
           {error && (
-            <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <p className="alert-error">
               {error}
             </p>
           )}

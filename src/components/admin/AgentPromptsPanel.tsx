@@ -43,7 +43,7 @@ export function AgentPromptsPanel() {
   }
   if (error) {
     return (
-      <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+      <p className="alert-error">
         {error}
       </p>
     );
@@ -148,7 +148,7 @@ function AgentCard({
 
       {!useKb && (
         <p className="tag mt-3 text-amber-300">
-          off — this agent answers from general knowledge only, ignoring uploaded documents
+          off, this agent answers from general knowledge only, ignoring uploaded documents
         </p>
       )}
 
