@@ -20,7 +20,9 @@ export async function POST(req: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin();
 
-    const allowed = await checkAndRecordRateLimit(clientIdentifier(req.headers));
+    const allowed = await checkAndRecordRateLimit(
+      `role_match:${clientIdentifier(req.headers)}`
+    );
     if (!allowed) {
       return NextResponse.json(
         { error: "You've made several requests recently. Please try again in a bit." },

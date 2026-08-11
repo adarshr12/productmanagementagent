@@ -1,12 +1,14 @@
 import crypto from "crypto";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 
-// Simple database-backed rate limiter for the public intake endpoint.
-// Returns true if the request is allowed, false if the visitor is over the cap.
+// Simple database-backed rate limiter, shared by every public endpoint that
+// needs one. `identifier` should be prefixed per-feature (e.g. "assistant:"
+// + IP) so different features don't silently share one budget — a chat
+// feature sends far more requests per session than a one-shot form.
 export async function checkAndRecordRateLimit(
-  identifier: string
+  identifier: string,
+  limit = parseInt(process.env.RATE_LIMIT_PER_HOUR || "5", 10)
 ): Promise<boolean> {
-  const limit = parseInt(process.env.RATE_LIMIT_PER_HOUR || "5", 10);
   const bucket = crypto.createHash("sha256").update(identifier).digest("hex");
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 

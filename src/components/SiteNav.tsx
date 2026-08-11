@@ -12,12 +12,20 @@ export function SiteNav() {
           <Compass className="h-5 w-5 text-accent-500" strokeWidth={2.25} />
           ProductPath
         </Link>
-        <Link
-          href="/login?next=/me"
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate transition hover:bg-accent-50 hover:text-ink"
-        >
-          Log in
-        </Link>
+        <div className="flex items-center gap-1">
+          <Link
+            href="/assistant"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate transition hover:bg-accent-50 hover:text-ink"
+          >
+            Ask AI
+          </Link>
+          <Link
+            href="/login?next=/me"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate transition hover:bg-accent-50 hover:text-ink"
+          >
+            Log in
+          </Link>
+        </div>
       </div>
     </nav>
   );
