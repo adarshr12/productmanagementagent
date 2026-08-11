@@ -221,35 +221,35 @@ export function KnowledgeBasePanel() {
         )}
       </div>
 
-      <h2 className="font-display mb-3 mt-8 text-lg font-semibold text-cream">
+      <h2 className="font-display mb-3 mt-8 text-lg font-semibold text-ink">
         Uploaded documents
       </h2>
       {docs.length === 0 ? (
-        <p className="text-sm text-cream/45">Nothing indexed yet.</p>
+        <p className="text-sm text-slate-soft">Nothing indexed yet.</p>
       ) : (
         <div className="card overflow-x-auto p-0">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-cream/45">
+              <tr className="border-b border-line text-slate-soft">
                 <th className="px-5 py-3 font-medium">Title</th>
                 <th className="px-5 py-3 font-medium">Status</th>
                 <th className="px-5 py-3 font-medium">Chunks</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.06]">
+            <tbody className="divide-y divide-line">
               {docs.map((d) => (
                 <tr key={d.id}>
                   <td className="px-5 py-3">
-                    <div className="font-medium text-cream">{d.title}</div>
+                    <div className="font-medium text-ink">{d.title}</div>
                     <div className="tag mt-0.5">{d.file_name}</div>
                     {d.error_message && (
-                      <div className="mt-1 text-xs text-red-300">{d.error_message}</div>
+                      <div className="mt-1 text-xs text-red-700">{d.error_message}</div>
                     )}
                   </td>
                   <td className="px-5 py-3">
                     <StatusBadge status={d.status} />
                   </td>
-                  <td className="px-5 py-3 text-cream/70">{d.chunk_count}</td>
+                  <td className="px-5 py-3 text-slate">{d.chunk_count}</td>
                 </tr>
               ))}
             </tbody>
@@ -287,26 +287,22 @@ function Feedback({ error, message }: { error: string | null; message: string | 
     );
   }
   if (message) {
-    return (
-      <p className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-        {message}
-      </p>
-    );
+    return <p className="alert-success">{message}</p>;
   }
   return null;
 }
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    indexed: "bg-emerald-500/10 text-emerald-300",
-    processing: "bg-amber-500/10 text-amber-300",
-    pending: "bg-white/10 text-cream/60",
-    error: "bg-red-500/10 text-red-300",
+    indexed: "bg-emerald-500/10 text-emerald-700",
+    processing: "bg-amber-500/10 text-amber-700",
+    pending: "bg-line text-slate",
+    error: "bg-red-500/10 text-red-700",
   };
   return (
     <span
       className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-        styles[status] || "bg-white/10 text-cream/60"
+        styles[status] || "bg-line text-slate"
       }`}
     >
       {status}

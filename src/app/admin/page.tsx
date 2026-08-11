@@ -42,21 +42,21 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="min-h-screen">
-      <nav className="border-b border-white/[0.08] bg-ink/90 backdrop-blur-md">
+      <nav className="border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
-          <span className="font-display text-lg font-semibold tracking-tight text-cream">
+          <span className="font-display text-lg font-semibold tracking-tight text-ink">
             <span className="text-accent-500">◆</span> Admin
           </span>
           <div className="flex items-center gap-5 text-sm">
             <Link
               href="/admin/completions"
-              className="font-medium text-cream/70 transition hover:text-cream"
+              className="font-medium text-slate transition hover:text-ink"
             >
               Completion rates →
             </Link>
             <button
               onClick={signOut}
-              className="font-medium text-cream/50 transition hover:text-cream"
+              className="font-medium text-slate transition hover:text-ink"
             >
               Sign out
             </button>
@@ -67,10 +67,10 @@ export default function AdminDashboardPage() {
       <div className="mx-auto max-w-4xl px-5 py-10">
         <section className="mb-12">
           <p className="tag mb-2 text-accent-500">agent prompts</p>
-          <h1 className="font-display text-2xl font-semibold text-cream">
+          <h1 className="font-display text-2xl font-semibold text-ink">
             Configure each agent
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-cream/55">
+          <p className="mt-2 max-w-2xl text-sm text-slate">
             Each place the app calls the model is its own agent, with its own
             system prompt and its own knowledge-base toggle. Edit and save,
             changes apply on the next request, no deploy needed.
@@ -82,10 +82,10 @@ export default function AdminDashboardPage() {
 
         <section>
           <p className="tag mb-2 text-accent-500">knowledge base</p>
-          <h1 className="font-display text-2xl font-semibold text-cream">
+          <h1 className="font-display text-2xl font-semibold text-ink">
             Collect documents
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-cream/55">
+          <p className="mt-2 max-w-2xl text-sm text-slate">
             Upload a file or paste text to add it to the knowledge base. This
             only feeds an agent&apos;s output once that agent&apos;s
             &ldquo;use knowledge base&rdquo; toggle above is switched on.

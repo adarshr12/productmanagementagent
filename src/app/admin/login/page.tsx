@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
     <main className="flex min-h-screen items-center justify-center px-5">
       <div className="w-full max-w-md">
         <p className="tag mb-2 text-accent-500">site owner only</p>
-        <h1 className="font-display mb-6 text-2xl font-semibold text-cream">
+        <h1 className="font-display mb-6 text-2xl font-semibold text-ink">
           Admin sign in
         </h1>
         <form onSubmit={handleLogin} className="card space-y-4">

@@ -6,121 +6,113 @@
    can't reach into the Tailwind theme) still derive from the same three
    values instead of carrying their own hand-typed, driftable copies. */
 :root {
-  --accent-200: #7fe6f5;
-  --accent-500: #22d3ee;
-  --accent-600: #0891b2;
+  --accent-200: #a9cbff;
+  --accent-500: #155eef;
+  --accent-teal: #0ba5a6;
 
   /* shadcn's semantic token set, in its expected `H S% L%` HSL-triplet
-     format — converted from this app's actual ink/cream/accent hex values
+     format — converted from this app's actual paper/ink/accent hex values
      (see tailwind.config.js), not shadcn's stock zinc/blue defaults. This
-     app is dark-only (no light/dark toggle), so there's no `.dark` block:
+     app is light-only (no light/dark toggle), so there's no `.dark` block:
      these values ARE the theme, and any shadcn component added later
      inherits it automatically via bg-background/text-foreground/etc. */
-  --background: 216 33% 6%;
-  --foreground: 203 45% 94%;
-  --card: 217 36% 10%;
-  --card-foreground: 203 45% 94%;
-  --popover: 219 37% 15%;
-  --popover-foreground: 203 45% 94%;
-  --primary: 188 86% 53%;
-  --primary-foreground: 216 33% 6%;
-  --secondary: 219 37% 15%;
-  --secondary-foreground: 203 45% 94%;
-  --muted: 219 37% 15%;
-  --muted-foreground: 206 23% 82%;
-  --accent: 188 86% 53%;
-  --accent-foreground: 216 33% 6%;
-  --destructive: 0 84% 60%;
+  --background: 220 20% 97%;
+  --foreground: 220 46% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 46% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 46% 12%;
+  --primary: 220 87% 51%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 20% 97%;
+  --secondary-foreground: 220 46% 12%;
+  --muted: 220 20% 97%;
+  --muted-foreground: 219 14% 39%;
+  --accent: 220 87% 51%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
-  --border: 217 33% 20%;
-  --input: 217 33% 20%;
-  --ring: 188 86% 53%;
+  --border: 217 17% 91%;
+  --input: 217 17% 91%;
+  --ring: 220 87% 51%;
   --radius: 0.75rem;
 }
 
 html,
 body {
-  @apply bg-ink text-cream antialiased;
+  @apply bg-paper text-ink antialiased;
 }
 
-/* Ambient background glow — flat solid color behind everything was the
-   biggest gap vs. the reference apps (which all use layered radial glow /
-   gradient-mesh backgrounds, never a flat fill). Applied as body's own
-   background (not a separate positioned layer) so it's always behind page
-   content by definition — no z-index stacking to fight with per-page
-   bg-ink wrappers. background-attachment: fixed keeps it stable on scroll. */
+/* Ambient wash — soft, barely-there blue/teal tints instead of the neon
+   glow a dark theme needs. Applied as body's own background so it's always
+   behind page content by definition, no z-index stacking to fight with
+   per-page wrappers. background-attachment: fixed keeps it stable on scroll. */
 body {
   background-image:
-    radial-gradient(60% 50% at 15% 0%, rgba(34, 211, 238, 0.16), transparent 60%),
-    radial-gradient(50% 45% at 100% 20%, rgba(34, 211, 238, 0.1), transparent 60%),
-    radial-gradient(70% 60% at 50% 100%, rgba(20, 60, 90, 0.25), transparent 65%);
+    radial-gradient(55% 45% at 12% 0%, rgba(21, 94, 239, 0.05), transparent 60%),
+    radial-gradient(50% 40% at 100% 15%, rgba(11, 165, 166, 0.06), transparent 60%);
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
 
-/* Subtle grain — flat solid color everywhere reads sterile/synthetic. */
+/* Faint paper texture — a flat fill everywhere reads sterile/synthetic. */
 .grain-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ---- Buttons ---- */
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-cream px-5 py-3
-    text-sm font-semibold text-ink shadow-[0_8px_24px_-10px_rgba(255,255,255,0.35)] transition
-    hover:bg-white hover:shadow-[0_10px_30px_-8px_rgba(255,255,255,0.45)]
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3
+    text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(16,25,43,0.5)] transition
+    hover:bg-ink/90 hover:shadow-[0_10px_26px_-8px_rgba(16,25,43,0.55)]
     disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-gold {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3
-    text-sm font-semibold text-ink transition
+    text-sm font-semibold text-white transition
     disabled:cursor-not-allowed disabled:opacity-40;
-  background: linear-gradient(135deg, var(--accent-200) 0%, var(--accent-500) 55%, var(--accent-600) 100%);
-  box-shadow: 0 10px 30px -8px rgba(34, 211, 238, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-teal) 100%);
+  box-shadow: 0 10px 24px -10px rgba(21, 94, 239, 0.45);
 }
 .btn-gold:hover {
-  box-shadow: 0 14px 36px -6px rgba(34, 211, 238, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  box-shadow: 0 14px 30px -8px rgba(21, 94, 239, 0.55);
   transform: translateY(-1px);
 }
 .btn-ghost {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15
-    bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-cream backdrop-blur-md transition
-    hover:border-accent-500/40 hover:bg-white/[0.08]
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line
+    bg-white px-4 py-2.5 text-sm font-semibold text-ink transition
+    hover:border-accent-500/40 hover:bg-accent-50
     disabled:cursor-not-allowed disabled:opacity-40;
 }
 
 /* ---- Option chips ---- */
 .chip {
-  @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04]
-    px-4 py-2 text-left text-sm font-medium text-cream/90 backdrop-blur-md transition
-    hover:border-accent-500 hover:bg-accent-500/10 hover:shadow-[0_0_20px_-6px_rgba(34,211,238,0.6)];
+  @apply inline-flex items-center gap-2 rounded-full border border-line bg-white
+    px-4 py-2 text-left text-sm font-medium text-ink transition
+    hover:border-accent-500 hover:bg-accent-50;
 }
 .chip-selected {
-  @apply border-accent-500 bg-accent-500/10 shadow-[0_0_20px_-6px_rgba(34,211,238,0.6)];
+  @apply border-accent-500 bg-accent-50;
 }
 
-/* ---- Cards / inputs — glass, not flat fill ---- */
+/* ---- Cards / inputs — a real surface, not a flat fill ---- */
 .card {
-  @apply relative rounded-2xl border border-white/10 p-6 sm:p-7;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  backdrop-filter: blur(20px);
-  box-shadow:
-    0 24px 48px -28px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.08) inset;
+  @apply relative rounded-2xl border border-line bg-white p-6 sm:p-7;
+  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 16px 32px -20px rgba(16, 25, 43, 0.12);
 }
 .field-label {
-  @apply mb-1.5 block text-sm font-medium text-cream/70;
+  @apply mb-1.5 block text-sm font-medium text-slate;
 }
 .field-input {
-  @apply w-full rounded-xl border border-white/15 bg-white/[0.03] px-4 py-3 text-sm text-cream
-    outline-none backdrop-blur-md transition placeholder:text-cream/35
-    focus:border-accent-500 focus:shadow-[0_0_0_3px_rgba(34,211,238,0.15)];
+  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink
+    outline-none transition placeholder:text-slate-soft
+    focus:border-accent-500 focus:shadow-[0_0_0_3px_rgba(21,94,239,0.12)];
 }
 
 /* ---- Small helpers ---- */
@@ -128,37 +120,33 @@ body {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
 }
 .alert-error {
-  @apply rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200;
+  @apply rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700;
 }
 .alert-success {
-  @apply rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200;
+  @apply rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700;
 }
 /* A shared subtle elevation for small chips/labels floating over the
    journey map and kanban board, replacing Tailwind's default shadow-sm
-   (the one un-tinted, non-glass shadow left in an otherwise custom system). */
+   (the one un-tinted, off-system shadow left in an otherwise custom system). */
 .shadow-glass-sm {
-  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5), 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
+  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 8px 16px -10px rgba(16, 25, 43, 0.12);
 }
 /* Small labels/tags — mono, lowercase, tracked out. Replaces the generic
    ALL-CAPS-sans-label pattern with a more considered typographic register. */
 .tag {
-  @apply font-mono text-[11px] tracking-wide text-cream/50;
+  @apply font-mono text-[11px] tracking-wide text-slate;
 }
 
 /* ---- Persona chat (the guided intake + mentor voice) ---- */
 .chat-bubble-mentor {
-  @apply max-w-[85%] rounded-2xl rounded-tr-sm border border-white/10 bg-white/[0.06] px-4 py-3
-    text-sm leading-relaxed text-cream/90 backdrop-blur-md;
-  box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.6), 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
+  @apply max-w-[85%] rounded-2xl rounded-tr-sm border border-line bg-white px-4 py-3
+    text-sm leading-relaxed text-ink;
+  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 12px 20px -16px rgba(16, 25, 43, 0.12);
 }
 .chat-bubble-user {
-  @apply max-w-[85%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-ink;
-  background: linear-gradient(135deg, var(--accent-200), var(--accent-500) 60%, var(--accent-600));
-  box-shadow: 0 12px 28px -14px rgba(34, 211, 238, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-}
-.chat-avatar {
-  @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500
-    text-base font-bold text-ink;
+  @apply max-w-[85%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-white;
+  background: linear-gradient(135deg, var(--accent-500), var(--accent-teal));
+  box-shadow: 0 12px 22px -14px rgba(21, 94, 239, 0.5);
 }
 @keyframes typing-dot {
   0%,
@@ -228,23 +216,6 @@ body {
   animation: btn-bounce 0.3s cubic-bezier(0.36, 0, 0.66, -0.56);
 }
 
-/* ---- Ambient glow orb (behind avatars) — pulsing, like the voice-AI
-   reference's glowing orb, not a static tint. ---- */
-@keyframes orb-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
-  50% {
-    transform: scale(1.18);
-    opacity: 0.85;
-  }
-}
-.orb-pulse {
-  animation: orb-pulse 3.2s ease-in-out infinite;
-}
-
 /* Respect the OS-level motion preference: stop looping/entrance animation,
    but still land every element in its correct FINAL state (a gauge that
    never draws in must still show the right score, not a blank arc). */
@@ -264,9 +235,5 @@ body {
   }
   .btn-bounce:active {
     animation: none;
-  }
-  .orb-pulse {
-    animation: none;
-    opacity: 0.6;
   }
 }

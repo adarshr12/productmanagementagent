@@ -65,15 +65,15 @@ export default function LoginPage() {
       <div className="w-full">
         <Link
           href="/"
-          className="font-display mb-6 inline-block text-lg font-semibold tracking-tight text-cream"
+          className="font-display mb-6 inline-block text-lg font-semibold tracking-tight text-ink"
         >
           <span className="text-accent-500">◆</span> ProductPath
         </Link>
         <div className="card">
-          <h1 className="font-display text-2xl font-semibold text-cream">
+          <h1 className="font-display text-2xl font-semibold text-ink">
             {mode === "signin" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="mt-1 text-sm text-cream/60">
+          <p className="mt-1 text-sm text-slate">
             Save your roadmaps and track your progress.
           </p>
 
@@ -84,9 +84,9 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          <div className="my-5 flex items-center gap-3 text-xs text-cream/30">
-            <div className="h-px flex-1 bg-white/10" /> or{" "}
-            <div className="h-px flex-1 bg-white/10" />
+          <div className="my-5 flex items-center gap-3 text-xs text-slate-soft">
+            <div className="h-px flex-1 bg-line" /> or{" "}
+            <div className="h-px flex-1 bg-line" />
           </div>
 
           <form onSubmit={emailAuth} className="space-y-4">
@@ -140,7 +140,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-cream/60">
+          <p className="mt-5 text-center text-sm text-slate">
             {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
             <button
               onClick={() => {

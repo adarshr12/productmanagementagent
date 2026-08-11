@@ -11,19 +11,23 @@ module.exports = {
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
-        // Cool near-black + a single electric-cyan accent, replacing the warm
-        // ink/gold "coaching brand" palette that was explicitly rejected.
-        // Cyan/teal (not purple/blue-violet) deliberately avoids the
-        // "AI-gradient" cliché flagged by the design-taste skill.
-        ink: "#0a0e14",
+        // Light, editorial, professional-services palette: cool paper
+        // background + deep-navy ink text + a single confident blue/teal
+        // accent. Replaces the dark cyan "AI SaaS" system — that read as a
+        // tech demo, not a credible advisor for a high-stakes career
+        // decision. Blue-to-teal (not purple) still avoids the AI-gradient
+        // cliché the original palette was chosen to avoid.
+        paper: "#f6f7f9",
         surface: {
-          DEFAULT: "#101722",
-          raised: "#182234",
+          DEFAULT: "#ffffff",
+          raised: "#fbfcfd",
         },
-        cream: {
-          DEFAULT: "#eaf2f7",
-          dim: "#c7d3dc",
+        ink: "#10192b",
+        slate: {
+          DEFAULT: "#566072",
+          soft: "#8a94a6",
         },
+        line: "#e3e6eb",
         accent: {
           // `DEFAULT`/`foreground` are the shadcn semantic slot (bg-accent,
           // text-accent-foreground) — new shadcn/ui components added via
@@ -32,11 +36,12 @@ module.exports = {
           // class in the app keeps resolving exactly as it did before.
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          50: "#e6fbff",
-          100: "#bff3fb",
-          200: "#7fe6f5",
-          500: "#22d3ee",
-          600: "#0891b2",
+          50: "#eaf3ff",
+          100: "#d6e8ff",
+          200: "#a9cbff",
+          500: "#155eef",
+          600: "#0f4fc7",
+          teal: "#0ba5a6",
         },
         // shadcn's remaining semantic tokens, mapped to the SAME palette
         // above (see globals.css :root) so a freshly-added shadcn component

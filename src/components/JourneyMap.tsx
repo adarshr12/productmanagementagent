@@ -74,8 +74,8 @@ function CarIcon() {
         strokeLinecap="round"
       />
       <rect x="2" y="12" width="28" height="4.5" rx="2.2" fill="currentColor" />
-      <circle cx="9" cy="17.5" r="2.5" fill="#0a0e14" stroke="currentColor" strokeWidth={1.6} />
-      <circle cx="23" cy="17.5" r="2.5" fill="#0a0e14" stroke="currentColor" strokeWidth={1.6} />
+      <circle cx="9" cy="17.5" r="2.5" fill="#10192b" stroke="currentColor" strokeWidth={1.6} />
+      <circle cx="23" cy="17.5" r="2.5" fill="#10192b" stroke="currentColor" strokeWidth={1.6} />
     </svg>
   );
 }
@@ -95,11 +95,10 @@ function smoothPath(points: { x: number; y: number }[]) {
 }
 
 /**
- * A generated-every-time visual: a flowing, curving road (top to bottom) —
- * matching the winding-path reference style, recolored to this product's
- * dark/cyan theme instead of the pink reference. As the visitor scrolls, a
- * car drives the length of the road (GSAP ScrollTrigger, scrubbed to scroll
- * position) while each flag's color still reflects real progress.
+ * A generated-every-time visual: a flowing, curving road (top to bottom),
+ * recolored to this product's light/blue-teal theme. As the visitor scrolls,
+ * a car drives the length of the road (GSAP ScrollTrigger, scrubbed to
+ * scroll position) while each flag's color still reflects real progress.
  */
 export function JourneyMap({
   steps,
@@ -191,7 +190,7 @@ export function JourneyMap({
           <path
             d={roadD}
             fill="none"
-            stroke="rgba(255,255,255,0.08)"
+            stroke="rgba(16,25,43,0.07)"
             strokeWidth={20}
             strokeLinecap="round"
           />
@@ -199,7 +198,7 @@ export function JourneyMap({
             ref={pathRef}
             d={roadD}
             fill="none"
-            stroke="rgba(255,255,255,0.28)"
+            stroke="rgba(16,25,43,0.22)"
             strokeWidth={2}
             strokeDasharray="10 10"
             strokeLinecap="round"
@@ -208,10 +207,10 @@ export function JourneyMap({
             ref={travelledRef}
             d={roadD}
             fill="none"
-            stroke="#22d3ee"
+            stroke="#155eef"
             strokeWidth={6}
             strokeLinecap="round"
-            style={{ filter: "drop-shadow(0 0 6px rgba(34,211,238,0.6))" }}
+            style={{ filter: "drop-shadow(0 0 6px rgba(21,94,239,0.35))" }}
           />
         </svg>
 
@@ -219,7 +218,7 @@ export function JourneyMap({
         <div
           ref={carRef}
           className="absolute -translate-x-1/2 -translate-y-1/2 text-accent-500"
-          style={{ left: "0%", top: "0%", filter: "drop-shadow(0 0 8px rgba(34,211,238,0.8))" }}
+          style={{ left: "0%", top: "0%", filter: "drop-shadow(0 0 6px rgba(21,94,239,0.4))" }}
           aria-hidden="true"
         >
           <CarIcon />
@@ -230,10 +229,10 @@ export function JourneyMap({
           className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
           style={{ left: pct(layout.start.x, VIEW_W), top: pct(layout.start.y, layout.viewH) }}
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-cream text-ink shadow">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-white text-ink shadow">
             <PinIcon />
           </span>
-          <span className="mt-1.5 max-w-[130px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-medium text-cream/70 shadow-glass-sm">
+          <span className="mt-1.5 max-w-[130px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-medium text-slate shadow-glass-sm">
             {startLabel}
           </span>
         </div>
@@ -253,8 +252,8 @@ export function JourneyMap({
                   isDone
                     ? "border-emerald-500 bg-emerald-500 text-white"
                     : isCurrent
-                    ? "border-accent-500 bg-surface text-accent-500 shadow-[0_0_16px_rgba(34,211,238,0.5)]"
-                    : "border-white/15 bg-surface text-cream/30"
+                    ? "border-accent-500 bg-surface text-accent-500 shadow-[0_0_14px_rgba(21,94,239,0.35)]"
+                    : "border-line bg-surface text-slate-soft"
                 }`}
               >
                 {isDone ? <CheckIcon /> : i + 1}
@@ -262,10 +261,10 @@ export function JourneyMap({
               <span
                 className={`mt-1.5 max-w-[150px] rounded-md px-2 py-1 text-center text-[11px] font-medium leading-snug shadow-glass-sm ${
                   isDone
-                    ? "bg-emerald-500/10 text-emerald-300"
+                    ? "bg-emerald-500/10 text-emerald-700"
                     : isCurrent
                     ? "bg-accent-500/10 text-accent-500"
-                    : "bg-surface-raised text-cream/40"
+                    : "bg-surface-raised text-slate-soft"
                 }`}
                 style={{
                   display: "-webkit-box",
@@ -285,16 +284,16 @@ export function JourneyMap({
           className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
           style={{ left: pct(layout.finish.x, VIEW_W), top: pct(layout.finish.y, layout.viewH) }}
         >
-          <span className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-ink bg-accent-500 text-ink shadow-[0_0_20px_rgba(34,211,238,0.6)]">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-accent-600 bg-accent-500 text-white shadow-[0_0_18px_rgba(21,94,239,0.4)]">
             <TargetIcon />
           </span>
-          <span className="mt-1.5 max-w-[140px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-semibold text-cream shadow-glass-sm">
+          <span className="mt-1.5 max-w-[140px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-semibold text-ink shadow-glass-sm">
             {finishLabel}
           </span>
         </div>
       </div>
 
-      <p className="mt-3 text-center text-xs text-cream/40">
+      <p className="mt-3 text-center text-xs text-slate-soft">
         {allDone
           ? `You've reached the end, you're ready for ${finishLabel} roles.`
           : `Scroll to drive the road to ${finishLabel}.`}

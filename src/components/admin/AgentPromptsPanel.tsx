@@ -39,7 +39,7 @@ export function AgentPromptsPanel() {
   }, []);
 
   if (loading) {
-    return <p className="text-sm text-cream/50">Loading agents…</p>;
+    return <p className="text-sm text-slate">Loading agents…</p>;
   }
   if (error) {
     return (
@@ -118,27 +118,27 @@ function AgentCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="tag text-accent-500">{agent.agent_key}</p>
-          <h3 className="font-display mt-1 text-lg font-semibold text-cream">
+          <h3 className="font-display mt-1 text-lg font-semibold text-ink">
             {agent.label}
           </h3>
           {agent.description && (
-            <p className="mt-1 max-w-lg text-sm text-cream/55">
+            <p className="mt-1 max-w-lg text-sm text-slate">
               {agent.description}
             </p>
           )}
         </div>
-        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-          <span className="text-xs font-medium text-cream/70">
+        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-line bg-white px-3 py-2">
+          <span className="text-xs font-medium text-slate">
             Use knowledge base
           </span>
           <span
             onClick={() => setUseKb((v) => !v)}
             className={`relative h-5 w-9 shrink-0 rounded-full transition ${
-              useKb ? "bg-accent-500" : "bg-white/15"
+              useKb ? "bg-accent-500" : "bg-line"
             }`}
           >
             <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full bg-ink transition ${
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition ${
                 useKb ? "left-4" : "left-0.5"
               }`}
             />
@@ -147,7 +147,7 @@ function AgentCard({
       </div>
 
       {!useKb && (
-        <p className="tag mt-3 text-amber-300">
+        <p className="tag mt-3 text-amber-700">
           off, this agent answers from general knowledge only, ignoring uploaded documents
         </p>
       )}
@@ -170,10 +170,10 @@ function AgentCard({
         </button>
         {dirty && !busy && <span className="tag">unsaved changes</span>}
         {message && !dirty && (
-          <span className="tag text-emerald-400">{message}</span>
+          <span className="tag text-emerald-700">{message}</span>
         )}
         {error && (
-          <span className="text-xs text-red-300">{error}</span>
+          <span className="text-xs text-red-600">{error}</span>
         )}
       </div>
     </div>

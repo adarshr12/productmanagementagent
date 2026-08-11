@@ -69,21 +69,21 @@ export default function ResultsClient({
         {role && (
           <p className="tag text-accent-500">roadmap · {role}</p>
         )}
-        <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-cream sm:text-4xl">
+        <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           {title}
         </h1>
-        {overview && <p className="mt-3 max-w-2xl text-cream/60">{overview}</p>}
+        {overview && <p className="mt-3 max-w-2xl text-slate">{overview}</p>}
       </header>
 
       {/* progress + share */}
       <div className="card mb-6">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-cream/80">
+          <span className="text-sm font-medium text-slate">
             {done} of {steps.length} steps done
           </span>
           <span className="text-sm font-semibold text-accent-500">{pct}%</span>
         </div>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line">
           <div
             className="h-full rounded-full bg-accent-500 transition-all"
             style={{ width: `${pct}%` }}
@@ -99,7 +99,7 @@ export default function ResultsClient({
           {view === "board" && (
             <button
               onClick={() => setView("mentor")}
-              className="text-sm font-medium text-cream/50 hover:text-cream"
+              className="text-sm font-medium text-slate-soft hover:text-ink"
             >
               ← Back to guidance
             </button>

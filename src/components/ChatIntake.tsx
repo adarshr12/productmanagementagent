@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import type { Question } from "@/lib/questions";
-import { MentorAvatar } from "@/components/MentorAvatar";
-import { useMediaQuery } from "@/lib/useMediaQuery";
 
 type Turn = { id: string; from: "mentor" | "user"; text: string };
 
@@ -18,11 +16,9 @@ function uid() {
 export function ChatIntake({
   questions,
   onComplete,
-  mentorPhotoSrc,
 }: {
   questions: Question[];
   onComplete: (answers: Record<string, string>) => void;
-  mentorPhotoSrc?: string;
 }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [step, setStep] = useState(-1);
@@ -33,7 +29,6 @@ export function ChatIntake({
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
-  const isDesktop = useMediaQuery("(min-width: 640px)");
 
   function pushMentor(text: string) {
     setTurns((t) => [...t, { id: uid(), from: "mentor", text }]);
@@ -120,7 +115,7 @@ export function ChatIntake({
   return (
     <div className="flex h-full min-h-0 w-full flex-col sm:grid sm:grid-cols-[1fr_auto]">
       {/* transcript — mentor lane right-aligned, user lane left-aligned */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-white/10 sm:border-b-0 sm:border-r">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-line sm:border-b-0 sm:border-r">
         <div
           ref={scrollRef}
           className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-8 sm:px-12 sm:py-12"
@@ -144,13 +139,13 @@ export function ChatIntake({
             {typing && (
               <div className="flex justify-end" role="status" aria-label="Your mentor is typing">
                 <div className="chat-bubble-mentor flex items-center gap-1 py-4">
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50" />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
                   <span
-                    className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50"
+                    className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40"
                     style={{ animationDelay: "0.15s" }}
                   />
                   <span
-                    className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/50"
+                    className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40"
                     style={{ animationDelay: "0.3s" }}
                   />
                 </div>
@@ -160,9 +155,9 @@ export function ChatIntake({
           </div>
 
           {currentQuestion && !typing && (
-            <div className="border-t border-white/10 px-5 py-4 sm:px-8">
+            <div className="border-t border-line px-5 py-4 sm:px-8">
               {error && (
-                <p role="alert" className="mb-2 text-xs text-accent-200">
+                <p role="alert" className="mb-2 text-xs text-red-600">
                   {error}
                 </p>
               )}
@@ -209,7 +204,7 @@ export function ChatIntake({
                   <button
                     type="button"
                     onClick={() => advance("")}
-                    className="flex min-h-[44px] shrink-0 items-center px-2 text-xs font-medium text-cream/40 hover:text-cream/70"
+                    className="flex min-h-[44px] shrink-0 items-center px-2 text-xs font-medium text-slate-soft hover:text-slate"
                   >
                     Skip
                   </button>
@@ -219,20 +214,16 @@ export function ChatIntake({
           )}
         </div>
 
-      {/* the mentor — big, persistent, on the right, no panel tint boxing it in */}
-      <div className="flex flex-row items-center gap-4 px-6 py-5 sm:w-[300px] sm:flex-col sm:justify-start sm:px-6 sm:py-10">
-        <MentorAvatar
-          src={mentorPhotoSrc}
-          size={isDesktop ? 220 : 120}
-          speaking={typing}
-        />
-        <div className="sm:-mt-3 sm:text-center">
-          <p className="text-sm font-semibold text-cream">
-            Your product mentor
-          </p>
+      {/* the mentor's identity — brand mark + progress, no illustrated face */}
+      <div className="flex flex-row items-center gap-4 px-6 py-5 sm:w-[260px] sm:flex-col sm:justify-center sm:px-6 sm:py-10">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-teal text-2xl font-bold text-white sm:h-16 sm:w-16">
+          ◆
+        </div>
+        <div className="sm:mt-4 sm:text-center">
+          <p className="text-sm font-semibold text-ink">Your product mentor</p>
           {step >= 0 && (
             <>
-              <p className="mt-1.5 text-xs font-medium text-cream/45">
+              <p className="mt-1.5 text-xs font-medium text-slate-soft">
                 Question {Math.min(step + 1, questions.length)} of{" "}
                 {questions.length}
               </p>
@@ -244,7 +235,7 @@ export function ChatIntake({
                   <span
                     key={i}
                     className={`h-1.5 w-1.5 rounded-full transition ${
-                      i <= step ? "bg-accent-500" : "bg-white/15"
+                      i <= step ? "bg-accent-500" : "bg-line"
                     }`}
                   />
                 ))}

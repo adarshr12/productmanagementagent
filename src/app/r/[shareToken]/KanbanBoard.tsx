@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { RoadmapStep, StepStatus } from "@/lib/getRoadmap";
 
 const COLUMNS: { key: StepStatus; label: string; accent: string }[] = [
-  { key: "todo", label: "To Do", accent: "border-white/20" },
+  { key: "todo", label: "To Do", accent: "border-slate-300" },
   { key: "in_progress", label: "In Progress", accent: "border-amber-400" },
   { key: "done", label: "Done", accent: "border-emerald-400" },
 ];
@@ -32,13 +32,13 @@ export default function KanbanBoard({
                 if (s) move(s, col.key);
                 setDragId(null);
               }}
-              className="rounded-2xl bg-white/[0.03] p-3"
+              className="rounded-2xl bg-paper p-3"
             >
               <div className="mb-3 flex items-center justify-between px-1">
-                <h2 className="text-sm font-semibold text-cream/80">
+                <h2 className="text-sm font-semibold text-slate">
                   {col.label}
                 </h2>
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-cream/50">
+                <span className="rounded-full bg-line px-2 py-0.5 text-xs font-medium text-slate">
                   {colSteps.length}
                 </span>
               </div>
@@ -57,14 +57,14 @@ export default function KanbanBoard({
                       <h3
                         className={`text-sm font-semibold ${
                           step.status === "done"
-                            ? "text-cream/40 line-through"
-                            : "text-cream"
+                            ? "text-slate-soft line-through"
+                            : "text-ink"
                         }`}
                       >
                         {step.title}
                       </h3>
                       {step.description && (
-                        <p className="mt-1 text-xs leading-relaxed text-cream/55">
+                        <p className="mt-1 text-xs leading-relaxed text-slate">
                           {step.description}
                         </p>
                       )}
@@ -79,7 +79,7 @@ export default function KanbanBoard({
                             move(step, COLUMNS[Math.max(0, idx - 1)].key)
                           }
                           disabled={idx === 0}
-                          className="min-h-[44px] rounded-md px-3 text-xs font-medium text-cream/50 hover:bg-white/5 disabled:opacity-30"
+                          className="min-h-[44px] rounded-md px-3 text-xs font-medium text-slate hover:bg-paper disabled:opacity-30"
                         >
                           ◀ Back
                         </button>
@@ -100,7 +100,7 @@ export default function KanbanBoard({
                   );
                 })}
                 {colSteps.length === 0 && (
-                  <p className="px-1 py-6 text-center text-xs text-cream/30">
+                  <p className="px-1 py-6 text-center text-xs text-slate-soft">
                     Drag steps here
                   </p>
                 )}
@@ -110,7 +110,7 @@ export default function KanbanBoard({
         })}
       </div>
 
-      <p className="mt-8 text-center text-xs text-cream/35">
+      <p className="mt-8 text-center text-xs text-slate-soft">
         Drag cards between columns, or use ◀ / ▶. Bookmark this page to track
         your progress, anyone with the link can view it.
       </p>

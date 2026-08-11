@@ -54,7 +54,7 @@ export default function MyRoadmapsPage() {
     return (
       <main className="min-h-screen">
         <SiteNav />
-        <p className="mx-auto max-w-6xl px-5 py-10 text-sm text-cream/50 sm:px-8">
+        <p className="mx-auto max-w-6xl px-5 py-10 text-sm text-slate sm:px-8">
           Loading…
         </p>
       </main>
@@ -68,10 +68,10 @@ export default function MyRoadmapsPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <p className="tag text-accent-500">your account</p>
-            <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-cream">
+            <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-ink">
               My roadmaps
             </h1>
-            {email && <p className="mt-1 text-sm text-cream/50">{email}</p>}
+            {email && <p className="mt-1 text-sm text-slate">{email}</p>}
           </div>
           <button onClick={signOut} className="btn-ghost">
             Sign out
@@ -80,7 +80,7 @@ export default function MyRoadmapsPage() {
 
         {rows.length === 0 ? (
           <div className="card text-center">
-            <p className="text-cream/60">
+            <p className="text-slate">
               You haven&apos;t saved any roadmaps yet.
             </p>
             <Link href="/" className="btn-primary mt-4 inline-flex">
@@ -102,7 +102,7 @@ export default function MyRoadmapsPage() {
                     {emoji}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-display font-semibold text-cream">
+                    <h3 className="truncate font-display font-semibold text-ink">
                       {r.title || "Career roadmap"}
                     </h3>
                     {r.role && (
@@ -113,7 +113,7 @@ export default function MyRoadmapsPage() {
                     <div className="text-sm font-bold text-accent-500">
                       {r.pct}%
                     </div>
-                    <div className="text-[11px] text-cream/40">
+                    <div className="text-[11px] text-slate-soft">
                       {r.done}/{r.total} done
                     </div>
                   </div>
