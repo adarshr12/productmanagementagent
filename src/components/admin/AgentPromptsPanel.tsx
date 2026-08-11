@@ -78,6 +78,7 @@ function AgentCard({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showTest, setShowTest] = useState(false);
 
   const dirty = prompt !== agent.system_prompt || useKb !== agent.use_knowledge_base;
 
@@ -175,7 +176,138 @@ function AgentCard({
         {error && (
           <span className="text-xs text-red-600">{error}</span>
         )}
+        <button
+          type="button"
+          onClick={() => setShowTest((v) => !v)}
+          className="ml-auto text-sm font-medium text-accent-500 hover:text-accent-600"
+        >
+          {showTest ? "Hide test console" : "Test this prompt →"}
+        </button>
       </div>
+
+      {showTest && (
+        <PromptPlayground systemPrompt={prompt} useKnowledgeBase={useKb} />
+      )}
+    </div>
+  );
+}
+
+function PromptPlayground({
+  systemPrompt,
+  useKnowledgeBase,
+}: {
+  systemPrompt: string;
+  useKnowledgeBase: boolean;
+}) {
+  const [sampleInput, setSampleInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{
+    output: string;
+    latency_ms: number;
+    retrieved_chunks: { title: string; similarity: number; preview: string }[];
+  } | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    setResult(null);
+    try {
+      const supabase = createBrowserClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const res = await fetch("/api/admin/agents/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          system_prompt: systemPrompt,
+          user_content: sampleInput,
+          use_knowledge_base: useKnowledgeBase,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Test run failed.");
+      setResult(data);
+    } catch (err: any) {
+      setError(err?.message || "Test run failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 rounded-xl border border-line bg-paper p-4">
+      <p className="tag mb-2">
+        iteration console — runs the prompt above (as currently edited, even
+        unsaved) against a sample input
+      </p>
+      <label className="field-label" htmlFor="sample-input">
+        Sample user input
+      </label>
+      <textarea
+        id="sample-input"
+        value={sampleInput}
+        onChange={(e) => setSampleInput(e.target.value)}
+        rows={4}
+        placeholder="Paste the kind of content this agent normally receives, e.g. a person's intake answers or a target role."
+        className="field-input mt-1 w-full resize-y font-mono text-xs"
+      />
+      <div className="mt-3 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={run}
+          disabled={busy || !sampleInput.trim()}
+          className="btn-ghost px-4 py-2 text-sm"
+        >
+          {busy ? "Running…" : "Run test"}
+        </button>
+        {error && <span className="text-xs text-red-600">{error}</span>}
+      </div>
+
+      {result && (
+        <div className="mt-4 space-y-3">
+          <p className="tag">{result.latency_ms}ms</p>
+
+          {useKnowledgeBase && (
+            <div>
+              <p className="tag mb-1.5">
+                retrieved chunks ({result.retrieved_chunks.length})
+              </p>
+              {result.retrieved_chunks.length === 0 ? (
+                <p className="text-xs text-slate-soft">
+                  Nothing matched — the knowledge base may be empty, or
+                  nothing relevant was found.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {result.retrieved_chunks.map((c, i) => (
+                    <div key={i} className="rounded-lg border border-line bg-white px-3 py-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-ink">{c.title}</span>
+                        <span className="text-slate-soft">
+                          {c.similarity.toFixed(3)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-slate">{c.preview}…</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div>
+            <p className="tag mb-1.5">model output</p>
+            <pre className="max-h-96 overflow-auto rounded-lg border border-line bg-white p-3 text-xs text-ink">
+              {result.output}
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
