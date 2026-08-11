@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Compass } from "lucide-react";
 
 export function SiteNav() {
   return (
@@ -6,9 +7,10 @@ export function SiteNav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
         <Link
           href="/"
-          className="font-display text-lg font-semibold tracking-tight text-ink"
+          className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-ink"
         >
-          <span className="text-accent-500">◆</span> ProductPath
+          <Compass className="h-5 w-5 text-accent-500" strokeWidth={2.25} />
+          ProductPath
         </Link>
         <Link
           href="/login?next=/me"
