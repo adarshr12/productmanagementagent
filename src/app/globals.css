@@ -9,6 +9,33 @@
   --accent-200: #7fe6f5;
   --accent-500: #22d3ee;
   --accent-600: #0891b2;
+
+  /* shadcn's semantic token set, in its expected `H S% L%` HSL-triplet
+     format — converted from this app's actual ink/cream/accent hex values
+     (see tailwind.config.js), not shadcn's stock zinc/blue defaults. This
+     app is dark-only (no light/dark toggle), so there's no `.dark` block:
+     these values ARE the theme, and any shadcn component added later
+     inherits it automatically via bg-background/text-foreground/etc. */
+  --background: 216 33% 6%;
+  --foreground: 203 45% 94%;
+  --card: 217 36% 10%;
+  --card-foreground: 203 45% 94%;
+  --popover: 219 37% 15%;
+  --popover-foreground: 203 45% 94%;
+  --primary: 188 86% 53%;
+  --primary-foreground: 216 33% 6%;
+  --secondary: 219 37% 15%;
+  --secondary-foreground: 203 45% 94%;
+  --muted: 219 37% 15%;
+  --muted-foreground: 206 23% 82%;
+  --accent: 188 86% 53%;
+  --accent-foreground: 216 33% 6%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 217 33% 20%;
+  --input: 217 33% 20%;
+  --ring: 188 86% 53%;
+  --radius: 0.75rem;
 }
 
 html,
