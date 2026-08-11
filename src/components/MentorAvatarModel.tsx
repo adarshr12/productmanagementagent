@@ -152,24 +152,32 @@ export function MentorAvatarModel({
   speaking?: boolean;
 }) {
   const width = size;
-  const height = Math.round(size * 1.18);
+  const height = Math.round(size * 1.22);
+  // Fade the bottom edge into whatever it's sitting on instead of cutting
+  // it off with a hard rectangle — reads as a portrait, not a framed photo.
+  const fadeMask = "linear-gradient(to bottom, black 70%, transparent 100%)";
 
   return (
     <div className="relative shrink-0" style={{ width, height }}>
       <div
-        className="orb-pulse pointer-events-none absolute rounded-2xl"
+        className="orb-pulse pointer-events-none absolute rounded-full"
         style={{
-          inset: -size * 0.16,
+          inset: -size * 0.22,
           background:
-            "radial-gradient(circle, rgba(34,211,238,0.4), rgba(34,211,238,0.08) 55%, transparent 72%)",
-          filter: "blur(10px)",
+            "radial-gradient(circle, rgba(34,211,238,0.38), rgba(34,211,238,0.07) 55%, transparent 72%)",
+          filter: "blur(14px)",
           animationDuration: speaking ? "1.3s" : "3.2s",
         }}
         aria-hidden="true"
       />
       <div
-        className="relative overflow-hidden rounded-2xl border border-accent-500/30 bg-[#0d131c] shadow-2xl"
-        style={{ width, height }}
+        className="relative overflow-hidden"
+        style={{
+          width,
+          height,
+          maskImage: fadeMask,
+          WebkitMaskImage: fadeMask,
+        }}
       >
         <Canvas
           camera={{ position: [0, 0, CAMERA_Z], fov: CAMERA_FOV }}
@@ -185,13 +193,6 @@ export function MentorAvatarModel({
             <Figure src={src} speaking={speaking} />
           </Suspense>
         </Canvas>
-        <div
-          className="pointer-events-none absolute inset-0 rounded-2xl"
-          style={{
-            boxShadow: "inset 0 0 40px 10px rgba(13,19,28,0.55)",
-          }}
-          aria-hidden="true"
-        />
       </div>
     </div>
   );

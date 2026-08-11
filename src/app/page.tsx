@@ -142,9 +142,9 @@ export default function Home() {
 
             {/* right: mentor preview */}
             <div className="lg:mt-2">
-              <div className="chat-shell flex h-[420px] flex-col items-center justify-center gap-5 px-6 py-6 text-center sm:h-[480px]">
-                <MentorAvatar size={112} />
-                <p className="font-display max-w-xs text-xl text-cream/90">
+              <div className="chat-shell flex flex-col items-center gap-4 px-6 pb-8 pt-10 text-center">
+                <MentorAvatar size={260} />
+                <p className="font-display -mt-2 max-w-xs text-xl text-cream/90">
                   &ldquo;Hey — let&apos;s find out which product role
                   actually fits you.&rdquo;
                 </p>

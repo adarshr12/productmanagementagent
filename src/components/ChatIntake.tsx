@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import type { Question } from "@/lib/questions";
 import { MentorAvatar } from "@/components/MentorAvatar";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 type Turn = { id: string; from: "mentor" | "user"; text: string };
 
@@ -32,6 +33,7 @@ export function ChatIntake({
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
+  const isDesktop = useMediaQuery("(min-width: 640px)");
 
   function pushMentor(text: string) {
     setTurns((t) => [...t, { id: uid(), from: "mentor", text }]);
@@ -209,9 +211,13 @@ export function ChatIntake({
         </div>
 
       {/* the mentor — big, persistent, on the right */}
-      <div className="flex flex-row items-center gap-4 bg-white/[0.02] px-6 py-5 sm:w-[280px] sm:flex-col sm:justify-center sm:px-6 sm:py-8">
-        <MentorAvatar src={mentorPhotoSrc} size={128} speaking={typing} />
-        <div className="sm:mt-4 sm:text-center">
+      <div className="flex flex-row items-center gap-4 bg-white/[0.02] px-6 py-5 sm:w-[300px] sm:flex-col sm:justify-start sm:px-6 sm:py-10">
+        <MentorAvatar
+          src={mentorPhotoSrc}
+          size={isDesktop ? 220 : 120}
+          speaking={typing}
+        />
+        <div className="sm:-mt-3 sm:text-center">
           <p className="text-sm font-semibold text-cream">
             Your product mentor
           </p>
