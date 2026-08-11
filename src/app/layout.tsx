@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -8,12 +8,14 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// Geometric grotesk for headlines — the futuristic register, replacing the
-// warm literary serif that was explicitly rejected.
-const grotesk = Space_Grotesk({
+// Bricolage Grotesque for headlines: a variable grotesque with real optical
+// character at display sizes, replacing Space Grotesk — one of the most
+// reached-for "modern tech" fonts in AI-generated sites, which is exactly
+// why it reads as generic rather than distinctive.
+const grotesk = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-grotesk",
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
 // Mono for tags/labels/scores — replaces uppercase-tracking-wide sans labels
