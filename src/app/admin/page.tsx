@@ -21,6 +21,16 @@ export default function AdminDashboardPage() {
         router.replace("/admin/login");
         return;
       }
+      // A valid session isn't enough on its own once public sign-up exists —
+      // confirm allowlist membership server-side before rendering anything.
+      const res = await fetch("/api/admin/whoami", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        await supabase.auth.signOut();
+        router.replace("/admin/login");
+        return;
+      }
       setReady(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
