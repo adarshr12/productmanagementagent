@@ -140,21 +140,20 @@ export default function Home() {
               </div>
             </div>
 
-            {/* right: mentor preview */}
-            <div className="lg:mt-2">
-              <div className="chat-shell flex flex-col items-center gap-4 px-6 pb-8 pt-10 text-center">
-                <MentorAvatar size={260} />
-                <p className="font-display -mt-2 max-w-xs text-xl text-cream/90">
-                  &ldquo;Hey — let&apos;s find out which product role
-                  actually fits you.&rdquo;
-                </p>
-                <button
-                  onClick={() => setPhase("intake")}
-                  className="btn-ghost mt-1 w-fit"
-                >
-                  Start the conversation →
-                </button>
-              </div>
+            {/* right: mentor preview — no card, the figure sits directly on
+                the page's ambient gradient */}
+            <div className="flex flex-col items-center gap-5 pt-4 text-center lg:pt-0">
+              <MentorAvatar size={320} />
+              <p className="font-display -mt-6 max-w-xs text-xl text-cream/90">
+                &ldquo;Hey — let&apos;s find out which product role
+                actually fits you.&rdquo;
+              </p>
+              <button
+                onClick={() => setPhase("intake")}
+                className="btn-ghost w-fit"
+              >
+                Start the conversation →
+              </button>
               {error && (
                 <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
                   {error}

@@ -210,8 +210,8 @@ export function ChatIntake({
           )}
         </div>
 
-      {/* the mentor — big, persistent, on the right */}
-      <div className="flex flex-row items-center gap-4 bg-white/[0.02] px-6 py-5 sm:w-[300px] sm:flex-col sm:justify-start sm:px-6 sm:py-10">
+      {/* the mentor — big, persistent, on the right, no panel tint boxing it in */}
+      <div className="flex flex-row items-center gap-4 px-6 py-5 sm:w-[300px] sm:flex-col sm:justify-start sm:px-6 sm:py-10">
         <MentorAvatar
           src={mentorPhotoSrc}
           size={isDesktop ? 220 : 120}

@@ -5,7 +5,10 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 import * as THREE from "three";
+
+gsap.registerPlugin(useGSAP);
 
 const CAMERA_FOV = 30;
 const CAMERA_Z = 1.85;
@@ -157,8 +160,47 @@ export function MentorAvatarModel({
   // it off with a hard rectangle — reads as a portrait, not a framed photo.
   const fadeMask = "linear-gradient(to bottom, black 70%, transparent 100%)";
 
+  const root = useRef<HTMLDivElement>(null);
+  const tilt = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    (_ctx, contextSafe) => {
+      // Entrance: rise and settle instead of just appearing.
+      gsap.from(root.current, {
+        opacity: 0,
+        y: 28,
+        scale: 0.94,
+        duration: 0.9,
+        ease: "power3.out",
+      });
+
+      // Idle parallax: the figure tilts toward the cursor, like it's
+      // paying attention to where you are on the page.
+      const setX = gsap.quickTo(tilt.current, "rotateY", {
+        duration: 0.7,
+        ease: "power3.out",
+      });
+      const setY = gsap.quickTo(tilt.current, "rotateX", {
+        duration: 0.7,
+        ease: "power3.out",
+      });
+
+      const onMove = contextSafe!((e: PointerEvent) => {
+        const rect = root.current?.getBoundingClientRect();
+        if (!rect) return;
+        const px = (e.clientX - (rect.left + rect.width / 2)) / rect.width;
+        const py = (e.clientY - (rect.top + rect.height / 2)) / rect.height;
+        setX(Math.max(-1, Math.min(1, px)) * 6);
+        setY(Math.max(-1, Math.min(1, py)) * -5);
+      });
+      window.addEventListener("pointermove", onMove);
+      return () => window.removeEventListener("pointermove", onMove);
+    },
+    { scope: root }
+  );
+
   return (
-    <div className="relative shrink-0" style={{ width, height }}>
+    <div ref={root} className="relative shrink-0" style={{ width, height }}>
       <div
         className="orb-pulse pointer-events-none absolute rounded-full"
         style={{
@@ -171,12 +213,14 @@ export function MentorAvatarModel({
         aria-hidden="true"
       />
       <div
+        ref={tilt}
         className="relative overflow-hidden"
         style={{
           width,
           height,
           maskImage: fadeMask,
           WebkitMaskImage: fadeMask,
+          transformStyle: "preserve-3d",
         }}
       >
         <Canvas
