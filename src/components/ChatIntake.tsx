@@ -162,7 +162,9 @@ export function ChatIntake({
           {currentQuestion && !typing && (
             <div className="border-t border-white/10 px-5 py-4 sm:px-8">
               {error && (
-                <p className="mb-2 text-xs text-accent-200">{error}</p>
+                <p role="alert" className="mb-2 text-xs text-accent-200">
+                  {error}
+                </p>
               )}
               {currentQuestion.type === "select" &&
                 currentQuestion.options && (
@@ -171,7 +173,7 @@ export function ChatIntake({
                       <button
                         key={opt}
                         onClick={() => advance(opt)}
-                        className="chip"
+                        className="chip min-h-[44px]"
                       >
                         {opt}
                       </button>
@@ -185,7 +187,11 @@ export function ChatIntake({
                 }}
                 className="flex items-center gap-2"
               >
+                <label htmlFor="free-text-answer" className="sr-only">
+                  {currentQuestion.label}
+                </label>
                 <input
+                  id="free-text-answer"
                   autoFocus
                   value={freeText}
                   onChange={(e) => setFreeText(e.target.value)}
@@ -196,14 +202,14 @@ export function ChatIntake({
                   }
                   className="field-input flex-1"
                 />
-                <button type="submit" className="btn-gold px-4 py-2.5">
+                <button type="submit" className="btn-gold min-h-[44px] px-4 py-2.5">
                   Send
                 </button>
                 {!currentQuestion.required && (
                   <button
                     type="button"
                     onClick={() => advance("")}
-                    className="shrink-0 text-xs font-medium text-cream/40 hover:text-cream/70"
+                    className="flex min-h-[44px] shrink-0 items-center px-2 text-xs font-medium text-cream/40 hover:text-cream/70"
                   >
                     Skip
                   </button>

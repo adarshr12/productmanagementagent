@@ -79,7 +79,7 @@ export default function KanbanBoard({
                             move(step, COLUMNS[Math.max(0, idx - 1)].key)
                           }
                           disabled={idx === 0}
-                          className="rounded-md px-2 py-1 text-xs font-medium text-cream/50 hover:bg-white/5 disabled:opacity-30"
+                          className="min-h-[44px] rounded-md px-3 text-xs font-medium text-cream/50 hover:bg-white/5 disabled:opacity-30"
                         >
                           ◀ Back
                         </button>
@@ -91,7 +91,7 @@ export default function KanbanBoard({
                             )
                           }
                           disabled={idx === COLUMNS.length - 1}
-                          className="rounded-md px-2 py-1 text-xs font-semibold text-accent-500 hover:bg-accent-500/10 disabled:opacity-30"
+                          className="min-h-[44px] rounded-md px-3 text-xs font-semibold text-accent-500 hover:bg-accent-500/10 disabled:opacity-30"
                         >
                           Next ▶
                         </button>
