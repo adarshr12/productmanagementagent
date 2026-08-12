@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Compass } from "lucide-react";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+  agentLabel?: string;
+};
 
 const GREETING =
   "Hey, I'm your AI product assistant. Ask me anything about product management, AI PM, career moves, frameworks, or how you'd tackle a specific situation.";
@@ -59,7 +63,10 @@ export function AssistantChat() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Something went wrong.");
-      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: data.reply, agentLabel: data.agent?.label },
+      ]);
     } catch (err: any) {
       setError(err?.message || "Something went wrong. Please try again.");
     } finally {
@@ -81,8 +88,11 @@ export function AssistantChat() {
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-teal text-white">
                 <Compass className="h-4 w-4" strokeWidth={2.25} />
               </span>
-              <div className="chat-bubble-mentor whitespace-pre-wrap font-display text-base">
-                {m.content}
+              <div>
+                {m.agentLabel && <p className="tag mb-1 text-accent-500">{m.agentLabel}</p>}
+                <div className="chat-bubble-mentor whitespace-pre-wrap font-display text-base">
+                  {m.content}
+                </div>
               </div>
             </div>
           ) : (

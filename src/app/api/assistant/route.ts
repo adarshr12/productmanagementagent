@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { retrieveChunks } from "@/lib/retrieve";
 import { groqChat, type ChatMessage } from "@/lib/groq";
-import { getAgentConfig } from "@/lib/agentConfig";
+import { pickAgent } from "@/lib/orchestrate";
 import { checkAndRecordRateLimit, clientIdentifier } from "@/lib/rateLimit";
 
 // Public, chat-based "ask a product expert" endpoint. Stateless: the client
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No message to respond to." }, { status: 400 });
     }
 
-    const agent = await getAgentConfig("product_assistant");
+    const agent = await pickAgent(history, lastUserMessage.content);
 
     const chunks = agent.useKnowledgeBase
       ? await retrieveChunks(lastUserMessage.content, 6)
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       1024
     );
 
-    return NextResponse.json({ reply });
+    return NextResponse.json({ reply, agent: { key: agent.agentKey, label: agent.label } });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || "Something went wrong. Please try again." },

@@ -9,7 +9,16 @@ type Agent = {
   description: string | null;
   system_prompt: string;
   use_knowledge_base: boolean;
+  agent_type: "flow" | "conversational" | "orchestrator";
+  routing_hint: string | null;
+  is_active: boolean;
   updated_at: string;
+};
+
+const AGENT_TYPE_LABEL: Record<Agent["agent_type"], string> = {
+  flow: "triggered by a specific action, not routed",
+  conversational: "chat — routed by the orchestrator",
+  orchestrator: "routes messages to conversational agents",
 };
 
 export function AgentPromptsPanel() {
@@ -75,12 +84,16 @@ function AgentCard({
 }) {
   const [prompt, setPrompt] = useState(agent.system_prompt);
   const [useKb, setUseKb] = useState(agent.use_knowledge_base);
+  const [routingHint, setRoutingHint] = useState(agent.routing_hint || "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showTest, setShowTest] = useState(false);
 
-  const dirty = prompt !== agent.system_prompt || useKb !== agent.use_knowledge_base;
+  const dirty =
+    prompt !== agent.system_prompt ||
+    useKb !== agent.use_knowledge_base ||
+    routingHint !== (agent.routing_hint || "");
 
   async function save() {
     setBusy(true);
@@ -101,6 +114,7 @@ function AgentCard({
           agent_key: agent.agent_key,
           system_prompt: prompt,
           use_knowledge_base: useKb,
+          ...(agent.agent_type === "conversational" ? { routing_hint: routingHint } : {}),
         }),
       });
       const data = await res.json();
@@ -118,7 +132,12 @@ function AgentCard({
     <div className="card">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="tag text-accent-500">{agent.agent_key}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="tag text-accent-500">{agent.agent_key}</p>
+            <span className="tag border border-line px-2 py-0.5">
+              {AGENT_TYPE_LABEL[agent.agent_type]}
+            </span>
+          </div>
           <h3 className="font-display mt-1 text-lg font-semibold text-ink">
             {agent.label}
           </h3>
@@ -153,12 +172,32 @@ function AgentCard({
         </p>
       )}
 
+      {agent.agent_type === "conversational" && (
+        <div className="mt-4">
+          <label className="field-label" htmlFor={`routing-${agent.agent_key}`}>
+            Routing hint — when should the orchestrator hand a message to this agent?
+          </label>
+          <textarea
+            id={`routing-${agent.agent_key}`}
+            value={routingHint}
+            onChange={(e) => setRoutingHint(e.target.value)}
+            rows={2}
+            className="field-input mt-1 w-full resize-y text-xs leading-relaxed"
+            placeholder='e.g. "The student explicitly wants to learn a concept step by step."'
+          />
+        </div>
+      )}
+
+      <label className="field-label mt-4 block" htmlFor={`prompt-${agent.agent_key}`}>
+        System prompt
+      </label>
       <textarea
+        id={`prompt-${agent.agent_key}`}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         rows={10}
         spellCheck={false}
-        className="field-input mt-4 w-full resize-y font-mono text-xs leading-relaxed"
+        className="field-input mt-1 w-full resize-y font-mono text-xs leading-relaxed"
       />
 
       <div className="mt-3 flex items-center gap-3">
