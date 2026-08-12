@@ -19,7 +19,16 @@ const ACCEPTED: Record<string, "pdf" | "docx" | "txt"> = {
   txt: "txt",
 };
 
-type Mode = "upload" | "paste";
+type Mode = "upload" | "paste" | "bulk";
+
+type BulkItem = { title: string; content: string; slug?: string };
+
+type BulkProgress = {
+  total: number;
+  done: number;
+  skipped: number;
+  errors: string[];
+};
 
 export function KnowledgeBasePanel() {
   const [mode, setMode] = useState<Mode>("upload");
@@ -28,6 +37,8 @@ export function KnowledgeBasePanel() {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [pasteText, setPasteText] = useState("");
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
+  const [bulkProgress, setBulkProgress] = useState<BulkProgress | null>(null);
 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -141,6 +152,80 @@ export function KnowledgeBasePanel() {
     }
   }
 
+  function parseBulkFile(raw: string): BulkItem[] {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error("Expected a JSON array of {title, content_md} objects.");
+    }
+    return parsed.map((item, i) => {
+      const t = String(item?.title || "").trim();
+      const c = String(item?.content_md ?? item?.text ?? item?.content ?? "").trim();
+      const slug = String(item?.slug || "").trim();
+      if (!t || !c) {
+        throw new Error(`Item ${i + 1} is missing a title or content.`);
+      }
+      return { title: t, content: c, slug };
+    });
+  }
+
+  async function handleBulk(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+    if (!bulkFile) {
+      setError("Choose a JSON file first.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const raw = await bulkFile.text();
+      const items = parseBulkFile(raw);
+      const alreadyIndexed = new Set(
+        docs.filter((d) => d.status === "indexed").map((d) => d.title)
+      );
+      const todo = items.filter((item) => !alreadyIndexed.has(item.title));
+      const progress: BulkProgress = {
+        total: items.length,
+        done: 0,
+        skipped: items.length - todo.length,
+        errors: [],
+      };
+      setBulkProgress({ ...progress });
+
+      for (const item of todo) {
+        const slug =
+          (item.slug || item.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60) ||
+          "note";
+        try {
+          await ingest({
+            title: item.title,
+            file_name: `${slug}.txt`,
+            source_type: "txt",
+            content_base64: textToBase64(item.content),
+          });
+        } catch (err: any) {
+          progress.errors.push(`${item.title}: ${err?.message || "failed"}`);
+        }
+        progress.done += 1;
+        setBulkProgress({ ...progress });
+      }
+
+      setMessage(
+        `Bulk import finished: ${progress.done - progress.errors.length} indexed, ` +
+          `${progress.skipped} already indexed, ${progress.errors.length} failed.`
+      );
+      setBulkFile(null);
+      const input = document.getElementById("bulk-file") as HTMLInputElement | null;
+      if (input) input.value = "";
+      await loadDocs();
+    } catch (err: any) {
+      setError(err?.message || "Bulk import failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div>
       <div className="card">
@@ -150,6 +235,9 @@ export function KnowledgeBasePanel() {
           </TabButton>
           <TabButton active={mode === "paste"} onClick={() => setMode("paste")}>
             Paste text
+          </TabButton>
+          <TabButton active={mode === "bulk"} onClick={() => setMode("bulk")}>
+            Bulk import (JSON)
           </TabButton>
         </div>
 
@@ -185,7 +273,7 @@ export function KnowledgeBasePanel() {
               {busy ? "Processing…" : "Upload & index"}
             </button>
           </form>
-        ) : (
+        ) : mode === "paste" ? (
           <form onSubmit={handlePaste} className="space-y-4">
             <div>
               <label className="field-label" htmlFor="paste-title">
@@ -216,6 +304,61 @@ export function KnowledgeBasePanel() {
             <Feedback error={error} message={message} />
             <button type="submit" className="btn-gold px-5 py-2.5 text-sm" disabled={busy}>
               {busy ? "Processing…" : "Save & index"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleBulk} className="space-y-4">
+            <div>
+              <label className="field-label" htmlFor="bulk-file">
+                JSON file — an array of objects, each with a title and content_md (or text)
+                field
+              </label>
+              <input
+                id="bulk-file"
+                type="file"
+                accept=".json"
+                className="field-input"
+                onChange={(e) => setBulkFile(e.target.files?.[0] ?? null)}
+              />
+              <p className="mt-1 text-xs text-slate-soft">
+                Each item becomes its own indexed document. Titles that are already indexed
+                are skipped, so it's safe to re-run this on the same file if it gets
+                interrupted. Keep this tab open until it finishes — items run one at a time
+                and can take a while under Voyage's rate limits.
+              </p>
+            </div>
+            {bulkProgress && (
+              <div className="rounded-lg border border-line bg-paper p-3 text-sm">
+                <div className="mb-1.5 flex justify-between text-slate">
+                  <span>
+                    {bulkProgress.done} / {bulkProgress.total} processed
+                  </span>
+                  <span>{bulkProgress.skipped} already indexed</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-line">
+                  <div
+                    className="h-full bg-accent-500"
+                    style={{
+                      width: `${
+                        bulkProgress.total
+                          ? Math.round((bulkProgress.done / bulkProgress.total) * 100)
+                          : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+                {bulkProgress.errors.length > 0 && (
+                  <ul className="mt-2 space-y-0.5 text-xs text-red-700">
+                    {bulkProgress.errors.map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            <Feedback error={error} message={message} />
+            <button type="submit" className="btn-gold px-5 py-2.5 text-sm" disabled={busy}>
+              {busy ? "Processing…" : "Import & index all"}
             </button>
           </form>
         )}

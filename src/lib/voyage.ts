@@ -21,26 +21,40 @@ export async function embedDocuments(texts: string[]): Promise<number[][]> {
   return out;
 }
 
+const MAX_RATE_LIMIT_RETRIES = 5;
+
 async function voyageEmbed(
   input: string[],
   inputType: "query" | "document"
 ): Promise<number[][]> {
-  const res = await fetch("https://api.voyageai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.VOYAGE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      input,
-      model: process.env.VOYAGE_MODEL || "voyage-3.5-lite",
-      input_type: inputType,
-    }),
-  });
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch("https://api.voyageai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.VOYAGE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input,
+        model: process.env.VOYAGE_MODEL || "voyage-3.5-lite",
+        input_type: inputType,
+      }),
+    });
 
-  if (!res.ok) {
+    if (res.ok) {
+      const data = await res.json();
+      return (data.data as { embedding: number[] }[]).map((d) => d.embedding);
+    }
+
+    if (res.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
+      const retryAfterHeader = Number(res.headers.get("retry-after"));
+      const waitMs = Number.isFinite(retryAfterHeader) && retryAfterHeader > 0
+        ? retryAfterHeader * 1000
+        : 2 ** attempt * 5000;
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      continue;
+    }
+
     throw new Error(`Voyage error ${res.status}: ${await res.text()}`);
   }
-  const data = await res.json();
-  return (data.data as { embedding: number[] }[]).map((d) => d.embedding);
 }
