@@ -10,6 +10,7 @@ import { ChatIntake } from "@/components/ChatIntake";
 import { SiteNav } from "@/components/SiteNav";
 import { Reveal } from "@/components/Reveal";
 import { PathGraphic } from "@/components/PathGraphic";
+import { CinematicHero } from "@/components/ui/cinematic-hero";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
@@ -87,40 +88,13 @@ export default function Home() {
       <main className="min-h-screen overflow-hidden">
         {nav}
 
-        <section className="mx-auto max-w-[1400px] px-6 pt-14 sm:px-10 sm:pt-20">
-          <h1 className="animate-fade-up font-display max-w-[15ch] text-[13vw] font-extrabold leading-[0.94] tracking-[-0.03em] text-ink sm:text-[8vw] lg:text-[5.6vw]">
-            Which product role actually fits{" "}
-            <span className="bg-gradient-to-r from-accent-500 to-accent-teal bg-clip-text text-transparent">
-              you?
-            </span>
-          </h1>
+        <CinematicHero onStart={() => setPhase("intake")} />
 
-          <div className="relative mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="animate-fade-up delay-1 max-w-lg">
-              <p className="text-lg text-slate">
-                Talk to your mentor for two minutes. We&apos;ll score{" "}
-                <strong className="text-ink">all 19 product roles</strong> for
-                how easily you can transition into each, explain exactly why,
-                and hand you a personalized, trackable roadmap.
-              </p>
-              <div className="mt-8 flex items-center gap-5">
-                <button
-                  onClick={() => setPhase("intake")}
-                  className="btn-gold btn-bounce px-7 py-3.5 text-base"
-                >
-                  Talk to my mentor →
-                </button>
-                {error && <p className="alert-error">{error}</p>}
-              </div>
-            </div>
-
-            <div className="animate-fade-up delay-2 -mb-10 flex justify-center lg:-mr-10 lg:mb-0 lg:justify-end">
-              <PathGraphic className="h-[280px] w-auto sm:h-[340px]" />
-            </div>
-          </div>
+        <section className="mx-auto max-w-[1400px] px-6 pt-10 sm:px-10 sm:pt-14">
+          {error && <p className="alert-error mb-6 text-center">{error}</p>}
 
           {/* credibility strip — real numbers, not a decorative icon row */}
-          <div className="animate-fade-up delay-3 mt-14 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:mt-16">
+          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line">
             {STATS.map((s) => (
               <div key={s.label} className="bg-white px-5 py-6 text-center sm:px-8 sm:py-8">
                 <p className="font-display text-3xl font-bold text-ink sm:text-4xl">
