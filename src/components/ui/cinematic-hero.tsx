@@ -250,19 +250,26 @@ function AnimatedHero({ onStart }: { onStart: () => void }) {
       const isMobile = window.innerWidth < 768;
 
       gsap.set(".ch-text-track", { autoAlpha: 0, y: 50, filter: "blur(16px)" });
+      gsap.set(".ch-quick-cta", { autoAlpha: 0, y: 20 });
       gsap.set(".ch-main-card", { y: window.innerHeight + 200 });
       gsap.set([".ch-card-left", ".ch-card-right", ".ch-mockup", ".ch-badge"], { autoAlpha: 0 });
       gsap.set(".ch-cta", { autoAlpha: 0, scale: 0.9, filter: "blur(20px)" });
 
       gsap
         .timeline({ delay: 0.2 })
-        .to(".ch-text-track", { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1.3, ease: "expo.out", stagger: 0.15 });
+        .to(".ch-text-track", { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1.3, ease: "expo.out", stagger: 0.15 })
+        .to(".ch-quick-cta", { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.4");
 
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top top",
-          end: "+=3600",
+          // Was 3600px of scroll to play out the whole sequence — that's
+          // roughly 4 viewport-heights of pure scrolling before the pinned
+          // section even lets go, which reads as "stuck," not cinematic.
+          // Compressed to a third of that; the .ch-quick-cta button above
+          // also means nobody has to sit through any of it just to click
+          // through to the chat.
+          end: "+=1200",
           pin: true,
           scrub: 1,
           anticipatePin: 1,
@@ -296,7 +303,7 @@ function AnimatedHero({ onStart }: { onStart: () => void }) {
         .fromTo(".ch-card-left", { x: -40, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 1.1 }, "-=1")
         .fromTo(".ch-card-right", { x: 40, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 1.1 }, "<")
         .to({}, { duration: 1.6 })
-        .set(".ch-hero-text", { autoAlpha: 0 })
+        .set([".ch-headline-group", ".ch-quick-cta"], { autoAlpha: 0 })
         .set(".ch-cta", { autoAlpha: 1 })
         .to({}, { duration: 1 })
         .to(
@@ -338,16 +345,27 @@ function AnimatedHero({ onStart }: { onStart: () => void }) {
     >
       <div className="ch-grid-bg absolute inset-0 z-0 pointer-events-none opacity-70" aria-hidden="true" />
 
-      {/* Headline + final CTA occupy the same footprint; only one is visible at a time. */}
+      {/* Headline + final CTA occupy the same footprint; only one is visible at a time.
+          The quick-start button below is a sibling of .ch-headline-group, not a
+          child — so hiding the headline group later doesn't take it down too, and
+          anyone who wants to start right away never has to scroll to find a button. */}
       <div className="ch-hero-text absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
-        <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl">
-          Which product role
-        </h1>
-        <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-6xl lg:text-7xl">
-          <span className="bg-gradient-to-r from-accent-500 to-accent-teal bg-clip-text text-transparent">
-            actually fits you?
-          </span>
-        </h1>
+        <div className="ch-headline-group flex flex-col items-center">
+          <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl">
+            Which product role
+          </h1>
+          <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-6xl lg:text-7xl">
+            <span className="bg-gradient-to-r from-accent-500 to-accent-teal bg-clip-text text-transparent">
+              actually fits you?
+            </span>
+          </h1>
+        </div>
+        <button
+          onClick={onStart}
+          className="ch-quick-cta ch-reveal btn-gold btn-bounce mt-8 px-6 py-3 text-sm"
+        >
+          Talk to my mentor →
+        </button>
       </div>
 
       <div className="ch-cta ch-reveal absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
