@@ -1,0 +1,119 @@
+"use client";
+
+import { useState } from "react";
+import type { RoadmapStep, StepStatus } from "@/lib/getRoadmap";
+
+const COLUMNS: { key: StepStatus; label: string; accent: string }[] = [
+  { key: "todo", label: "To Do", accent: "border-slate-300" },
+  { key: "in_progress", label: "In Progress", accent: "border-amber-400" },
+  { key: "done", label: "Done", accent: "border-emerald-400" },
+];
+
+export default function KanbanBoard({
+  steps,
+  move,
+}: {
+  steps: RoadmapStep[];
+  move: (step: RoadmapStep, status: StepStatus) => void;
+}) {
+  const [dragId, setDragId] = useState<string | null>(null);
+
+  return (
+    <>
+      <div className="grid gap-4 md:grid-cols-3">
+        {COLUMNS.map((col) => {
+          const colSteps = steps.filter((s) => s.status === col.key);
+          return (
+            <div
+              key={col.key}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                const s = steps.find((x) => x.id === dragId);
+                if (s) move(s, col.key);
+                setDragId(null);
+              }}
+              className="rounded-2xl bg-paper p-3"
+            >
+              <div className="mb-3 flex items-center justify-between px-1">
+                <h2 className="text-sm font-semibold text-slate">
+                  {col.label}
+                </h2>
+                <span className="rounded-full bg-line px-2 py-0.5 text-xs font-medium text-slate">
+                  {colSteps.length}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {colSteps.map((step) => {
+                  const idx = COLUMNS.findIndex((c) => c.key === step.status);
+                  return (
+                    <article
+                      key={step.id}
+                      draggable
+                      onDragStart={() => setDragId(step.id)}
+                      onDragEnd={() => setDragId(null)}
+                      className={`cursor-grab rounded-xl border-l-4 ${col.accent} bg-surface-raised p-3 shadow-glass-sm active:cursor-grabbing`}
+                    >
+                      <h3
+                        className={`text-sm font-semibold ${
+                          step.status === "done"
+                            ? "text-slate-soft line-through"
+                            : "text-ink"
+                        }`}
+                      >
+                        {step.title}
+                      </h3>
+                      {step.description && (
+                        <p className="mt-1 text-xs leading-relaxed text-slate">
+                          {step.description}
+                        </p>
+                      )}
+                      {step.estimated_time && (
+                        <span className="tag mt-2 inline-flex">
+                          ⏱ {step.estimated_time}
+                        </span>
+                      )}
+                      <div className="mt-3 flex items-center justify-between">
+                        <button
+                          onClick={() =>
+                            move(step, COLUMNS[Math.max(0, idx - 1)].key)
+                          }
+                          disabled={idx === 0}
+                          className="min-h-[44px] rounded-md px-3 text-xs font-medium text-slate hover:bg-paper disabled:opacity-30"
+                        >
+                          ◀ Back
+                        </button>
+                        <button
+                          onClick={() =>
+                            move(
+                              step,
+                              COLUMNS[Math.min(COLUMNS.length - 1, idx + 1)].key
+                            )
+                          }
+                          disabled={idx === COLUMNS.length - 1}
+                          className="min-h-[44px] rounded-md px-3 text-xs font-semibold text-accent-500 hover:bg-accent-500/10 disabled:opacity-30"
+                        >
+                          Next ▶
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+                {colSteps.length === 0 && (
+                  <p className="px-1 py-6 text-center text-xs text-slate-soft">
+                    Drag steps here
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="mt-8 text-center text-xs text-slate-soft">
+        Drag cards between columns, or use ◀ / ▶. Bookmark this page to track
+        your progress, anyone with the link can view it.
+      </p>
+    </>
+  );
+}

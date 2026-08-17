@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# env — NEVER commit real secrets
+.env
+.env.local
+.env*.local
+.env.production
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+tsconfig.tsbuildinfo
