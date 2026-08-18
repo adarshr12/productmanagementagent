@@ -58,7 +58,7 @@ export default function AssistantPage() {
               </h2>
               <p className="mt-2 text-sm text-slate">
                 Ask about a role, a framework, or a decision you&apos;re
-                stuck on — the same mentor that builds your roadmap.
+                stuck on. It&apos;s the same mentor who builds your roadmap.
               </p>
             </div>
           </Card>

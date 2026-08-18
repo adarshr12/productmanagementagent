@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Compass } from "lucide-react";
 import type { Question } from "@/lib/questions";
+import { SplineScene } from "@/components/ui/splite";
+import { SplineErrorBoundary } from "@/components/ui/spline-error-boundary";
 
 type Turn = { id: string; from: "mentor" | "user"; text: string };
 
@@ -215,12 +217,23 @@ export function ChatIntake({
           )}
         </div>
 
-      {/* the mentor's identity — brand mark + progress, no illustrated face */}
-      <div className="flex flex-row items-center gap-4 px-6 py-5 sm:w-[260px] sm:flex-col sm:justify-center sm:px-6 sm:py-10">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-teal text-white sm:h-16 sm:w-16">
+      {/* the mentor's identity — brand mark + progress. The 3D scene is a
+          background layer behind the icon (hidden on the mobile row layout,
+          where there's no vertical room for it), same pattern as /assistant. */}
+      <div className="relative flex flex-row items-center gap-4 overflow-hidden px-6 py-5 sm:w-[260px] sm:flex-col sm:justify-center sm:px-6 sm:py-10">
+        <div className="absolute inset-0 z-0 hidden opacity-40 sm:block">
+          <SplineErrorBoundary fallback={null}>
+            <SplineScene
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="h-full w-full"
+            />
+          </SplineErrorBoundary>
+        </div>
+
+        <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-teal text-white shadow-lg sm:h-16 sm:w-16">
           <Compass className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={2.25} />
         </div>
-        <div className="sm:mt-4 sm:text-center">
+        <div className="relative z-10 sm:mt-4 sm:text-center">
           <p className="text-sm font-semibold text-ink">Your product mentor</p>
           {step >= 0 && (
             <>

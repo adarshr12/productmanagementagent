@@ -205,11 +205,11 @@ function StaticHero({ onStart }: { onStart: () => void }) {
               &quot;Growth PM&quot; or &quot;BA&quot;? Stop guessing.
             </h3>
             <p className="mb-6 text-base leading-relaxed text-slate">
-              Job titles like these all sound the same from outside, and a
-              five-minute quiz can&apos;t tell them apart for you. Talk to a
-              mentor for two minutes and get all 19 roles scored against your
-              specific background, with the reasons why — then a trackable
-              roadmap for the one that fits.
+              Job titles like these all sound the same from outside. A
+              five-minute quiz can&apos;t tell them apart for you, but a real
+              conversation with your mentor can. Two minutes, all 19 roles
+              scored against your own background, and the real reasons why.
+              Then a roadmap for the one that fits.
             </p>
             <button onClick={onStart} className="btn-gold btn-bounce px-7 py-3.5 text-base">
               Talk to my mentor →
@@ -413,11 +413,11 @@ function AnimatedHero({ onStart }: { onStart: () => void }) {
                 &quot;Growth PM&quot; or &quot;BA&quot;? Stop guessing.
               </h3>
               <p className="mx-auto hidden max-w-sm text-base leading-relaxed text-slate md:block lg:mx-0 lg:max-w-none">
-                Job titles like these all sound the same from outside, and a
-                five-minute quiz can&apos;t tell them apart for you. Talk to
-                a mentor for two minutes and get all 19 roles scored against
-                your specific background, with the reasons why — then a
-                trackable roadmap for the one that fits.
+                Job titles like these all sound the same from outside. A
+                five-minute quiz can&apos;t tell them apart for you, but a
+                real conversation with your mentor can. Two minutes, all 19
+                roles scored against your own background, and the real
+                reasons why. Then a roadmap for the one that fits.
               </p>
             </div>
           </div>

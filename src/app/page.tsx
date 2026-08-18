@@ -140,7 +140,7 @@ export default function Home() {
 
           <p className="tag mt-6 text-center">
             for people moving into product manager, business analyst, and
-            related roles — not for PMs already 5+ years in
+            related roles, not for PMs already 5+ years in
           </p>
         </section>
 
@@ -222,7 +222,7 @@ export default function Home() {
           <div className="mx-auto max-w-[1400px] px-6 py-20 sm:px-10">
             <p className="tag mb-2">every role, actually explained</p>
             <h2 className="font-display max-w-2xl text-2xl font-semibold text-ink sm:text-3xl">
-              Not just a score — the full map of where you could go.
+              Not just a score. The full map of where you could go.
             </h2>
             <div className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-6">
               {ROLE_FAMILIES.map((group, gi) => (
@@ -250,7 +250,7 @@ export default function Home() {
             Ready to see where you fit?
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-slate">
-            Two minutes, no login, no résumé — just a conversation with your
+            Two minutes, no login, no résumé. Just a conversation with your
             mentor.
           </p>
           <button
@@ -262,7 +262,7 @@ export default function Home() {
         </section>
 
         <footer className="mx-auto max-w-[1400px] px-6 pb-10 text-center sm:px-10">
-          <p className="tag">no résumé required to start — just a conversation</p>
+          <p className="tag">no résumé required to start, just a conversation</p>
         </footer>
       </main>
     );
