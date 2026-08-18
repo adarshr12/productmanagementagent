@@ -25,14 +25,18 @@ export default function AssistantPage() {
             chat on wide screens. Hidden below lg — there's no room for it
             next to the chat on mobile/tablet, and it's purely decorative. */}
         <div className="hidden w-[380px] shrink-0 border-l border-line p-4 lg:block xl:w-[440px]">
-          <Card className="relative h-full w-full overflow-hidden bg-[#0a0e1a] text-white">
-            <Spotlight className="-top-40 left-0 md:-top-20 md:left-40" />
+          <Card className="relative h-full w-full overflow-hidden border-line bg-white text-ink">
+            {/* A dark card is where Spotlight's white-glow-on-black look and
+                the neutral text gradient below came from — restyled here to
+                this app's actual paper/ink/accent palette instead, matching
+                the light theme the rest of the site (and the hero) uses. */}
+            <Spotlight className="-top-40 left-0 from-accent-200 via-accent-100 to-transparent md:-top-20 md:left-40" />
 
             {/* Background layer: the 3D scene, full-bleed behind the text. */}
             <div className="absolute inset-0 z-0">
               <SplineErrorBoundary
                 fallback={
-                  <div className="flex h-full w-full items-center justify-center p-6 text-center text-xs text-neutral-500">
+                  <div className="flex h-full w-full items-center justify-center p-6 text-center text-xs text-slate-soft">
                     3D scene unavailable right now.
                   </div>
                 }
@@ -45,11 +49,14 @@ export default function AssistantPage() {
             </div>
 
             {/* Foreground layer: text, anchored to the bottom over the scene. */}
-            <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-[#0a0e1a] via-[#0a0e1a]/40 to-transparent p-6">
-              <h2 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-2xl font-bold text-transparent">
-                Your mentor is listening
+            <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-white via-white/70 to-transparent p-6">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-ink">
+                Your mentor is{" "}
+                <span className="bg-gradient-to-r from-accent-500 to-accent-teal bg-clip-text text-transparent">
+                  listening
+                </span>
               </h2>
-              <p className="mt-2 text-sm text-neutral-300">
+              <p className="mt-2 text-sm text-slate">
                 Ask about a role, a framework, or a decision you&apos;re
                 stuck on — the same mentor that builds your roadmap.
               </p>
