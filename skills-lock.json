@@ -168,6 +168,12 @@
       "sourceType": "github",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
       "computedHash": "ae6989c5c68a8a0cebbc2504e44f933dddd50d17974f295dc2fa5a80cb3d63ed"
+    },
+    "ux-saas-app": {
+      "source": "https://app.mcpmarket.com/install/A3jM1grRzpiywvDJebB5GnYAHIt6DnjyTDxvXRj9eMU",
+      "sourceType": "local",
+      "skillPath": ".claude/skills/ux-saas-app/SKILL.md",
+      "computedHash": "e1ec70d39732f26e99834afcae9bbdff37e834c57bf179c6f64dea9c590d23c2"
     }
   }
 }
