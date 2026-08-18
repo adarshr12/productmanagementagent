@@ -4,7 +4,18 @@ import { useEffect, useRef, useState } from "react";
 
 /** Fades/rises a child in once it scrolls into view. Reuses the existing
  * `.animate-fade-up` keyframe (already reduced-motion safe) instead of
- * pulling in a new animation library for a one-shot reveal. */
+ * pulling in a new animation library for a one-shot reveal.
+ *
+ * Renders fully visible on the server and on first paint — only once
+ * `useEffect` has actually run (confirming JS is live) does it switch to
+ * the hidden-until-scrolled-into-view state. The old version started
+ * hidden (`opacity-0`) unconditionally and depended on a client effect to
+ * ever reveal it, including its own "never leave this permanently
+ * invisible" fallback timer — if hydration never completes at all (a
+ * blocked script, a slow connection, JS disabled), that effect never
+ * runs, and the content stays invisible forever despite being real,
+ * present markup in the page. That's indistinguishable from "the content
+ * isn't there" to anyone actually looking at the rendered page. */
 export function Reveal({
   children,
   delayMs = 0,
@@ -15,9 +26,11 @@ export function Reveal({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [live, setLive] = useState(false);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    setLive(true);
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
@@ -39,11 +52,17 @@ export function Reveal({
     };
   }, []);
 
+  const revealClassName = !live
+    ? className
+    : visible
+      ? `animate-fade-up ${className}`
+      : `opacity-0 ${className}`;
+
   return (
     <div
       ref={ref}
-      className={visible ? `animate-fade-up ${className}` : `opacity-0 ${className}`}
-      style={visible ? { animationDelay: `${delayMs}ms` } : undefined}
+      className={revealClassName}
+      style={live && visible ? { animationDelay: `${delayMs}ms` } : undefined}
     >
       {children}
     </div>
