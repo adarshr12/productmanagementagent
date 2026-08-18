@@ -104,6 +104,11 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          <p className="tag mt-6 text-center">
+            for people moving into product manager, business analyst, and
+            related roles — not for PMs already 5+ years in
+          </p>
         </section>
 
         {/* how it works — asymmetric, not three equal cards */}
@@ -153,10 +158,7 @@ export default function Home() {
         </section>
 
         <footer className="mx-auto max-w-[1400px] px-6 pb-10 text-center sm:px-10">
-          <p className="tag">
-            built for people moving into product manager, analyst, and
-            related roles
-          </p>
+          <p className="tag">no résumé required to start — just a conversation</p>
         </footer>
       </main>
     );

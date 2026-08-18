@@ -202,12 +202,14 @@ function StaticHero({ onStart }: { onStart: () => void }) {
           </div>
           <div className="text-center lg:text-left">
             <h3 className="mb-3 text-2xl font-bold tracking-tight text-ink lg:text-4xl">
-              A mentor, not a form.
+              &quot;Growth PM&quot; or &quot;BA&quot;? Stop guessing.
             </h3>
             <p className="mb-6 text-base leading-relaxed text-slate">
-              ProductPath scores all 19 product roles against your background
-              in a two-minute conversation, then hands you a personalized,
-              trackable roadmap — not a static quiz result.
+              Job titles like these all sound the same from outside, and a
+              five-minute quiz can&apos;t tell them apart for you. Talk to a
+              mentor for two minutes and get all 19 roles scored against your
+              specific background, with the reasons why — then a trackable
+              roadmap for the one that fits.
             </p>
             <button onClick={onStart} className="btn-gold btn-bounce px-7 py-3.5 text-base">
               Talk to my mentor →
@@ -408,12 +410,14 @@ function AnimatedHero({ onStart }: { onStart: () => void }) {
 
             <div className="ch-card-left order-3 flex w-full flex-col justify-center px-4 text-center lg:order-1 lg:px-0 lg:text-left">
               <h3 className="mb-0 text-2xl font-bold tracking-tight text-ink lg:mb-5 lg:text-4xl">
-                A mentor, not a form.
+                &quot;Growth PM&quot; or &quot;BA&quot;? Stop guessing.
               </h3>
               <p className="mx-auto hidden max-w-sm text-base leading-relaxed text-slate md:block lg:mx-0 lg:max-w-none">
-                ProductPath scores all 19 product roles against your
-                background in a two-minute conversation, then hands you a
-                personalized, trackable roadmap — not a static quiz result.
+                Job titles like these all sound the same from outside, and a
+                five-minute quiz can&apos;t tell them apart for you. Talk to
+                a mentor for two minutes and get all 19 roles scored against
+                your specific background, with the reasons why — then a
+                trackable roadmap for the one that fits.
               </p>
             </div>
           </div>
