@@ -11,6 +11,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { Reveal } from "@/components/Reveal";
 import { PathGraphic } from "@/components/PathGraphic";
 import { CinematicHero } from "@/components/ui/cinematic-hero";
+import { MessageCircle, ListChecks, Map as MapIcon, Compass } from "lucide-react";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
@@ -18,6 +19,38 @@ const STATS = [
   { value: "19", label: "product roles scored" },
   { value: "~2 min", label: "average conversation" },
   { value: "Free", label: "no login to start" },
+];
+
+// Grouped once at module scope, not on every render — ROLE_CATALOG is a
+// static import, so this only needs to run once.
+const ROLE_FAMILIES: { family: string; roles: typeof ROLE_CATALOG }[] = [
+  "PM ladder",
+  "Specialization",
+  "Adjacent role",
+].map((family) => ({
+  family,
+  roles: ROLE_CATALOG.filter((r) => r.family === family),
+}));
+
+const HOW_IT_WORKS = [
+  {
+    icon: MessageCircle,
+    step: "01",
+    title: "Talk it through",
+    body: "A real conversation, not a form. Your mentor asks, you answer in your own words, and every past answer stays visible as you go.",
+  },
+  {
+    icon: ListChecks,
+    step: "02",
+    title: "Get every role scored",
+    body: "See your fit for AI PM, Growth PM, BA and more, with the specific reasons why.",
+  },
+  {
+    icon: MapIcon,
+    step: "03",
+    title: "Follow a trackable roadmap",
+    body: "Pick a role and get a guided path from where you are to where you're going.",
+  },
 ];
 
 export default function Home() {
@@ -111,50 +144,121 @@ export default function Home() {
           </p>
         </section>
 
-        {/* how it works — asymmetric, not three equal cards */}
-        <section className="mx-auto max-w-[1400px] px-6 py-20 sm:px-10">
+        {/* how it works — bento sizing, icon per step, a bleed graphic
+            behind the section instead of flat white space */}
+        <section className="relative mx-auto max-w-[1400px] overflow-hidden px-6 py-24 sm:px-10">
+          <PathGraphic className="pointer-events-none absolute -right-24 top-1/2 hidden h-[560px] w-auto -translate-y-1/2 opacity-[0.06] lg:block" />
           <p className="tag mb-8">how it works</p>
-          <div className="grid gap-6 lg:grid-cols-12 lg:gap-4">
-            <Reveal className="lg:col-span-7">
-              <div className="card flex h-full flex-col justify-center border-accent-500/20">
-                <p className="tag mb-3">01</p>
-                <h3 className="font-display text-2xl font-semibold text-ink">
-                  Talk it through
-                </h3>
-                <p className="mt-2 max-w-md text-sm text-slate">
-                  A real conversation, not a form. Your mentor asks, you
-                  answer in your own words, and every past answer stays
-                  visible as you go.
-                </p>
-              </div>
-            </Reveal>
-            <div className="flex flex-col gap-6 lg:col-span-5">
-              <Reveal delayMs={120}>
-                <div className="card">
-                  <p className="tag mb-3">02</p>
-                  <h3 className="font-display text-lg font-semibold text-ink">
-                    Get every role scored
-                  </h3>
-                  <p className="mt-1 text-sm text-slate">
-                    See your fit for AI PM, Growth PM, BA and more, with the
-                    specific reasons why.
-                  </p>
-                </div>
-              </Reveal>
-              <Reveal delayMs={240}>
-                <div className="card">
-                  <p className="tag mb-3">03</p>
-                  <h3 className="font-display text-lg font-semibold text-ink">
-                    Follow a trackable roadmap
-                  </h3>
-                  <p className="mt-1 text-sm text-slate">
-                    Pick a role and get a guided path from where you are to
-                    where you&apos;re going.
-                  </p>
-                </div>
-              </Reveal>
+          <div className="relative grid gap-6 lg:grid-cols-12 lg:gap-4">
+            {HOW_IT_WORKS.slice(0, 2).map((step, i) => {
+              const Icon = step.icon;
+              const primary = i === 0;
+              return (
+                <Reveal
+                  key={step.step}
+                  delayMs={i * 120}
+                  className={primary ? "lg:col-span-7" : "lg:col-span-5"}
+                >
+                  <div
+                    className={`card flex h-full flex-col ${
+                      primary ? "justify-center border-accent-500/20 sm:p-9" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-teal text-white ${
+                          primary ? "h-12 w-12" : "h-10 w-10"
+                        }`}
+                      >
+                        <Icon className={primary ? "h-6 w-6" : "h-5 w-5"} strokeWidth={2.25} />
+                      </span>
+                      <p className="tag">{step.step}</p>
+                    </div>
+                    <h3
+                      className={`font-display mt-4 font-semibold text-ink ${
+                        primary ? "text-2xl" : "text-lg"
+                      }`}
+                    >
+                      {step.title}
+                    </h3>
+                    <p className={`mt-2 text-sm text-slate ${primary ? "max-w-md" : ""}`}>
+                      {step.body}
+                    </p>
+                  </div>
+                </Reveal>
+              );
+            })}
+
+            {/* Third step as a full-width horizontal strip rather than
+                wrapping to a new row at the same width as card 2 — that
+                left an empty gap beside it instead of using the row. */}
+            {HOW_IT_WORKS.slice(2).map((step) => {
+              const Icon = step.icon;
+              return (
+                <Reveal key={step.step} delayMs={240} className="lg:col-span-12">
+                  <div className="card flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-teal text-white">
+                      <Icon className="h-5 w-5" strokeWidth={2.25} />
+                    </span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="tag">{step.step}</p>
+                        <h3 className="font-display text-lg font-semibold text-ink">
+                          {step.title}
+                        </h3>
+                      </div>
+                      <p className="mt-1 text-sm text-slate">{step.body}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* role coverage — makes "19 roles scored" concrete instead of just
+            a number in the stats strip above */}
+        <section className="border-y border-line bg-white">
+          <div className="mx-auto max-w-[1400px] px-6 py-20 sm:px-10">
+            <p className="tag mb-2">every role, actually explained</p>
+            <h2 className="font-display max-w-2xl text-2xl font-semibold text-ink sm:text-3xl">
+              Not just a score — the full map of where you could go.
+            </h2>
+            <div className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-6">
+              {ROLE_FAMILIES.map((group, gi) => (
+                <Reveal key={group.family} delayMs={gi * 100}>
+                  <p className="tag mb-3 text-accent-500">{group.family}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {group.roles.map((r) => (
+                      <span key={r.id} className="chip cursor-default hover:border-line hover:bg-white">
+                        <span aria-hidden>{r.emoji}</span>
+                        {r.label}
+                      </span>
+                    ))}
+                  </div>
+                </Reveal>
+              ))}
             </div>
           </div>
+        </section>
+
+        {/* repeated CTA — the hero's button is the only other one on the
+            page, and it can be several screens of scroll away by here */}
+        <section className="mx-auto max-w-[1400px] px-6 py-20 text-center sm:px-10">
+          <Compass className="mx-auto h-8 w-8 text-accent-500" strokeWidth={2.25} />
+          <h2 className="font-display mt-4 text-2xl font-semibold text-ink sm:text-3xl">
+            Ready to see where you fit?
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-slate">
+            Two minutes, no login, no résumé — just a conversation with your
+            mentor.
+          </p>
+          <button
+            onClick={() => setPhase("intake")}
+            className="btn-gold btn-bounce mt-6 px-7 py-3.5 text-base"
+          >
+            Talk to my mentor →
+          </button>
         </section>
 
         <footer className="mx-auto max-w-[1400px] px-6 pb-10 text-center sm:px-10">
