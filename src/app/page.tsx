@@ -11,6 +11,8 @@ import { SiteNav } from "@/components/SiteNav";
 import { Reveal } from "@/components/Reveal";
 import { PathGraphic } from "@/components/PathGraphic";
 import { CinematicHero } from "@/components/ui/cinematic-hero";
+import { PinnedHowItWorks } from "@/components/ui/pinned-how-it-works";
+import { JourneySection } from "@/components/JourneySection";
 import { MessageCircle, ListChecks, Map as MapIcon, Compass } from "lucide-react";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
@@ -144,75 +146,37 @@ export default function Home() {
           </p>
         </section>
 
-        {/* how it works — bento sizing, icon per step, a bleed graphic
-            behind the section instead of flat white space */}
+        {/* how it works — pinned corkboard cards instead of the flat bento
+            grid, sourced from a 21st.dev component and reskinned to the
+            paper/ink/accent palette (chosen because it reuses the same
+            scroll-driven feel as the hero instead of introducing a new
+            interaction pattern) */}
         <section className="relative mx-auto max-w-[1400px] overflow-hidden px-6 py-24 sm:px-10">
           <PathGraphic className="pointer-events-none absolute -right-24 top-1/2 hidden h-[560px] w-auto -translate-y-1/2 opacity-[0.06] lg:block" />
-          <p className="tag mb-8">how it works</p>
-          <div className="relative grid gap-6 lg:grid-cols-12 lg:gap-4">
-            {HOW_IT_WORKS.slice(0, 2).map((step, i) => {
-              const Icon = step.icon;
-              const primary = i === 0;
-              return (
-                <Reveal
-                  key={step.step}
-                  delayMs={i * 120}
-                  className={primary ? "lg:col-span-7" : "lg:col-span-5"}
-                >
-                  <div
-                    className={`card flex h-full flex-col ${
-                      primary ? "justify-center border-accent-500/20 sm:p-9" : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-teal text-white ${
-                          primary ? "h-12 w-12" : "h-10 w-10"
-                        }`}
-                      >
-                        <Icon className={primary ? "h-6 w-6" : "h-5 w-5"} strokeWidth={2.25} />
-                      </span>
-                      <p className="tag">{step.step}</p>
-                    </div>
-                    <h3
-                      className={`font-display mt-4 font-semibold text-ink ${
-                        primary ? "text-2xl" : "text-lg"
-                      }`}
-                    >
-                      {step.title}
-                    </h3>
-                    <p className={`mt-2 text-sm text-slate ${primary ? "max-w-md" : ""}`}>
-                      {step.body}
-                    </p>
-                  </div>
-                </Reveal>
-              );
-            })}
+          <p className="tag mb-8 text-center">how it works</p>
+          <Reveal>
+            <PinnedHowItWorks steps={HOW_IT_WORKS} />
+          </Reveal>
+        </section>
 
-            {/* Third step as a full-width horizontal strip rather than
-                wrapping to a new row at the same width as card 2 — that
-                left an empty gap beside it instead of using the row. */}
-            {HOW_IT_WORKS.slice(2).map((step) => {
-              const Icon = step.icon;
-              return (
-                <Reveal key={step.step} delayMs={240} className="lg:col-span-12">
-                  <div className="card flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-teal text-white">
-                      <Icon className="h-5 w-5" strokeWidth={2.25} />
-                    </span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="tag">{step.step}</p>
-                        <h3 className="font-display text-lg font-semibold text-ink">
-                          {step.title}
-                        </h3>
-                      </div>
-                      <p className="mt-1 text-sm text-slate">{step.body}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              );
-            })}
+        {/* the roadmap, previewed with the real JourneyMap component —
+            not a mockup, the same component a live roadmap renders */}
+        <section className="border-y border-line bg-white">
+          <div className="mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
+            <p className="tag mb-2">the roadmap</p>
+            <h2 className="font-display max-w-2xl text-2xl font-semibold text-ink sm:text-3xl">
+              Your journey, not just a checklist.
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-slate">
+              This is the actual roadmap view you get once you pick a role,
+              shown here with a sample path from business analyst to growth
+              PM.
+            </p>
+            <div className="mt-12">
+              <Reveal>
+                <JourneySection />
+              </Reveal>
+            </div>
           </div>
         </section>
 
