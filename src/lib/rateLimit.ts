@@ -9,25 +9,31 @@ export async function checkAndRecordRateLimit(
   identifier: string,
   limit = parseInt(process.env.RATE_LIMIT_PER_HOUR || "5", 10)
 ): Promise<boolean> {
-  const bucket = crypto.createHash("sha256").update(identifier).digest("hex");
-  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  try {
+    const bucket = crypto.createHash("sha256").update(identifier).digest("hex");
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-  const supabaseAdmin = getSupabaseAdmin();
-  const { count, error } = await supabaseAdmin
-    .from("rate_limits")
-    .select("*", { count: "exact", head: true })
-    .eq("bucket", bucket)
-    .gte("created_at", since);
+    const supabaseAdmin = getSupabaseAdmin();
+    const { count, error } = await supabaseAdmin
+      .from("rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("bucket", bucket)
+      .gte("created_at", since);
 
-  if (error) {
-    throw new Error(`Rate limit check failed: ${error.message}`);
+    if (error) {
+      console.warn("Rate limit check query warning (failing open):", error.message);
+      return true;
+    }
+    if ((count ?? 0) >= limit) {
+      return false;
+    }
+
+    await supabaseAdmin.from("rate_limits").insert({ bucket });
+    return true;
+  } catch (err: any) {
+    console.warn("Rate limit check network error (failing open):", err?.message || err);
+    return true;
   }
-  if ((count ?? 0) >= limit) {
-    return false;
-  }
-
-  await supabaseAdmin.from("rate_limits").insert({ bucket });
-  return true;
 }
 
 // Best-effort extraction of a client identifier from request headers.

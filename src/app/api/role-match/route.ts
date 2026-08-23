@@ -11,6 +11,8 @@ import {
   parseMatches,
 } from "@/lib/roleMatch";
 
+import { verifyUser } from "@/lib/verifyUser";
+
 // Step 1 of the flow: take the person's background, score every product role for
 // transition fit, and return the ranked list. Reusable backend API.
 export const runtime = "nodejs";
@@ -19,6 +21,7 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin();
+    const user = await verifyUser(req);
 
     const allowed = await checkAndRecordRateLimit(
       `role_match:${clientIdentifier(req.headers)}`
@@ -43,7 +46,10 @@ export async function POST(req: NextRequest) {
     }
 
     // save the intake (dedicated columns + full answers blob)
-    const intakeRow: Record<string, unknown> = { answers };
+    const intakeRow: Record<string, unknown> = {
+      answers,
+      user_id: user?.id ?? null,
+    };
     for (const q of INTAKE_QUESTIONS) {
       if (q.column) {
         intakeRow[q.column] = String(answers[q.id] ?? "").trim() || null;
