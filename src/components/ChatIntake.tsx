@@ -110,7 +110,7 @@ export function ChatIntake({
       setTimeout(() => {
         setTyping(false);
         pushMentor(
-          "Perfect, that's everything I need. Scoring you against every product role now..."
+          "Perfect, that's everything I need. Scoring your profile and redirecting you to create an account / sign in..."
         );
         setTimeout(() => onComplete(nextAnswers), 900);
       }, 700);
