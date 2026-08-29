@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
 import { ROLE_CATALOG } from "@/lib/roles";
@@ -10,10 +10,19 @@ import { ChatIntake } from "@/components/ChatIntake";
 import { SiteNav } from "@/components/SiteNav";
 import { Reveal } from "@/components/Reveal";
 import { PathGraphic } from "@/components/PathGraphic";
-import { CinematicHero } from "@/components/ui/cinematic-hero";
-import { PinnedHowItWorks } from "@/components/ui/pinned-how-it-works";
+import { HowItWorksShowcase } from "@/components/ui/how-it-works-showcase";
 import { JourneySection } from "@/components/JourneySection";
-import { MessageCircle, ListChecks, Map as MapIcon, Compass } from "lucide-react";
+import { SearchCardsAnimation } from "@/components/SearchCardsAnimation";
+import {
+  MessageCircle,
+  ListChecks,
+  Map as MapIcon,
+  Compass,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
@@ -97,10 +106,17 @@ export default function Home() {
       router.push(`/r/${data.shareToken}`);
     } catch (err: any) {
       setError(err?.message || "Something went wrong. Please try again.");
-      setPhase("roles");
       setPickingRole(null);
     }
   }
+
+  useEffect(() => {
+    function handleReset() {
+      setPhase("landing");
+    }
+    window.addEventListener("reset-landing", handleReset);
+    return () => window.removeEventListener("reset-landing", handleReset);
+  }, []);
 
   const nav = <SiteNav />;
 
@@ -119,16 +135,88 @@ export default function Home() {
 
   // ================= LANDING =================
   if (phase === "landing") {
+    // No overflow-x here: per the CSS overflow spec, setting only one axis
+    // to a non-"visible" value forces the *other* axis to compute as
+    // "auto" too — so even "overflow-x-hidden" still creates a scroll
+    // container on the y-axis and breaks position:sticky for anything
+    // pinned inside (e.g. the how-it-works panel). Horizontal bleed from
+    // decorative elements is instead clipped at the true root (html/body
+    // in globals.css), which doesn't have this problem.
     return (
-      <main className="min-h-screen overflow-hidden">
+      <main className="min-h-screen">
         {nav}
 
-        <CinematicHero onStart={() => setPhase("intake")} />
+        {/* Hero Section */}
+        <section className="relative overflow-hidden pt-8 pb-16 sm:pt-12 sm:pb-20">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
+              {/* Left Copy Column */}
+              <div className="lg:col-span-7">
+                <div className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+                  <Sparkles className="h-3.5 w-3.5 text-accent-500" />
+                  <span>Built for career switchers</span>
+                </div>
 
-        <section className="mx-auto max-w-[1400px] px-6 pt-10 sm:px-10 sm:pt-14">
+                <h1 className="font-display mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl leading-[1.12]">
+                  Stop guessing which product role fits you.{" "}
+                  <span className="text-accent-500">
+                    Talk to an advisor in 2 minutes.
+                  </span>
+                </h1>
+
+                <p className="mt-5 text-lg leading-relaxed text-slate max-w-2xl">
+                  Get 19 PM, BA, and Product Analyst roles scored against your actual background — plus a step-by-step career transition roadmap.
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <button
+                    onClick={() => setPhase("intake")}
+                    className="btn-gold btn-bounce cursor-pointer px-7 py-4 text-base font-semibold shadow-lg shadow-accent-500/25 transition-all hover:scale-105"
+                  >
+                    Start 2-Minute Mentorship
+                    <ArrowRight className="h-5 w-5" />
+                  </button>
+
+                  <a
+                    href="#how-it-works"
+                    className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-6 py-4 text-sm font-semibold text-ink shadow-sm transition hover:border-accent-300 hover:bg-accent-50/50"
+                  >
+                    How it works
+                  </a>
+                </div>
+
+                <div className="mt-10 flex flex-wrap items-center gap-6 border-t border-line/80 pt-6 text-xs text-slate">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-accent-500" />
+                    <span>No Resume Required</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-accent-amber" />
+                    <span>19 Roles Evaluated</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent-violet" />
+                    <span>Actionable Steps & Timelines</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right showcase column */}
+              <div className="lg:col-span-5">
+                <div className="relative">
+                  <div className="pointer-events-none absolute -top-10 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-accent-400/20 blur-3xl" />
+                  <div className="pointer-events-none absolute -bottom-10 right-10 h-32 w-32 rounded-full bg-accent-violet/20 blur-2xl" />
+                  <SearchCardsAnimation className="relative z-10 w-full max-w-[420px] mx-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1400px] px-6 pt-6 sm:px-10 sm:pt-10">
           {error && <p className="alert-error mb-6 text-center">{error}</p>}
 
-          {/* credibility strip — real numbers, not a decorative icon row */}
+          {/* credibility strip — real numbers */}
           <div className="grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line">
             {STATS.map((s) => (
               <div key={s.label} className="bg-white px-5 py-6 text-center sm:px-8 sm:py-8">
@@ -141,64 +229,66 @@ export default function Home() {
           </div>
 
           <p className="tag mt-6 text-center">
-            for people moving into product manager, business analyst, and
-            related roles, not for PMs already 5+ years in
+            for people moving into product manager, business analyst, and related roles
           </p>
         </section>
 
-        {/* how it works — pinned corkboard cards instead of the flat bento
-            grid, sourced from a 21st.dev component and reskinned to the
-            paper/ink/accent palette (chosen because it reuses the same
-            scroll-driven feel as the hero instead of introducing a new
-            interaction pattern) */}
-        <section className="relative mx-auto max-w-[1400px] overflow-hidden px-6 py-24 sm:px-10">
+        {/* how it works section — GSAP vertical scroll showcase */}
+        <section id="how-it-works" className="relative w-full">
           <PathGraphic className="pointer-events-none absolute -right-24 top-1/2 hidden h-[560px] w-auto -translate-y-1/2 opacity-[0.06] lg:block" />
-          <p className="tag mb-8 text-center">how it works</p>
-          <Reveal>
-            <PinnedHowItWorks steps={HOW_IT_WORKS} />
-          </Reveal>
+          <HowItWorksShowcase steps={HOW_IT_WORKS} />
         </section>
 
-        {/* the roadmap, previewed with the real JourneyMap component —
-            not a mockup, the same component a live roadmap renders */}
-        <section className="border-y border-line bg-white">
-          <div className="mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
-            <p className="tag mb-2">the roadmap</p>
-            <h2 className="font-display max-w-2xl text-2xl font-semibold text-ink sm:text-3xl">
-              Your journey, not just a checklist.
+        {/* Roadmap preview section */}
+        <section id="roadmap" className="border-y border-line bg-white">
+          <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+              Your personalized Product Transition Path
             </h2>
-            <p className="mt-2 max-w-xl text-sm text-slate">
-              This is the actual roadmap view you get once you pick a role,
-              shown here with a sample path from business analyst to growth
-              PM.
+
+            <p className="mt-3 max-w-2xl text-sm text-slate sm:text-base">
+              This is the actual roadmap view generated once you select your target role — shown here with a sample path from Business Analyst to Growth PM.
             </p>
-            <div className="mt-12">
-              <Reveal>
-                <JourneySection />
-              </Reveal>
+
+            <div className="mt-10">
+              <JourneySection />
             </div>
           </div>
         </section>
 
-        {/* role coverage — makes "19 roles scored" concrete instead of just
-            a number in the stats strip above */}
+        {/* Role coverage section */}
         <section className="border-y border-line bg-white">
-          <div className="mx-auto max-w-[1400px] px-6 py-20 sm:px-10">
-            <p className="tag mb-2">every role, actually explained</p>
-            <h2 className="font-display max-w-2xl text-2xl font-semibold text-ink sm:text-3xl">
-              Not just a score. The full map of where you could go.
+          <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+              19 Product Roles, mapped to your background
             </h2>
+
+            <p className="mt-3 max-w-2xl text-sm text-slate sm:text-base">
+              Every role family requires a distinct toolkit. We evaluate where your transferable experience holds a natural edge.
+            </p>
+
             <div className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-6">
               {ROLE_FAMILIES.map((group, gi) => (
                 <Reveal key={group.family} delayMs={gi * 100}>
-                  <p className="tag mb-3 text-accent-500">{group.family}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {group.roles.map((r) => (
-                      <span key={r.id} className="chip cursor-default hover:border-line hover:bg-white">
-                        <span aria-hidden>{r.emoji}</span>
-                        {r.label}
-                      </span>
-                    ))}
+                  <div className="flex h-full flex-col justify-between rounded-2xl border border-line bg-paper p-6 sm:p-8 transition-all duration-300 hover:border-slate/40">
+                    <div>
+                      <div className="mb-4 inline-flex items-center gap-2 rounded-lg bg-white border border-line px-3 py-1 text-xs font-bold text-ink">
+                        <Zap className="h-3.5 w-3.5 text-accent-500" />
+                        <span className="capitalize">{group.family}</span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {group.roles.map((r) => (
+                          <span
+                            key={r.id}
+                            className="chip cursor-default border-line bg-white text-ink transition-colors hover:border-ink"
+                          >
+                            <span aria-hidden className="text-base">{r.emoji}</span>
+                            <span className="font-medium">{r.label}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </Reveal>
               ))}
@@ -206,27 +296,31 @@ export default function Home() {
           </div>
         </section>
 
-        {/* repeated CTA — the hero's button is the only other one on the
-            page, and it can be several screens of scroll away by here */}
-        <section className="mx-auto max-w-[1400px] px-6 py-20 text-center sm:px-10">
-          <Compass className="mx-auto h-8 w-8 text-accent-500" strokeWidth={2.25} />
-          <h2 className="font-display mt-4 text-2xl font-semibold text-ink sm:text-3xl">
-            Ready to see where you fit?
-          </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate">
-            Two minutes, no login, no résumé. Just a conversation with your
-            mentor.
-          </p>
-          <button
-            onClick={() => setPhase("intake")}
-            className="btn-gold btn-bounce mt-6 px-7 py-3.5 text-base"
-          >
-            Talk to my mentor →
-          </button>
+        {/* Bottom CTA Section */}
+        <section className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+          <div className="rounded-3xl border border-line bg-paper p-8 sm:p-14 text-center shadow-sm">
+            <div className="mx-auto max-w-2xl">
+              <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+                No résumé required to start. Just a conversation.
+              </h2>
+
+              <p className="mt-4 text-base text-slate sm:text-lg leading-relaxed">
+                Two minutes. Answer 4 questions about your actual work history and get your custom role evaluation and transition roadmap.
+              </p>
+
+              <button
+                onClick={() => setPhase("intake")}
+                className="btn-gold btn-bounce cursor-pointer mt-8 inline-flex items-center gap-2.5 px-8 py-4 text-base font-semibold shadow-lg shadow-accent-500/20 transition-all hover:scale-105"
+              >
+                <span>Talk to my mentor</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </section>
 
-        <footer className="mx-auto max-w-[1400px] px-6 pb-10 text-center sm:px-10">
-          <p className="tag">no résumé required to start, just a conversation</p>
+        <footer className="mx-auto max-w-[1400px] px-6 pb-12 text-center sm:px-10">
+          <p className="tag">ProductPath • Built for product management career transitions</p>
         </footer>
       </main>
     );

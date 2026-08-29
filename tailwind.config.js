@@ -17,31 +17,33 @@ module.exports = {
         // tech demo, not a credible advisor for a high-stakes career
         // decision. Blue-to-teal (not purple) still avoids the AI-gradient
         // cliché the original palette was chosen to avoid.
-        paper: "#f6f7f9",
+        // Palette derived directly from Lottie animation (cd0a9496-172f-4bad-8dd1-36a1d32caca9/VmHC2dM7zF.lottie)
+        paper: "#f4f8fd",
         surface: {
           DEFAULT: "#ffffff",
-          raised: "#fbfcfd",
+          raised: "#f8fafd",
         },
-        ink: "#10192b",
+        ink: "#0f172a",
         slate: {
-          DEFAULT: "#566072",
-          soft: "#8a94a6",
+          DEFAULT: "#475569",
+          soft: "#8297b0",
         },
-        line: "#e3e6eb",
+        line: "#dbe4f0",
         accent: {
-          // `DEFAULT`/`foreground` are the shadcn semantic slot (bg-accent,
-          // text-accent-foreground) — new shadcn/ui components added via
-          // `npx shadcn add` pick this up automatically. The numeric shades
-          // below are untouched: every existing accent-500/accent-600/etc.
-          // class in the app keeps resolving exactly as it did before.
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          50: "#eaf3ff",
-          100: "#d6e8ff",
-          200: "#a9cbff",
-          500: "#155eef",
-          600: "#0f4fc7",
-          teal: "#0ba5a6",
+          50: "#eef4ff",
+          100: "#dbe8fe",
+          200: "#c9dcf7",
+          300: "#9ccaef",
+          400: "#5886f5",
+          500: "#3f6ddc",
+          600: "#2553c2",
+          700: "#1d42a3",
+          teal: "#5886f5",
+          violet: "#b687f2",
+          amber: "#eaad59",
+          rose: "#e695ae",
         },
         // shadcn's remaining semantic tokens, mapped to the SAME palette
         // above (see globals.css :root) so a freshly-added shadcn component

@@ -351,34 +351,34 @@ function AnimatedHero({ onStart }: { onStart: () => void }) {
           The quick-start button below is a sibling of .ch-headline-group, not a
           child — so hiding the headline group later doesn't take it down too, and
           anyone who wants to start right away never has to scroll to find a button. */}
-      <div className="ch-hero-text absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
-        <div className="ch-headline-group flex flex-col items-center">
-          <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl">
+      <div className="ch-hero-text absolute inset-0 z-30 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
+        <div className="ch-headline-group flex flex-col items-center pointer-events-auto">
+          <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-normal leading-[1.05] tracking-wide text-ink sm:text-6xl lg:text-7xl">
             Which product role
           </h1>
-          <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-6xl lg:text-7xl">
-            <span className="bg-gradient-to-r from-accent-500 to-accent-teal bg-clip-text text-transparent">
+          <h1 className="ch-text-track ch-reveal font-display max-w-3xl text-4xl font-normal leading-[1.05] tracking-wide sm:text-6xl lg:text-7xl">
+            <span className="text-accent-500">
               actually fits you?
             </span>
           </h1>
         </div>
         <button
           onClick={onStart}
-          className="ch-quick-cta ch-reveal btn-gold btn-bounce mt-8 px-6 py-3 text-sm"
+          className="ch-quick-cta ch-reveal btn-gold btn-bounce pointer-events-auto cursor-pointer mt-8 px-6 py-3 text-sm"
         >
           Talk to my mentor →
         </button>
       </div>
 
-      <div className="ch-cta ch-reveal absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
-        <h2 className="font-display mb-4 text-3xl font-bold tracking-tight text-ink sm:text-5xl">
+      <div className="ch-cta ch-reveal absolute inset-0 z-30 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
+        <h2 className="font-display mb-4 text-3xl font-normal tracking-wide text-ink sm:text-5xl">
           Ready to find your path?
         </h2>
         <p className="mb-8 max-w-md text-base text-slate sm:text-lg">
           Talk to your mentor for two minutes. Get all 19 product roles
           scored, and a roadmap built around you.
         </p>
-        <button onClick={onStart} className="btn-gold btn-bounce pointer-events-auto px-7 py-3.5 text-base">
+        <button onClick={onStart} className="btn-gold btn-bounce pointer-events-auto cursor-pointer px-7 py-3.5 text-base">
           Talk to my mentor →
         </button>
       </div>
