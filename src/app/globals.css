@@ -246,3 +246,26 @@ body {
     animation: none;
   }
 }
+
+/* Also drop entrance/loop animations below the desktop breakpoint (mobile
+   & tablet) — same 1024px cutoff used app-wide to gate the heavier
+   GSAP/Lottie set-pieces to a static, non-animated view on small screens.
+   Independent of the user's OS-level reduced-motion setting. */
+@media (max-width: 1023px) {
+  .typing-dot {
+    animation: none;
+    opacity: 0.6;
+  }
+  .animate-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .score-arc {
+    animation: none;
+    stroke-dashoffset: var(--score-offset);
+  }
+  .btn-bounce:active {
+    animation: none;
+  }
+}

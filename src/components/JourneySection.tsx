@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { BusinessmanStaircaseMap } from "@/components/BusinessmanStaircaseMap";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { JourneyMap, type JourneyStep } from "@/components/JourneyMap";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -42,11 +43,21 @@ export function JourneySection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [completedCount, setCompletedCount] = useState(0); // Starts at 0 (no green initially)
   const [viewMode] = useState<"businessman" | "classic">("businessman");
+  // Below the desktop breakpoint this whole section drops its scroll-pin
+  // and scroll-driven progress — the framer-motion highlight below becomes
+  // an instant, non-animated state change instead.
+  //
+  // `initial: true` (assume mobile) so the GSAP pin below is only ever
+  // created once we're certain this is desktop, never created against the
+  // default guess and then torn down when the real value resolves — that
+  // race is what corrupts the layout (React replacing a live-pinned
+  // subtree out from under GSAP, which manages that DOM outside React).
+  const isMobileOrTablet = useMediaQuery("(max-width: 1023px)", true);
 
   // Pin the ENTIRE JourneySection (left column text + right map) sticky in place on scroll!
   useGSAP(
     () => {
-      if (!sectionRef.current) return;
+      if (isMobileOrTablet || !sectionRef.current) return;
 
       const trigger = ScrollTrigger.create({
         trigger: sectionRef.current,
@@ -64,18 +75,22 @@ export function JourneySection() {
 
       return () => trigger.kill();
     },
-    { scope: sectionRef }
+    { scope: sectionRef, dependencies: [isMobileOrTablet] }
   );
 
   return (
     <div
       ref={sectionRef}
-      className="flex min-h-screen w-full flex-col justify-center gap-6 py-6"
+      className="flex w-full flex-col gap-6 py-6 lg:min-h-screen lg:justify-center"
     >
       {/* Main Grid: Left Column Text & Right Column Staircase both STAY STICKY TOGETHER */}
       <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
-        {/* Left Column Text List - Pins sticky with the section and turns green on scroll */}
-        <div className="flex flex-col justify-center gap-5 lg:col-span-5">
+        {/* Left Column Text List - Pins sticky with the section and turns green on
+            scroll. Hidden on mobile & tablet: the accordion rows in
+            BusinessmanStaircaseMap's mobile checklist now surface this same
+            title/description content per step, so this duplicate list is
+            desktop-only. */}
+        <div className="hidden flex-col justify-center gap-5 lg:col-span-5 lg:flex">
           {JOURNEY_POINTS.map((point, i) => {
             const isGreen = i < completedCount;
 
@@ -86,7 +101,7 @@ export function JourneySection() {
                   opacity: isGreen ? 1 : 0.45,
                   scale: isGreen ? 1.02 : 1,
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: isMobileOrTablet ? 0 : 0.3 }}
                 className={`flex items-start gap-4 rounded-2xl border p-4 transition-all duration-500 ${
                   isGreen
                     ? "border-emerald-200 bg-emerald-50/70 shadow-sm"

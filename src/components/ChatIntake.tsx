@@ -80,6 +80,7 @@ export function ChatIntake({
   useEffect(() => {
     if (!scrollRef.current) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(max-width: 1023px)").matches) return;
     const last = scrollRef.current.lastElementChild;
     if (last) {
       gsap.fromTo(
