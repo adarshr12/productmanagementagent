@@ -64,6 +64,12 @@ const HOW_IT_WORKS = [
   },
 ];
 
+// The mentor flow isn't public yet. NEXT_PUBLIC_LOCKDOWN_MODE controls the
+// "Coming soon" badges and disabled CTAs below without touching this file
+// again — set it to "false" in Vercel's env vars (and redeploy) to flip the
+// site live; unset or any other value keeps lockdown on by default.
+const LOCKDOWN_MODE = process.env.NEXT_PUBLIC_LOCKDOWN_MODE !== "false";
+
 export default function Home() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("landing");
@@ -157,10 +163,12 @@ export default function Home() {
                     <Sparkles className="h-3.5 w-3.5 text-accent-500" />
                     <span>Built for career switchers</span>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-accent-amber/40 bg-accent-amber/10 px-3.5 py-1.5 text-xs font-semibold text-accent-amber shadow-sm">
-                    <Zap className="h-3.5 w-3.5" />
-                    <span>Coming soon</span>
-                  </div>
+                  {LOCKDOWN_MODE && (
+                    <div className="inline-flex items-center gap-1.5 rounded-full border border-accent-amber/40 bg-accent-amber/10 px-3.5 py-1.5 text-xs font-semibold text-accent-amber shadow-sm">
+                      <Zap className="h-3.5 w-3.5" />
+                      <span>Coming soon</span>
+                    </div>
+                  )}
                 </div>
 
                 <h1 className="font-display mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl leading-[1.12]">
@@ -179,25 +187,38 @@ export default function Home() {
                     of wrapping the primary button's full text onto a
                     second line. */}
                 <div className="mt-8 flex flex-nowrap items-center gap-2 sm:gap-4">
-                  {/* The mentor flow isn't live yet — the button stays visible
-                      (so the offer is still legible) but is disabled, with a
-                      hover tooltip explaining why, instead of starting an
-                      intake that doesn't go anywhere. */}
-                  <div className="group relative inline-block">
+                  {/* The mentor flow is gated behind LOCKDOWN_MODE — while
+                      locked the button stays visible (so the offer is still
+                      legible) but is disabled, with a hover tooltip
+                      explaining why, instead of starting an intake that
+                      doesn't go anywhere. */}
+                  {LOCKDOWN_MODE ? (
+                    <div className="group relative inline-block">
+                      <button
+                        type="button"
+                        disabled
+                        aria-disabled="true"
+                        className="btn-gold whitespace-nowrap px-4 py-3 text-sm font-semibold opacity-60 shadow-lg shadow-accent-500/25 cursor-not-allowed sm:px-7 sm:py-4 sm:text-base"
+                      >
+                        <span className="sm:hidden">Start Now</span>
+                        <span className="hidden sm:inline">Start 2-Minute Mentorship</span>
+                        <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                      </button>
+                      <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-3 py-1.5 text-center text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+                        Coming soon — check back shortly
+                      </span>
+                    </div>
+                  ) : (
                     <button
                       type="button"
-                      disabled
-                      aria-disabled="true"
-                      className="btn-gold whitespace-nowrap px-4 py-3 text-sm font-semibold opacity-60 shadow-lg shadow-accent-500/25 cursor-not-allowed sm:px-7 sm:py-4 sm:text-base"
+                      onClick={() => setPhase("intake")}
+                      className="btn-gold btn-bounce cursor-pointer whitespace-nowrap px-4 py-3 text-sm font-semibold shadow-lg shadow-accent-500/25 transition-all hover:scale-105 sm:px-7 sm:py-4 sm:text-base"
                     >
                       <span className="sm:hidden">Start Now</span>
                       <span className="hidden sm:inline">Start 2-Minute Mentorship</span>
                       <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
-                    <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-3 py-1.5 text-center text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
-                      Coming soon — check back shortly
-                    </span>
-                  </div>
+                  )}
 
                   <a
                     href="#how-it-works"
@@ -352,20 +373,31 @@ export default function Home() {
                 Two minutes. Answer 4 questions about your actual work history and get your custom role evaluation and transition roadmap.
               </p>
 
-              <div className="group relative mt-8 inline-block">
+              {LOCKDOWN_MODE ? (
+                <div className="group relative mt-8 inline-block">
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    className="btn-gold inline-flex items-center gap-2.5 px-8 py-4 text-base font-semibold opacity-60 shadow-lg shadow-accent-500/20 cursor-not-allowed"
+                  >
+                    <span>Talk to my mentor</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </button>
+                  <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-3 py-1.5 text-center text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+                    Coming soon — check back shortly
+                  </span>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="btn-gold inline-flex items-center gap-2.5 px-8 py-4 text-base font-semibold opacity-60 shadow-lg shadow-accent-500/20 cursor-not-allowed"
+                  onClick={() => setPhase("intake")}
+                  className="btn-gold btn-bounce cursor-pointer mt-8 inline-flex items-center gap-2.5 px-8 py-4 text-base font-semibold shadow-lg shadow-accent-500/20 transition-all hover:scale-105"
                 >
                   <span>Talk to my mentor</span>
                   <ArrowRight className="h-5 w-5" />
                 </button>
-                <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-3 py-1.5 text-center text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
-                  Coming soon — check back shortly
-                </span>
-              </div>
+              )}
             </div>
           </div>
         </section>

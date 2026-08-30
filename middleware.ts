@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// The mentor flow, admin tools, and every other route are not ready for
-// public use yet. Until they are, every request except the bare landing
-// page (and the static assets it needs to render) is redirected back to
-// "/" — which itself already shows a "Coming soon" badge with its CTA
-// buttons disabled, rather than being functional.
+// The mentor flow, admin tools, and every other route are gated behind the
+// same NEXT_PUBLIC_LOCKDOWN_MODE flag as the "Coming soon" badges and
+// disabled CTAs in src/app/page.tsx. While locked (the default — unset or
+// anything other than "false"), every request except the bare landing page
+// (and the static assets it needs to render) is redirected back to "/".
+// Set NEXT_PUBLIC_LOCKDOWN_MODE=false in Vercel's env vars and redeploy to
+// open the rest of the site back up.
+const LOCKDOWN_MODE = process.env.NEXT_PUBLIC_LOCKDOWN_MODE !== "false";
+
 export function middleware(request: NextRequest) {
+  if (!LOCKDOWN_MODE) {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
 
   if (pathname === "/") {
