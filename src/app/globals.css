@@ -6,51 +6,53 @@
    can't reach into the Tailwind theme) still derive from the same three
    values instead of carrying their own hand-typed, driftable copies. */
 :root {
-  --accent-200: #a9cbff;
-  --accent-500: #155eef;
-  --accent-teal: #0ba5a6;
+  --accent-200: #c9dcf7;
+  --accent-500: #3f6ddc;
+  --accent-teal: #5886f5;
+  --accent-violet: #b687f2;
+  --accent-amber: #eaad59;
 
-  /* shadcn's semantic token set, in its expected `H S% L%` HSL-triplet
-     format — converted from this app's actual paper/ink/accent hex values
-     (see tailwind.config.js), not shadcn's stock zinc/blue defaults. This
-     app is light-only (no light/dark toggle), so there's no `.dark` block:
-     these values ARE the theme, and any shadcn component added later
-     inherits it automatically via bg-background/text-foreground/etc. */
-  --background: 220 20% 97%;
-  --foreground: 220 46% 12%;
+  --background: 216 70% 97%;
+  --foreground: 222 47% 11%;
   --card: 0 0% 100%;
-  --card-foreground: 220 46% 12%;
+  --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
-  --popover-foreground: 220 46% 12%;
-  --primary: 220 87% 51%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 224 68% 55%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 220 20% 97%;
-  --secondary-foreground: 220 46% 12%;
-  --muted: 220 20% 97%;
-  --muted-foreground: 219 14% 39%;
-  --accent: 220 87% 51%;
+  --secondary: 216 70% 97%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 216 70% 97%;
+  --muted-foreground: 217 19% 45%;
+  --accent: 224 68% 55%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
-  --border: 217 17% 91%;
-  --input: 217 17% 91%;
-  --ring: 220 87% 51%;
+  --border: 215 45% 90%;
+  --input: 215 45% 90%;
+  --ring: 224 68% 55%;
   --radius: 0.75rem;
 }
 
 html,
 body {
   @apply bg-paper text-ink antialiased;
+  /* Clip horizontal bleed from decorative elements at the true root
+     instead of on inner wrappers (e.g. <main>, section) — overflow-x
+     on an inner ancestor forces its overflow-y to compute as "auto"
+     too (per the CSS overflow spec), which breaks position:sticky for
+     anything pinned inside it. html/body are exempt from that problem
+     since they're the actual scrolling viewport sticky sticks against. */
+  overflow-x: hidden;
 }
 
-/* Ambient wash — soft, barely-there blue/teal tints instead of the neon
-   glow a dark theme needs. Applied as body's own background so it's always
-   behind page content by definition, no z-index stacking to fight with
-   per-page wrappers. background-attachment: fixed keeps it stable on scroll. */
+/* Ambient wash — soft Lottie-inspired blue, violet, and amber tints.
+   Applied as body's own background so it's always behind page content. */
 body {
   background-image:
-    radial-gradient(55% 45% at 12% 0%, rgba(21, 94, 239, 0.05), transparent 60%),
-    radial-gradient(50% 40% at 100% 15%, rgba(11, 165, 166, 0.06), transparent 60%);
+    radial-gradient(55% 45% at 12% 0%, rgba(63, 109, 220, 0.08), transparent 60%),
+    radial-gradient(50% 40% at 100% 15%, rgba(182, 135, 242, 0.08), transparent 60%),
+    radial-gradient(40% 35% at 50% 100%, rgba(234, 173, 89, 0.05), transparent 60%);
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
@@ -69,19 +71,19 @@ body {
 /* ---- Buttons ---- */
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3
-    text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(16,25,43,0.5)] transition
-    hover:bg-ink/90 hover:shadow-[0_10px_26px_-8px_rgba(16,25,43,0.55)]
+    text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.4)] transition
+    hover:bg-ink/90 hover:shadow-[0_10px_26px_-8px_rgba(15,23,42,0.5)]
     disabled:cursor-not-allowed disabled:opacity-40;
 }
 .btn-gold {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3
     text-sm font-semibold text-white transition
     disabled:cursor-not-allowed disabled:opacity-40;
-  background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-teal) 100%);
-  box-shadow: 0 10px 24px -10px rgba(21, 94, 239, 0.45);
+  background: linear-gradient(135deg, #3f6ddc 0%, #5886f5 50%, #b687f2 100%);
+  box-shadow: 0 10px 24px -10px rgba(63, 109, 220, 0.45);
 }
 .btn-gold:hover {
-  box-shadow: 0 14px 30px -8px rgba(21, 94, 239, 0.55);
+  box-shadow: 0 14px 30px -8px rgba(63, 109, 220, 0.6);
   transform: translateY(-1px);
 }
 .btn-ghost {
@@ -164,7 +166,14 @@ body {
   animation: typing-dot 1.1s ease-in-out infinite;
 }
 
-/* ---- Hero fade-up ---- */
+/* ---- Hero fade-up ----
+   The "to" state resolves to `transform: none`, not `translateY(0)` —
+   translateY(0) still computes to a non-"none" matrix, and a lingering
+   transform (even a visually-identity one) on an ancestor permanently
+   establishes a new containing block, silently breaking position:sticky
+   and position:fixed for anything nested inside it (e.g. the how-it-works
+   pinned scroll panel) since `animation: ... both` keeps the "to" state
+   applied forever after the animation finishes. */
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -172,7 +181,7 @@ body {
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 .animate-fade-up {
