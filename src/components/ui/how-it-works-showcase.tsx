@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import Image from "next/image";
 import { MessageCircle, ListChecks, Map as MapIcon, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -58,6 +59,20 @@ export function HowItWorksShowcase({
   const progressLineRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  // Same 1024px cutoff used app-wide for the heavier GSAP/Lottie set
+  // pieces — below it this becomes the plain static stacked-cards view,
+  // independent of the OS reduced-motion setting.
+  //
+  // `initial: true` (assume mobile/no-motion) matters here, not just for
+  // taste: on real mount this starts false-until-confirmed-otherwise, and
+  // if it defaulted to "desktop", the very first paint would create the
+  // GSAP ScrollTrigger pin (which wraps this section in a real DOM spacer
+  // outside React's control) only to have it swapped out a tick later once
+  // this hook resolves to "actually mobile" — React replacing that subtree
+  // out from under a live pin corrupts the layout (overlapping sections).
+  // Defaulting to mobile means the pin is only ever *created* once we're
+  // sure it's desktop, never torn down mid-flight.
+  const isMobileOrTablet = useMediaQuery("(max-width: 1023px)", true);
 
   React.useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -65,7 +80,7 @@ export function HowItWorksShowcase({
 
   useGSAP(
     () => {
-      if (reducedMotion || !containerRef.current) return;
+      if (reducedMotion || isMobileOrTablet || !containerRef.current) return;
 
       const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
       if (cards.length === 0) return;
@@ -133,7 +148,7 @@ export function HowItWorksShowcase({
         ScrollTrigger.getById("how-it-works-timeline")?.kill();
       };
     },
-    { scope: containerRef, dependencies: [steps.length, reducedMotion] }
+    { scope: containerRef, dependencies: [steps.length, reducedMotion, isMobileOrTablet] }
   );
 
   const scrollToStep = (index: number) => {
@@ -147,10 +162,16 @@ export function HowItWorksShowcase({
     }
   };
 
-  // ---- reduced motion fallback: simple stacked cards ----
-  if (reducedMotion) {
+  // ---- reduced motion / mobile & tablet fallback: simple stacked cards ----
+  if (reducedMotion || isMobileOrTablet) {
     return (
       <div className="mx-auto w-full max-w-[1100px] py-16">
+        <div className="mb-2 flex justify-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+            <MessageCircle className="h-3.5 w-3.5 text-accent-500" />
+            <span>How it works</span>
+          </div>
+        </div>
         <h2 className="font-display mb-12 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
           {heading}
         </h2>
@@ -191,7 +212,10 @@ export function HowItWorksShowcase({
       <div className="mx-auto w-full max-w-[1240px]">
         {/* Section Header */}
         <div className="mb-10 text-center md:mb-14">
-          <p className="tag mb-2">how it works</p>
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+            <MessageCircle className="h-3.5 w-3.5 text-accent-500" />
+            <span>How it works</span>
+          </div>
           <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
             {heading}
           </h2>

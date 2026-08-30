@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DotLottieReact, DotLottie, setWasmUrl } from "@lottiefiles/dotlottie-react";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 // dotlottie-web fetches its WASM render engine from a CDN (jsdelivr, with an
 // unpkg fallback) by default. That's an unnecessary runtime dependency on a
@@ -30,10 +31,17 @@ setWasmUrl("/animations/dotlottie-player.wasm");
  * animated canvas crossfades in on top of it the instant it's actually
  * ready, so there's never a blank space, just a static frame that quietly
  * starts moving.
+ *
+ * This is a purely decorative hero illustration, not functional content —
+ * so below the desktop breakpoint (mobile & tablet) it renders nothing at
+ * all, rather than falling back to the static poster image. That's a
+ * deliberate step further than just hiding it with CSS: neither the poster
+ * SVG nor the Lottie/WASM asset is ever requested on a small screen.
  */
 export function SearchCardsAnimation({ className = "" }: { className?: string }) {
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   useEffect(() => {
     if (!dotLottie) return;
@@ -45,6 +53,8 @@ export function SearchCardsAnimation({ className = "" }: { className?: string })
     dotLottie.addEventListener("load", onLoad);
     return () => dotLottie.removeEventListener("load", onLoad);
   }, [dotLottie]);
+
+  if (!isDesktop) return null;
 
   return (
     <div className={`relative flex aspect-square items-center justify-center ${className}`}>

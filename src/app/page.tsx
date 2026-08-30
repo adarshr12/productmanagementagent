@@ -147,14 +147,20 @@ export default function Home() {
         {nav}
 
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-8 pb-16 sm:pt-12 sm:pb-20">
+        <section className="relative overflow-hidden pt-8 pb-8 sm:pt-12 sm:pb-10">
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
             <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
               {/* Left Copy Column */}
               <div className="lg:col-span-7">
-                <div className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
-                  <Sparkles className="h-3.5 w-3.5 text-accent-500" />
-                  <span>Built for career switchers</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+                    <Sparkles className="h-3.5 w-3.5 text-accent-500" />
+                    <span>Built for career switchers</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-accent-amber/40 bg-accent-amber/10 px-3.5 py-1.5 text-xs font-semibold text-accent-amber shadow-sm">
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>Coming soon</span>
+                  </div>
                 </div>
 
                 <h1 className="font-display mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl leading-[1.12]">
@@ -168,18 +174,34 @@ export default function Home() {
                   Get 19 PM, BA, and Product Analyst roles scored against your actual background — plus a step-by-step career transition roadmap.
                 </p>
 
-                <div className="mt-8 flex flex-wrap items-center gap-4">
-                  <button
-                    onClick={() => setPhase("intake")}
-                    className="btn-gold btn-bounce cursor-pointer px-7 py-4 text-base font-semibold shadow-lg shadow-accent-500/25 transition-all hover:scale-105"
-                  >
-                    Start 2-Minute Mentorship
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
+                {/* flex-nowrap + a shorter mobile-only CTA label keep both
+                    buttons on one line even at the narrowest width, instead
+                    of wrapping the primary button's full text onto a
+                    second line. */}
+                <div className="mt-8 flex flex-nowrap items-center gap-2 sm:gap-4">
+                  {/* The mentor flow isn't live yet — the button stays visible
+                      (so the offer is still legible) but is disabled, with a
+                      hover tooltip explaining why, instead of starting an
+                      intake that doesn't go anywhere. */}
+                  <div className="group relative inline-block">
+                    <button
+                      type="button"
+                      disabled
+                      aria-disabled="true"
+                      className="btn-gold whitespace-nowrap px-4 py-3 text-sm font-semibold opacity-60 shadow-lg shadow-accent-500/25 cursor-not-allowed sm:px-7 sm:py-4 sm:text-base"
+                    >
+                      <span className="sm:hidden">Start Now</span>
+                      <span className="hidden sm:inline">Start 2-Minute Mentorship</span>
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                    <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-3 py-1.5 text-center text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+                      Coming soon — check back shortly
+                    </span>
+                  </div>
 
                   <a
                     href="#how-it-works"
-                    className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-6 py-4 text-sm font-semibold text-ink shadow-sm transition hover:border-accent-300 hover:bg-accent-50/50"
+                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink shadow-sm transition hover:border-accent-300 hover:bg-accent-50/50 sm:px-6 sm:py-4"
                   >
                     How it works
                   </a>
@@ -201,8 +223,11 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Right showcase column */}
-              <div className="lg:col-span-5">
+              {/* Right showcase column — illustration only, no functional
+                  content, so it's dropped entirely below desktop rather than
+                  shown as a static image: no animation/video/image on
+                  mobile or tablet. */}
+              <div className="hidden lg:col-span-5 lg:block">
                 <div className="relative">
                   <div className="pointer-events-none absolute -top-10 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-accent-400/20 blur-3xl" />
                   <div className="pointer-events-none absolute -bottom-10 right-10 h-32 w-32 rounded-full bg-accent-violet/20 blur-2xl" />
@@ -213,17 +238,22 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-[1400px] px-6 pt-6 sm:px-10 sm:pt-10">
+        <section className="mx-auto max-w-[1400px] px-6 sm:px-10">
           {error && <p className="alert-error mb-6 text-center">{error}</p>}
 
-          {/* credibility strip — real numbers */}
+          {/* credibility strip — real numbers. Value and label both stay on
+              a single line even in the narrowest column (mobile's 3-up
+              grid) via a smaller mobile-only type scale and tighter
+              tracking/padding, instead of wrapping to 2-3 lines. */}
           <div className="grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line">
             {STATS.map((s) => (
-              <div key={s.label} className="bg-white px-5 py-6 text-center sm:px-8 sm:py-8">
-                <p className="font-display text-3xl font-bold text-ink sm:text-4xl">
+              <div key={s.label} className="bg-white px-1.5 py-4 text-center sm:px-8 sm:py-8">
+                <p className="font-display whitespace-nowrap text-lg font-bold text-ink sm:text-4xl">
                   {s.value}
                 </p>
-                <p className="mt-1 text-xs text-slate sm:text-sm">{s.label}</p>
+                <p className="mt-1 whitespace-nowrap text-[10px] leading-tight tracking-tight text-slate sm:whitespace-normal sm:text-sm">
+                  {s.label}
+                </p>
               </div>
             ))}
           </div>
@@ -242,6 +272,10 @@ export default function Home() {
         {/* Roadmap preview section */}
         <section id="roadmap" className="border-y border-line bg-white">
           <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+              <MapIcon className="h-3.5 w-3.5 text-accent-500" />
+              <span>Your roadmap</span>
+            </div>
             <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
               Your personalized Product Transition Path
             </h2>
@@ -259,6 +293,10 @@ export default function Home() {
         {/* Role coverage section */}
         <section className="border-y border-line bg-white">
           <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+              <ListChecks className="h-3.5 w-3.5 text-accent-500" />
+              <span>Role coverage</span>
+            </div>
             <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
               19 Product Roles, mapped to your background
             </h2>
@@ -300,6 +338,12 @@ export default function Home() {
         <section className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
           <div className="rounded-3xl border border-line bg-paper p-8 sm:p-14 text-center shadow-sm">
             <div className="mx-auto max-w-2xl">
+              <div className="mb-2 flex justify-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm">
+                  <Sparkles className="h-3.5 w-3.5 text-accent-500" />
+                  <span>Get started</span>
+                </div>
+              </div>
               <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
                 No résumé required to start. Just a conversation.
               </h2>
@@ -308,13 +352,20 @@ export default function Home() {
                 Two minutes. Answer 4 questions about your actual work history and get your custom role evaluation and transition roadmap.
               </p>
 
-              <button
-                onClick={() => setPhase("intake")}
-                className="btn-gold btn-bounce cursor-pointer mt-8 inline-flex items-center gap-2.5 px-8 py-4 text-base font-semibold shadow-lg shadow-accent-500/20 transition-all hover:scale-105"
-              >
-                <span>Talk to my mentor</span>
-                <ArrowRight className="h-5 w-5" />
-              </button>
+              <div className="group relative mt-8 inline-block">
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="btn-gold inline-flex items-center gap-2.5 px-8 py-4 text-base font-semibold opacity-60 shadow-lg shadow-accent-500/20 cursor-not-allowed"
+                >
+                  <span>Talk to my mentor</span>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+                <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-3 py-1.5 text-center text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+                  Coming soon — check back shortly
+                </span>
+              </div>
             </div>
           </div>
         </section>

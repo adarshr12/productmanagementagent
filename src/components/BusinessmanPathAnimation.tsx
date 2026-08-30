@@ -2,10 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { DotLottieReact, DotLottie, setWasmUrl } from "@lottiefiles/dotlottie-react";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 // Self-host the WASM engine locally to avoid runtime CDN failures
 setWasmUrl("/animations/dotlottie-player.wasm");
 
+/**
+ * Decorative-only illustration (see BusinessmanStaircaseMap, which overlays
+ * the actual stair-step content on top of it). Below the desktop breakpoint
+ * it renders nothing at all — no poster image, no Lottie/WASM fetch —
+ * matching SearchCardsAnimation's approach, rather than just hiding it with
+ * CSS while still downloading both assets.
+ */
 export function BusinessmanPathAnimation({
   className = "",
   autoplay = true,
@@ -17,6 +25,7 @@ export function BusinessmanPathAnimation({
 }) {
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   useEffect(() => {
     if (!dotLottie) return;
@@ -28,6 +37,8 @@ export function BusinessmanPathAnimation({
     dotLottie.addEventListener("load", onLoad);
     return () => dotLottie.removeEventListener("load", onLoad);
   }, [dotLottie]);
+
+  if (!isDesktop) return null;
 
   return (
     <div className={`relative flex aspect-square items-center justify-center overflow-hidden ${className}`}>
