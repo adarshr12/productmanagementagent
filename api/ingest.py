@@ -1,14 +1,14 @@
 """Admin-only ingestion endpoint (Vercel Python serverless function).
 
 Flow:  verify the caller is the logged-in admin  ->  create a `documents` row  ->
-parse the uploaded file  ->  chunk it  ->  embed the chunks with Voyage  ->
+parse the uploaded file  ->  chunk it  ->  embed the chunks with Gemini  ->
 store the chunks  ->  mark the document `indexed`.
 
 The browser sends JSON:
     { "title", "file_name", "source_type", "content_base64" }
 with the admin's Supabase access token in the  Authorization: Bearer <token>  header.
 
-Secrets (service-role key, Voyage key) live in environment variables and never
+Secrets (service-role key, Gemini key) live in environment variables and never
 leave the server.
 """
 from __future__ import annotations
@@ -61,8 +61,9 @@ SUPABASE_URL = (
     or os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
 ).rstrip("/")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
-VOYAGE_API_KEY = os.environ.get("VOYAGE_API_KEY", "")
-VOYAGE_MODEL = os.environ.get("VOYAGE_MODEL", "voyage-3.5-lite")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_EMBED_MODEL", "gemini-embedding-001")
+GEMINI_DIM = int(os.environ.get("GEMINI_EMBED_DIM", "768"))
 
 
 class handler(BaseHTTPRequestHandler):
@@ -76,7 +77,7 @@ class handler(BaseHTTPRequestHandler):
 
     # -- main logic ----------------------------------------------------------
     def _handle(self):
-        if not (SUPABASE_URL and SERVICE_KEY and VOYAGE_API_KEY):
+        if not (SUPABASE_URL and SERVICE_KEY and GEMINI_API_KEY):
             raise _HttpError(500, "Server is missing required environment variables.")
 
         self._require_admin()
@@ -105,7 +106,7 @@ class handler(BaseHTTPRequestHandler):
                 "file_name": file_name,
                 "source_type": source_type,
                 "status": "processing",
-                "embedding_model": VOYAGE_MODEL,
+                "embedding_model": GEMINI_MODEL,
             },
         )[0]
         document_id = document["id"]
@@ -120,8 +121,9 @@ class handler(BaseHTTPRequestHandler):
             # 4) embed
             vectors = embed_texts(
                 [c["content"] for c in chunks],
-                api_key=VOYAGE_API_KEY,
-                model=VOYAGE_MODEL,
+                api_key=GEMINI_API_KEY,
+                model=GEMINI_MODEL,
+                dimension=GEMINI_DIM,
                 input_type="document",
             )
 
