@@ -139,17 +139,180 @@ body {
   @apply font-mono text-[11px] tracking-wide text-slate;
 }
 
-/* ---- Persona chat (the guided intake + mentor voice) ---- */
+/* ---- Persona chat (the guided intake + mentor voice) ----
+   Pill-shaped bubbles, evenly rounded on all four corners rather than a
+   directional "tail" — soft light bubble for the mentor, solid near-black
+   for the person, quiet gray timestamp underneath each one. */
 .chat-bubble-mentor {
-  @apply max-w-[85%] rounded-2xl rounded-tr-sm border border-line bg-white px-4 py-3
-    text-sm leading-relaxed text-ink;
-  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 12px 20px -16px rgba(16, 25, 43, 0.12);
+  @apply max-w-[85%] rounded-[26px] bg-surface-raised px-5 py-3
+    text-sm leading-relaxed text-ink transition-shadow duration-200;
+  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.03), 0 10px 20px -18px rgba(16, 25, 43, 0.14);
 }
 .chat-bubble-user {
-  @apply max-w-[85%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-white;
-  background: linear-gradient(135deg, var(--accent-500), var(--accent-teal));
-  box-shadow: 0 12px 22px -14px rgba(21, 94, 239, 0.5);
+  @apply max-w-[85%] rounded-[26px] bg-ink px-5 py-3 text-sm leading-relaxed text-white;
+  box-shadow: 0 10px 22px -16px rgba(15, 23, 42, 0.45);
 }
+/* A small round avatar chip, shared between AssistantChat and ChatIntake so
+   both chat surfaces read as the same conversation with the same mentor,
+   not two differently-branded threads. Default (mentor) framing is a light
+   circle around the app's own robot still, so the character reads clearly
+   against it; the person's own messages get the --user modifier instead,
+   a solid dark chip around a plain person mark. */
+.chat-avatar {
+  @apply flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden
+    rounded-full border border-line bg-white p-1 shadow-sm;
+}
+.chat-avatar img {
+  @apply h-full w-full object-contain;
+}
+.chat-avatar--user {
+  @apply border-0 bg-ink p-0 text-white;
+}
+/* Timestamp caption under a bubble — quiet by default, never competing
+   with the message text for attention. */
+.chat-timestamp {
+  @apply mt-1.5 px-1 text-[11px] font-medium text-slate-soft/80;
+}
+/* Soft, full-page diagonal wash behind the assistant chat — blue in the
+   lower-left, warm cream in the upper-right, violet along the bottom edge,
+   layered over a light diagonal base so the blend reads immediately
+   instead of sitting as a faint tint at the page edges. Same three accent
+   hues the rest of the app uses, just turned up enough to actually be a
+   background rather than a hint of one. */
+.chat-gradient-bg {
+  background:
+    /* a defined blue-violet band along the very bottom edge, not just two
+       soft blobs with a gap between them */
+    linear-gradient(to top, rgba(110, 120, 225, 0.32) 0%, transparent 22%),
+    radial-gradient(58% 50% at 12% 18%, rgba(88, 134, 245, 0.38), transparent 62%),
+    radial-gradient(52% 46% at 88% 8%, rgba(234, 173, 89, 0.30), transparent 62%),
+    radial-gradient(60% 55% at 22% 100%, rgba(182, 135, 242, 0.36), transparent 65%),
+    radial-gradient(55% 50% at 95% 100%, rgba(88, 134, 245, 0.34), transparent 62%),
+    linear-gradient(135deg, #e7eefd 0%, #f4f1fb 38%, #fbf3e8 65%, #e9eefc 100%);
+}
+/* The mentor panel's speech bubble, reshaped as a thought bubble — an
+   evenly rounded cloud with two small trailing circles drifting toward the
+   character's head. The call site keeps the bubble wide (not shifted left
+   by a negative margin) and right up against the robot with only a tiny
+   gap, specifically so these two dots — positioned OUTSIDE the bubble's
+   own box, not tucked inside its corner — can actually bridge that gap and
+   read as a trail leading to the character's head, instead of trailing off
+   into empty space beside it. */
+.mentor-thought-bubble {
+  @apply relative rounded-[26px] border border-line bg-white px-4 py-3
+    text-left text-sm font-medium leading-snug text-ink shadow-lg;
+}
+.mentor-thought-bubble::before,
+.mentor-thought-bubble::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  box-shadow: 0 6px 14px -10px rgba(16, 25, 43, 0.25);
+}
+.mentor-thought-bubble::before {
+  width: 11px;
+  height: 11px;
+  top: 22px;
+  right: -9px;
+}
+.mentor-thought-bubble::after {
+  width: 6px;
+  height: 6px;
+  top: 12px;
+  right: -18px;
+}
+/* ---- Mentor companion (the app's own animation-bot Lottie character
+   beside the chat, not a static icon) — reacts to conversation state via
+   a `data-mentor-state` attribute driving the rings/dots/bars layered
+   around it (the source clip itself has no state markers to switch
+   between, see MentorPresence.tsx), plus a live speed nudge on the
+   player itself. */
+.mentor-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+[data-mentor-state="listening"] .mentor-ring-1 {
+  animation: mentor-ring-pulse 2.2s ease-out infinite;
+}
+[data-mentor-state="listening"] .mentor-ring-2 {
+  animation: mentor-ring-pulse 2.2s ease-out infinite;
+  animation-delay: 0.7s;
+}
+@keyframes mentor-ring-pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+.mentor-bar {
+  /* a plain HTML span, not an SVG shape — default border-box/center
+     origin is exactly right, no fill-box needed (that's what caused the
+     eyes-flying-off-canvas bug in the earlier hand-drawn version). */
+  opacity: 0;
+}
+[data-mentor-state="responding"] .mentor-bar {
+  opacity: 1;
+  animation: mentor-bar 0.6s ease-in-out infinite;
+}
+[data-mentor-state="responding"] .mentor-bar:nth-child(2) {
+  animation-delay: 0.12s;
+}
+[data-mentor-state="responding"] .mentor-bar:nth-child(3) {
+  animation-delay: 0.24s;
+}
+@keyframes mentor-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.mentor-thought {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+[data-mentor-state="thinking"] .mentor-thought-1 {
+  animation: mentor-thought-fade 1.8s ease-in-out infinite;
+}
+[data-mentor-state="thinking"] .mentor-thought-2 {
+  animation: mentor-thought-fade 1.8s ease-in-out infinite;
+  animation-delay: 0.25s;
+}
+[data-mentor-state="thinking"] .mentor-thought-3 {
+  animation: mentor-thought-fade 1.8s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+@keyframes mentor-thought-fade {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  40%,
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Mentor speech bubble ---- */
+.mentor-bubble {
+  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 10px 20px -12px rgba(16, 25, 43, 0.18);
+}
+
 @keyframes typing-dot {
   0%,
   60%,
@@ -245,6 +408,26 @@ body {
   .btn-bounce:active {
     animation: none;
   }
+  .mentor-ring-1,
+  .mentor-ring-2,
+  .mentor-thought-1,
+  .mentor-thought-2,
+  .mentor-thought-3 {
+    animation: none;
+  }
+  .mentor-ring {
+    opacity: 0;
+  }
+  .mentor-thought {
+    opacity: 0;
+  }
+  /* Responding still needs to read as "on" without the loop — a flat set
+     of raised bars beats an invisible one. */
+  [data-mentor-state="responding"] .mentor-bar {
+    animation: none;
+    opacity: 1;
+    transform: scaleY(0.75);
+  }
 }
 
 /* Also drop entrance/loop animations below the desktop breakpoint (mobile
@@ -267,5 +450,23 @@ body {
   }
   .btn-bounce:active {
     animation: none;
+  }
+  .mentor-ring-1,
+  .mentor-ring-2,
+  .mentor-thought-1,
+  .mentor-thought-2,
+  .mentor-thought-3 {
+    animation: none;
+  }
+  .mentor-ring {
+    opacity: 0;
+  }
+  .mentor-thought {
+    opacity: 0;
+  }
+  [data-mentor-state="responding"] .mentor-bar {
+    animation: none;
+    opacity: 1;
+    transform: scaleY(0.75);
   }
 }

@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { MessageCircle, Target, Map as MapIcon } from "lucide-react";
+import { MessageCircle, Target, Map as MapIcon, UserRound } from "lucide-react";
 import type { Question } from "@/lib/questions";
-import { SplineScene } from "@/components/ui/splite";
-import { SplineErrorBoundary } from "@/components/ui/spline-error-boundary";
+import { MentorPresence, MENTOR_CAPTIONS } from "@/components/MentorPresence";
 
 // What the mentor panel highlights at each stage — gives the sidebar real
 // content instead of just an icon and a progress count, and reassures
@@ -22,13 +21,46 @@ function currentStage(step: number, total: number) {
   return STAGES.find((s) => progress <= s.until) ?? STAGES[STAGES.length - 1];
 }
 
-type Turn = { id: string; from: "mentor" | "user"; text: string };
+type Turn = { id: string; from: "mentor" | "user"; text: string; at: number };
 
 const GREETING =
   "Hey, welcome. I'm going to ask a handful of quick questions so I can score you against every product role and tell you exactly why, not just guess. Answer with a tap, or just type, whatever's faster.";
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+// Same quiet-caption treatment as AssistantChat, so both surfaces read as
+// one consistent mentor thread rather than two differently-built chats.
+// Locale pinned to en-US for the same reason as AssistantChat's copy of
+// this helper — keeps formatting stable regardless of environment locale.
+function formatTime(ms: number) {
+  return new Date(ms).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+// Same robot still used in AssistantChat's copy of this helper, so every
+// mentor line across both chat surfaces is visibly the same character.
+function MentorAvatar() {
+  return (
+    <span className="chat-avatar mt-0.5">
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny static
+          avatar, not worth routing through next/image. */}
+      <img src="/animations/animation-bot-poster.svg" alt="" aria-hidden="true" />
+    </span>
+  );
+}
+
+// The person's own avatar — a plain human mark, mirrored from the mentor's
+// robot avatar on the opposite lane.
+function UserAvatar() {
+  return (
+    <span className="chat-avatar chat-avatar--user mt-0.5">
+      <UserRound className="h-4 w-4" strokeWidth={2.25} />
+    </span>
+  );
 }
 
 export function ChatIntake({
@@ -44,15 +76,16 @@ export function ChatIntake({
   const [typing, setTyping] = useState(true);
   const [freeText, setFreeText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [justResponded, setJustResponded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
   function pushMentor(text: string) {
-    setTurns((t) => [...t, { id: uid(), from: "mentor", text }]);
+    setTurns((t) => [...t, { id: uid(), from: "mentor", text, at: Date.now() }]);
   }
   function pushUser(text: string) {
-    setTurns((t) => [...t, { id: uid(), from: "user", text }]);
+    setTurns((t) => [...t, { id: uid(), from: "user", text, at: Date.now() }]);
   }
 
   useEffect(() => {
@@ -75,6 +108,17 @@ export function ChatIntake({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turns, typing]);
+
+  // A brief "responding" beat right as a new mentor line lands — the
+  // companion visibly delivers the line instead of just sitting in
+  // "listening" the whole time a message happens to be on screen.
+  useEffect(() => {
+    const last = turns[turns.length - 1];
+    if (!last || last.from !== "mentor") return;
+    setJustResponded(true);
+    const id = setTimeout(() => setJustResponded(false), 900);
+    return () => clearTimeout(id);
+  }, [turns]);
 
   // New turns lift in, reinforces "this is happening now," not a static log.
   useEffect(() => {
@@ -132,7 +176,14 @@ export function ChatIntake({
     step >= 0 && step < questions.length ? questions[step] : null;
   const stage = currentStage(Math.max(step, 0), questions.length);
   const stageIndex = STAGES.indexOf(stage);
-  const StageIcon = stage.icon;
+
+  const presenceState = typing
+    ? "thinking"
+    : justResponded
+      ? "responding"
+      : currentQuestion
+        ? "listening"
+        : "idle";
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col sm:grid sm:grid-cols-[1fr_auto]">
@@ -146,20 +197,27 @@ export function ChatIntake({
         >
           {turns.map((t) =>
               t.from === "mentor" ? (
-                <div key={t.id} className="flex justify-end">
-                  <div className="chat-bubble-mentor font-display text-lg">
-                    {t.text}
+                <div key={t.id} className="flex items-start justify-end gap-2">
+                  <div className="flex flex-col items-end">
+                    <div className="chat-bubble-mentor font-display text-lg">
+                      {t.text}
+                    </div>
+                    <p className="chat-timestamp pr-1">{formatTime(t.at)}</p>
                   </div>
+                  <MentorAvatar />
                 </div>
               ) : (
                 <div key={t.id} className="flex items-start justify-start gap-2">
-                  <span className="tag mt-2.5 shrink-0">you</span>
-                  <div className="chat-bubble-user">{t.text}</div>
+                  <UserAvatar />
+                  <div>
+                    <div className="chat-bubble-user">{t.text}</div>
+                    <p className="chat-timestamp">{formatTime(t.at)}</p>
+                  </div>
                 </div>
               )
             )}
             {typing && (
-              <div className="flex justify-end" role="status" aria-label="Your mentor is typing">
+              <div className="flex items-start justify-end gap-2" role="status" aria-label="Your mentor is typing">
                 <div className="chat-bubble-mentor flex items-center gap-1 py-4">
                   <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
                   <span
@@ -171,6 +229,7 @@ export function ChatIntake({
                     style={{ animationDelay: "0.3s" }}
                   />
                 </div>
+                <MentorAvatar />
               </div>
             )}
             <div ref={endRef} />
@@ -236,27 +295,28 @@ export function ChatIntake({
           )}
         </div>
 
-      {/* the mentor's identity — brand mark + progress. The 3D scene is a
-          background layer behind the icon (hidden on the mobile row layout,
-          where there's no vertical room for it), same pattern as /assistant. */}
+      {/* the mentor's identity — a living presence, not a static icon. The
+          floating robot reacts in real time to what's actually happening
+          in the conversation (thinking while composing, listening while
+          it's your turn, responding as a line lands), so the panel reads
+          as someone attentive rather than a decorative brand mark. */}
       <div className="relative flex flex-row items-center gap-4 overflow-hidden px-6 py-5 sm:w-[260px] sm:flex-col sm:justify-center sm:px-6 sm:py-10">
-        <div className="absolute inset-0 z-0 hidden opacity-40 sm:block">
-          <SplineErrorBoundary fallback={null}>
-            <SplineScene
-              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-              className="h-full w-full"
-            />
-          </SplineErrorBoundary>
+        <div className="relative z-10 flex shrink-0 flex-col items-center gap-2 sm:flex-col-reverse">
+          <MentorPresence state={presenceState} size={140} />
+          <div
+            key={presenceState}
+            className="mentor-bubble animate-fade-up rounded-2xl rounded-bl-sm border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink sm:rounded-bl-2xl sm:rounded-br-sm"
+          >
+            {MENTOR_CAPTIONS[presenceState]}
+          </div>
         </div>
-
-        <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-teal text-white shadow-lg sm:h-16 sm:w-16">
-          <StageIcon className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={2.25} />
-        </div>
-        <div className="relative z-10 min-w-0 sm:mt-4 sm:text-center">
+        <div className="relative z-10 min-w-0 sm:mt-1 sm:text-center">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-soft">
             Your product mentor
           </p>
-          <p className="mt-1 text-sm font-semibold text-ink">{stage.label}</p>
+          <p className="mt-1 text-sm font-semibold text-ink">
+            {stage.label}
+          </p>
           {step >= 0 && (
             <p className="mt-1 text-xs font-medium text-slate-soft">
               Question {Math.min(step + 1, questions.length)} of{" "}
