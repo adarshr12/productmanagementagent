@@ -19,6 +19,13 @@ const ACCEPTED: Record<string, "pdf" | "docx" | "txt"> = {
   txt: "txt",
 };
 
+// Vercel caps a serverless function's request body at 4.5MB, a hard
+// platform limit that can't be raised from code. The file gets base64-
+// encoded before it's sent (~33% bigger) and wrapped in a JSON body, so
+// stay well under that ceiling rather than let the platform reject it
+// with a plain-text response our JSON parsing can't make sense of.
+const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
+
 type Mode = "upload" | "paste" | "bulk";
 
 type BulkItem = { title: string; content: string; slug?: string };
@@ -75,7 +82,21 @@ export function KnowledgeBasePanel() {
       },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const raw = await res.text();
+    let data: any = null;
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {
+      // Not JSON — the platform rejected the request before our code ever
+      // ran (e.g. Vercel's 4.5MB body-size cap returns plain text), so
+      // there's no { error } field to read.
+      if (res.status === 413 || /request entity too large/i.test(raw)) {
+        throw new Error(
+          "That file is too large for a single upload (the platform caps requests around 4.5MB). Try a smaller file, or use the Paste text tab instead."
+        );
+      }
+      throw new Error(`Ingestion failed (server returned status ${res.status}).`);
+    }
     if (!res.ok) throw new Error(data?.error || "Ingestion failed.");
     return data as { document_id: string; chunk_count: number };
   }
@@ -92,6 +113,12 @@ export function KnowledgeBasePanel() {
     const sourceType = ACCEPTED[ext];
     if (!sourceType) {
       setError("Only PDF, DOCX, or TXT files are supported.");
+      return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(
+        `That file is ${(file.size / (1024 * 1024)).toFixed(1)}MB, which is too large for a single upload (limit is about ${MAX_UPLOAD_BYTES / (1024 * 1024)}MB). Try a smaller file, split it, or use the Paste text tab for the raw text instead.`
+      );
       return;
     }
 
