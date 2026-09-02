@@ -95,6 +95,11 @@ export function KnowledgeBasePanel() {
           "That file is too large for a single upload (the platform caps requests around 4.5MB). Try a smaller file, or use the Paste text tab instead."
         );
       }
+      if (res.status === 504 || res.status >= 500) {
+        throw new Error(
+          "Server timed out or errored (likely a temporary embedding-provider rate limit). Safe to retry — bulk import will skip anything already indexed."
+        );
+      }
       throw new Error(`Ingestion failed (server returned status ${res.status}).`);
     }
     if (!res.ok) throw new Error(data?.error || "Ingestion failed.");
@@ -236,6 +241,9 @@ export function KnowledgeBasePanel() {
         }
         progress.done += 1;
         setBulkProgress({ ...progress });
+        // A short gap between items eases pressure on the embedding
+        // provider's free-tier per-minute rate limit across a long run.
+        await new Promise((r) => setTimeout(r, 400));
       }
 
       setMessage(

@@ -15,6 +15,16 @@ import urllib.error
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 BATCH_SIZE = 100
 MAX_RETRIES = 5
+REQUEST_TIMEOUT = 20
+
+# ingest.py runs under a 60s Vercel function timeout (vercel.json), shared
+# with auth, parsing, chunking, and the Supabase writes that come after
+# embedding. A full 2,4,8,16,32s exponential backoff (62s worst case) can
+# outlast that timeout on its own, and a killed function returns a plain
+# HTML/text error page, not JSON — which surfaces client-side as an
+# "Unexpected token" crash instead of a real error message. Budget embedding
+# retries to leave the rest of the function room to actually finish.
+RETRY_BUDGET_SECONDS = 35
 
 
 def _normalize(vec: list[float]) -> list[float]:
@@ -37,15 +47,16 @@ def embed_texts(
         return []
 
     task_type = "RETRIEVAL_DOCUMENT" if input_type == "document" else "RETRIEVAL_QUERY"
+    deadline = time.monotonic() + RETRY_BUDGET_SECONDS
 
     vectors: list[list[float]] = []
     for start in range(0, len(texts), BATCH_SIZE):
         batch = texts[start : start + BATCH_SIZE]
-        vectors.extend(_embed_batch(batch, api_key, model, dimension, task_type))
+        vectors.extend(_embed_batch(batch, api_key, model, dimension, task_type, deadline))
     return vectors
 
 
-def _embed_batch(batch, api_key, model, dimension, task_type):
+def _embed_batch(batch, api_key, model, dimension, task_type, deadline):
     payload = json.dumps(
         {
             "requests": [
@@ -70,12 +81,20 @@ def _embed_batch(batch, api_key, model, dimension, task_type):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=45) as response:
+            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
                 body = json.loads(response.read().decode("utf-8"))
             return [_normalize(e["values"]) for e in body.get("embeddings", [])]
         except urllib.error.HTTPError as err:
             if err.code == 429 and attempt < MAX_RETRIES:
-                time.sleep((2**attempt) * 2)
+                backoff = (2**attempt) * 2
+                # Don't sleep past our budget — better to fail fast with a
+                # clear "rate limited" error the caller can retry later than
+                # to get killed mid-sleep by the platform's own timeout.
+                if time.monotonic() + backoff >= deadline:
+                    raise RuntimeError(
+                        "Gemini embedding error 429: rate limited, retry budget exhausted for this item"
+                    ) from err
+                time.sleep(backoff)
                 continue
             detail = err.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"Gemini embedding error {err.code}: {detail}") from err
