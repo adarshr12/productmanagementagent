@@ -14,17 +14,23 @@ import urllib.error
 
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 BATCH_SIZE = 100
-MAX_RETRIES = 5
-REQUEST_TIMEOUT = 20
+MAX_RETRIES = 1
+REQUEST_TIMEOUT = 15
 
 # ingest.py runs under a 60s Vercel function timeout (vercel.json), shared
-# with auth, parsing, chunking, and the Supabase writes that come after
-# embedding. A full 2,4,8,16,32s exponential backoff (62s worst case) can
-# outlast that timeout on its own, and a killed function returns a plain
-# HTML/text error page, not JSON — which surfaces client-side as an
-# "Unexpected token" crash instead of a real error message. Budget embedding
-# retries to leave the rest of the function room to actually finish.
-RETRY_BUDGET_SECONDS = 35
+# with auth, parsing, chunking, and the two Supabase writes that happen
+# AFTER embedding returns — none of which count against this budget, so it
+# has to be small. A killed function returns a plain HTML/text error page
+# rather than JSON, which surfaced client-side as an "Unexpected token"
+# crash instead of a real error message.
+#
+# Sustained rate limiting (a bulk import of hundreds of items hitting the
+# free tier) also won't clear up within a few seconds of retrying inside
+# one invocation — so beyond one short retry, failing fast and letting the
+# caller re-run later (bulk import dedupes by title, so a re-run only
+# retries what actually failed) is both safer and no slower in practice
+# than trying to survive the rate limit in-process.
+RETRY_BUDGET_SECONDS = 8
 
 
 def _normalize(vec: list[float]) -> list[float]:
