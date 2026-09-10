@@ -1,4 +1,4 @@
-// The fixed intake questionnaire (12 questions). Shared by the public form and
+// The fixed intake questionnaire (14 questions). Shared by the public form and
 // the roadmap API so they never drift apart. Five questions map to dedicated
 // database columns; the rest are stored in the flexible `answers` field.
 
@@ -81,6 +81,31 @@ export const INTAKE_QUESTIONS: Question[] = [
       "Interview preparation",
       "Getting shortlisted / resume",
       "Domain knowledge",
+    ],
+  },
+  {
+    id: "target_company_stage",
+    label: "What stage of company do you picture yourself at?",
+    type: "select",
+    required: true,
+    options: [
+      "Early-stage startup (seed to Series A)",
+      "Growth-stage startup (Series B and beyond)",
+      "Mid-size, established company",
+      "Big Tech / large enterprise",
+      "No strong preference yet",
+    ],
+  },
+  {
+    id: "target_business_model",
+    label: "What kind of product do you want to work on?",
+    type: "select",
+    required: true,
+    options: [
+      "B2B / software other businesses pay for",
+      "B2C / consumer app people use in daily life",
+      "Marketplace or platform (connects two sides, like buyers and sellers)",
+      "No strong preference yet",
     ],
   },
   {

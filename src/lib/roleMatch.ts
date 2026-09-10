@@ -21,6 +21,8 @@ export function backgroundQuery(answers: Record<string, string>): string {
     answers.experience_level && `Experience: ${answers.experience_level}`,
     answers.strengths && `Strengths: ${answers.strengths}`,
     answers.biggest_skill_gap && `Biggest skill gap: ${answers.biggest_skill_gap}`,
+    answers.target_company_stage && `Target company stage: ${answers.target_company_stage}`,
+    answers.target_business_model && `Target product type: ${answers.target_business_model}`,
   ]
     .filter(Boolean)
     .join(". ");

@@ -53,9 +53,19 @@ export async function POST(req: NextRequest) {
 
     const agent = await pickAgent(history, lastUserMessage.content);
 
-    const chunks = agent.useKnowledgeBase
-      ? await retrieveChunks(lastUserMessage.content, 6)
-      : [];
+    // Retrieval calls the same embedding provider the knowledge-base ingest
+    // pipeline uses, which has its own daily quota — a busy import day can
+    // exhaust it. The prompts are already written to answer well with no
+    // CONTEXT at all, so a retrieval failure should degrade to that, not
+    // take down the whole chat turn.
+    let chunks: Awaited<ReturnType<typeof retrieveChunks>> = [];
+    if (agent.useKnowledgeBase) {
+      try {
+        chunks = await retrieveChunks(lastUserMessage.content, 6);
+      } catch (err) {
+        console.error("Knowledge-base retrieval failed, answering without it:", err);
+      }
+    }
     const context = chunks
       .map((c, i) => `[${i + 1}] (Source: "${c.document_title}") ${c.content}`)
       .join("\n\n");
@@ -66,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     const reply = await groqChat(
       [{ role: "system", content: systemContent }, ...history],
-      1024
+      1536
     );
 
     return NextResponse.json({ reply, agent: { key: agent.agentKey, label: agent.label } });

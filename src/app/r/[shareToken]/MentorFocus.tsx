@@ -70,7 +70,7 @@ export default function MentorFocus({
                       {step.title}
                     </h3>
                     {step.description && (
-                      <p className="mt-1.5 text-sm text-slate">
+                      <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate">
                         {step.description}
                       </p>
                     )}
@@ -87,7 +87,7 @@ export default function MentorFocus({
                     </div>
 
                     {step.resource_note && (
-                      <p className="mt-3 rounded-xl border border-accent-500/15 bg-accent-500/[0.06] px-3 py-2.5 text-sm text-slate">
+                      <p className="mt-3 whitespace-pre-line rounded-xl border border-accent-500/15 bg-accent-500/[0.06] px-3 py-2.5 text-sm leading-relaxed text-slate">
                         📚 {step.resource_note}
                       </p>
                     )}

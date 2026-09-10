@@ -72,7 +72,11 @@ export default function ResultsClient({
         <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           {title}
         </h1>
-        {overview && <p className="mt-3 max-w-2xl text-slate">{overview}</p>}
+        {overview && (
+          <p className="mt-3 max-w-3xl whitespace-pre-line leading-relaxed text-slate">
+            {overview}
+          </p>
+        )}
       </header>
 
       {/* progress + share */}

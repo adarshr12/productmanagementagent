@@ -42,19 +42,28 @@ export async function POST(req: NextRequest) {
 
     const agent = await getAgentConfig("roadmap");
 
-    // retrieve grounding context for this role + background, only while
-    // this agent's knowledge-base toggle is on
-    const chunks = agent.useKnowledgeBase
-      ? await retrieveChunks(roadmapQuery(answers, role), 6)
-      : [];
+    // Retrieval is optional here (the prompt is written to work well from
+    // general knowledge alone), so a failure — including the embedding
+    // provider's own daily quota running out — should just mean no context,
+    // not a broken roadmap generation.
+    let chunks: Awaited<ReturnType<typeof retrieveChunks>> = [];
+    if (agent.useKnowledgeBase) {
+      try {
+        chunks = await retrieveChunks(roadmapQuery(answers, role), 8);
+      } catch (err) {
+        console.error("Knowledge-base retrieval failed, generating without it:", err);
+      }
+    }
     const context = chunks
       .map((c, i) => `[${i + 1}] (Source: "${c.document_title}") ${c.content}`)
       .join("\n\n");
 
-    // ONE Groq call for the roadmap
+    // ONE Groq call for the roadmap — a much more detailed roadmap needs
+    // more room than the 2048-token default.
     const raw = await groqJSON(
       agent.systemPrompt,
-      buildRoadmapUserContent(answers, role, context)
+      buildRoadmapUserContent(answers, role, context),
+      6000
     );
     const roadmap = parseRoadmap(raw);
 

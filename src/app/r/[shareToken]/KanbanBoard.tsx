@@ -64,7 +64,7 @@ export default function KanbanBoard({
                         {step.title}
                       </h3>
                       {step.description && (
-                        <p className="mt-1 text-xs leading-relaxed text-slate">
+                        <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-slate">
                           {step.description}
                         </p>
                       )}
