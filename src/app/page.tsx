@@ -68,7 +68,7 @@ const HOW_IT_WORKS = [
 // "Coming soon" badges and disabled CTAs below without touching this file
 // again — set it to "false" in Vercel's env vars (and redeploy) to flip the
 // site live; unset or any other value keeps lockdown on by default.
-const LOCKDOWN_MODE = process.env.NEXT_PUBLIC_LOCKDOWN_MODE !== "false";
+const LOCKDOWN_MODE = process.env.NEXT_PUBLIC_LOCKDOWN_MODE === "true";
 
 export default function Home() {
   const router = useRouter();

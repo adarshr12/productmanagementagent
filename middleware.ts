@@ -8,7 +8,7 @@ import type { NextRequest } from "next/server";
 // (and the static assets it needs to render) is redirected back to "/".
 // Set NEXT_PUBLIC_LOCKDOWN_MODE=false in Vercel's env vars and redeploy to
 // open the rest of the site back up.
-const LOCKDOWN_MODE = process.env.NEXT_PUBLIC_LOCKDOWN_MODE !== "false";
+const LOCKDOWN_MODE = process.env.NEXT_PUBLIC_LOCKDOWN_MODE === "true";
 
 export function middleware(request: NextRequest) {
   if (!LOCKDOWN_MODE) {
