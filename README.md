@@ -24,8 +24,8 @@ built) enterprise direction.
 - **Next.js** (pages + JS API) and a **Python** ingestion function — hosted on
   **Vercel** (subdomain of your domain; your existing Netlify site is untouched).
 - **Supabase** — Postgres + pgvector + Auth, with Row-Level Security on every table.
-- **Voyage AI** (`voyage-3.5-lite`) for embeddings · **Groq**
-  (`llama-3.3-70b-versatile`) for the roadmap.
+- **Google Gemini** (`gemini-embedding-001`) for embeddings · **Groq**
+  (`openai/gpt-oss-120b`) for the roadmap and chat.
 
 ## Architecture notes
 
