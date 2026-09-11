@@ -80,6 +80,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ intakeId: intake.id, matches });
   } catch (err: any) {
+    console.error("Role matching failed:", err);
     return NextResponse.json(
       { error: err?.message || "Something went wrong scoring roles." },
       { status: 500 }

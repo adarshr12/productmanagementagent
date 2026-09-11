@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ reply, agent: { key: agent.agentKey, label: agent.label } });
   } catch (err: any) {
+    console.error("Assistant request failed:", err);
     return NextResponse.json(
       { error: err?.message || "Something went wrong. Please try again." },
       { status: 500 }

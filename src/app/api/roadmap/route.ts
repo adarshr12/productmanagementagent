@@ -99,6 +99,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ shareToken });
   } catch (err: any) {
+    console.error("Roadmap generation failed:", err);
     return NextResponse.json(
       { error: err?.message || "Something went wrong generating your roadmap." },
       { status: 500 }
