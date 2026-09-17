@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         title: roadmap.title,
         content: roadmap.overview,
         role: role.label,
-        model: process.env.GEMINI_CHAT_MODEL || "gemini-2.0-flash",
+        model: process.env.GEMINI_CHAT_MODEL || "gemini-3.6-flash",
       })
       .select("id")
       .single();

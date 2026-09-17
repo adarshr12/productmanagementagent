@@ -5,11 +5,11 @@
 // site — roadmap, role-match, assistant chat, the orchestrator router, and the
 // admin agent test — keeps working without edits. Provider is now Gemini.
 //
-// Default model is gemini-2.0-flash: it's on the free tier, has generous rate
-// limits, and (unlike the 2.5 "thinking" models) spends its whole output budget
-// on the answer, so small maxOutputTokens budgets don't come back empty.
-// Override with GEMINI_CHAT_MODEL in the environment if you want a different one.
-const MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.0-flash";
+// Default model is gemini-3.6-flash: the free-tier flash model Google's API
+// currently points callers to (gemini-2.0-flash was retired with a 404 that
+// named 3.6-flash as its replacement). Override with GEMINI_CHAT_MODEL in the
+// environment to move to a newer one without a code change when this is retired.
+const MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-3.6-flash";
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 const MAX_RETRIES = 4;
 
