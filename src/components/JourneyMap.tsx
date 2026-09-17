@@ -1,303 +1,411 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { useMemo, useRef, useState } from "react";
 
 export type JourneyStep = {
   id: string;
   title: string;
   status: "todo" | "in_progress" | "done";
+  details?: string[];
 };
-
-const ROW_H = 168;
-const MARGIN_TOP = 90;
-const CENTER_X = 210;
-const AMPLITUDE = 120;
-const VIEW_W = CENTER_X * 2;
-
-// Real SVG icons — no emoji-as-icon (flags, cars, person glyphs render
-// inconsistently across platforms and read as unpolished at this size).
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
-      <path
-        d="M5 12.5 10 17.5 19 7"
-        stroke="currentColor"
-        strokeWidth={2.4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={3}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   );
 }
 
-function PinIcon() {
+// Pinpoint Marker Icon for the road nodes
+function PinpointMarker({
+  stepNumber,
+  status,
+  isHovered,
+}: {
+  stepNumber: number;
+  status: "todo" | "in_progress" | "done";
+  isHovered?: boolean;
+}) {
+  const isDone = status === "done";
+  const isCurrent = status === "in_progress";
+
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="3.2" fill="currentColor" />
-      <circle
-        cx="12"
-        cy="12"
-        r="8.5"
-        stroke="currentColor"
-        strokeWidth={1.6}
-        opacity={0.5}
-      />
-    </svg>
+    <div
+      className={`group relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 text-xs font-extrabold shadow-lg transition-all duration-300 ${
+        isDone
+          ? "border-white bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-emerald-900/30"
+          : isCurrent
+          ? "border-white bg-gradient-to-tr from-sky-500 to-blue-600 text-white ring-4 ring-sky-300/50 shadow-sky-900/40"
+          : "border-slate-200 bg-slate-800 text-slate-100 shadow-slate-900/20 hover:bg-slate-700"
+      } ${isHovered ? "scale-125 ring-4 ring-sky-400 shadow-2xl" : "hover:scale-110"}`}
+    >
+      {isDone ? <CheckIcon /> : stepNumber}
+    </div>
   );
 }
 
-function TargetIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={1.8} />
-      <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth={1.8} />
-      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-    </svg>
-  );
-}
+// Catmull-Rom to Cubic Bezier curve string generator for 100% smooth curves with ZERO kinks
+function getSmoothSplineD(pts: { x: number; y: number }[]) {
+  if (pts.length < 2) return "";
+  let d = `M ${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
 
-function CarIcon() {
-  return (
-    <svg viewBox="0 0 32 20" className="h-5 w-8" fill="none" aria-hidden="true">
-      <path
-        d="M4 13 6 7.5c.6-1.6 1.3-2 3-2h10c1.7 0 2.4.4 3 2L28 13"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      <rect x="2" y="12" width="28" height="4.5" rx="2.2" fill="currentColor" />
-      <circle cx="9" cy="17.5" r="2.5" fill="#10192b" stroke="currentColor" strokeWidth={1.6} />
-      <circle cx="23" cy="17.5" r="2.5" fill="#10192b" stroke="currentColor" strokeWidth={1.6} />
-    </svg>
-  );
-}
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
 
-// Smooth cubic-bezier road through a column of points, curving left/right —
-// a flowing road rather than a straight line or right-angle path.
-function smoothPath(points: { x: number; y: number }[]) {
-  if (points.length === 0) return "";
-  let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const p0 = points[i - 1];
-    const p1 = points[i];
-    const midY = (p0.y + p1.y) / 2;
-    d += ` C ${p0.x} ${midY}, ${p1.x} ${midY}, ${p1.x} ${p1.y}`;
+    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
   }
   return d;
 }
 
-/**
- * A generated-every-time visual: a flowing, curving road (top to bottom),
- * recolored to this product's light/blue-teal theme. As the visitor scrolls,
- * a car drives the length of the road (GSAP ScrollTrigger, scrubbed to
- * scroll position) while each flag's color still reflects real progress.
- */
 export function JourneyMap({
   steps,
   startLabel,
   finishLabel,
+  onSelectStep,
 }: {
   steps: JourneyStep[];
   startLabel: string;
   finishLabel: string;
+  onSelectStep?: (stepId: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
-  const travelledRef = useRef<SVGPathElement>(null);
-  const carRef = useRef<HTMLDivElement>(null);
-
-  const layout = useMemo(() => {
-    const total = steps.length + 2; // + start + finish
-    const at = (i: number) => ({
-      x: CENTER_X + (i % 2 === 0 ? -1 : 1) * AMPLITUDE * (i === 0 || i === total - 1 ? 0 : 1),
-      y: MARGIN_TOP + i * ROW_H,
-    });
-    const start = at(0);
-    const finish = at(total - 1);
-    const stepPoints = steps.map((s, i) => ({ step: s, ...at(i + 1) }));
-    const allPoints = [start, ...stepPoints, finish];
-    const viewH = MARGIN_TOP * 2 + (total - 1) * ROW_H;
-    return { start, finish, stepPoints, allPoints, viewH };
-  }, [steps]);
-
-  const roadD = smoothPath(layout.allPoints);
-
-  // Scroll-driven: the road draws in and the car travels its length as the
-  // visitor scrolls through this section.
-  useEffect(() => {
-    if (!containerRef.current || !pathRef.current) return;
-    const pathEl = pathRef.current;
-    const travelledEl = travelledRef.current;
-    const carEl = carRef.current;
-    const totalLen = pathEl.getTotalLength();
-
-    if (travelledEl) {
-      travelledEl.style.strokeDasharray = `${totalLen}`;
-      travelledEl.style.strokeDashoffset = `${totalLen}`;
-    }
-
-    const trigger = ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top 85%",
-      end: "bottom 60%",
-      scrub: 0.6,
-      onUpdate: (self) => {
-        const len = self.progress * totalLen;
-        if (travelledEl) travelledEl.style.strokeDashoffset = `${totalLen - len}`;
-        if (carEl) {
-          const pt = pathEl.getPointAtLength(len);
-          const ptAhead = pathEl.getPointAtLength(Math.min(len + 1, totalLen));
-          const angle =
-            (Math.atan2(ptAhead.y - pt.y, ptAhead.x - pt.x) * 180) / Math.PI;
-          gsap.set(carEl, {
-            left: `${(pt.x / VIEW_W) * 100}%`,
-            top: `${(pt.y / layout.viewH) * 100}%`,
-            rotate: angle,
-          });
-        }
-      },
-    });
-
-    return () => trigger.kill();
-  }, [layout.viewH, roadD]);
 
   const firstNotDoneIdx = steps.findIndex((s) => s.status !== "done");
-  const allDone = firstNotDoneIdx === -1 && steps.length > 0;
 
-  const pct = (v: number, total: number) => `${(v / total) * 100}%`;
+  // Default closed state (no card open by default unless hovered/clicked)
+  const [hoveredStepId, setHoveredStepId] = useState<string | null>(null);
+  const [clickedStepId, setClickedStepId] = useState<string | null>(null);
+
+  // Scalable SVG ViewBox dimensions (fits 100% container width with ZERO horizontal scroll!)
+  const VIEW_W = 1000;
+  const VIEW_H = 620;
+
+  // Road thickness configuration
+  const ROAD_WIDTH = 48;
+  const WHITE_BORDER_OFFSET = 6;
+
+  // Generate smooth horizontal centerline spline points in the middle band
+  const centerPoints = useMemo(() => {
+    const total = steps.length + 2; // + start + finish
+    const pts = [];
+
+    const waveRatios = [
+      { x: 0.08, y: 0.50 }, // Start Left
+      { x: 0.20, y: 0.40 },
+      { x: 0.34, y: 0.60 },
+      { x: 0.50, y: 0.42 },
+      { x: 0.66, y: 0.58 },
+      { x: 0.80, y: 0.40 },
+      { x: 0.92, y: 0.50 }, // Target Right
+    ];
+
+    for (let i = 0; i < total; i++) {
+      const progress = i / (total - 1);
+      const idxFloat = progress * (waveRatios.length - 1);
+      const idx0 = Math.floor(idxFloat);
+      const idx1 = Math.min(idx0 + 1, waveRatios.length - 1);
+      const t = idxFloat - idx0;
+
+      const rx = waveRatios[idx0].x + t * (waveRatios[idx1].x - waveRatios[idx0].x);
+      const ry = waveRatios[idx0].y + t * (waveRatios[idx1].y - waveRatios[idx0].y);
+
+      pts.push({
+        x: rx * VIEW_W,
+        y: ry * VIEW_H,
+      });
+    }
+    return pts;
+  }, [steps.length, VIEW_W, VIEW_H]);
+
+  const smoothCenterD = useMemo(() => getSmoothSplineD(centerPoints), [centerPoints]);
+
+  const startPt = centerPoints[0];
+  const finishPt = centerPoints[centerPoints.length - 1];
+
+  // Map steps onto alternating top/bottom road edge points
+  const stepNodes = useMemo(() => {
+    return steps.map((step, idx) => {
+      const cPt = centerPoints[idx + 1];
+      const prev = centerPoints[Math.max(0, idx)];
+      const next = centerPoints[Math.min(centerPoints.length - 1, idx + 2)];
+
+      const dx = next.x - prev.x;
+      const dy = next.y - prev.y;
+      const angle = Math.atan2(dy, dx);
+
+      const isTop = idx % 2 === 0;
+      const normAngle = angle + (isTop ? -Math.PI / 2 : Math.PI / 2);
+      const r = ROAD_WIDTH / 2 + WHITE_BORDER_OFFSET / 2;
+
+      const nodeX = cPt.x + r * Math.cos(normAngle);
+      const nodeY = cPt.y + r * Math.sin(normAngle);
+
+      return {
+        step,
+        index: idx,
+        centerPt: cPt,
+        nodePt: { x: nodeX, y: nodeY },
+        isTop,
+      };
+    });
+  }, [steps, centerPoints]);
+
+  const activeFocusedId = hoveredStepId || clickedStepId;
 
   return (
-    <div className="card overflow-hidden">
-      <div
-        ref={containerRef}
-        className="relative mx-auto w-full"
-        style={{ maxWidth: VIEW_W, aspectRatio: `${VIEW_W} / ${layout.viewH}` }}
-      >
-        <svg
-          className="absolute inset-0 h-full w-full"
-          viewBox={`0 0 ${VIEW_W} ${layout.viewH}`}
-          preserveAspectRatio="xMidYMid meet"
-          aria-hidden="true"
-        >
-          <path
-            d={roadD}
-            fill="none"
-            stroke="rgba(16,25,43,0.07)"
-            strokeWidth={20}
-            strokeLinecap="round"
-          />
-          <path
-            ref={pathRef}
-            d={roadD}
-            fill="none"
-            stroke="rgba(16,25,43,0.22)"
-            strokeWidth={2}
-            strokeDasharray="10 10"
-            strokeLinecap="round"
-          />
-          <path
-            ref={travelledRef}
-            d={roadD}
-            fill="none"
-            stroke="#155eef"
-            strokeWidth={6}
-            strokeLinecap="round"
-            style={{ filter: "drop-shadow(0 0 6px rgba(21,94,239,0.35))" }}
-          />
-        </svg>
+    <div className="relative w-full rounded-3xl border border-sky-200/80 bg-gradient-to-b from-[#e0f2fe] via-[#f0f9ff] to-[#ffffff] p-4 shadow-xl sm:p-8">
+      {/* Soft Ambient Sky Background */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+        <div className="absolute -top-32 left-1/3 h-96 w-96 rounded-full bg-white/70 blur-3xl" />
+        <div className="absolute top-1/2 -right-24 h-96 w-96 rounded-full bg-sky-200/50 blur-3xl" />
+      </div>
 
-        {/* the car — driven by scroll position */}
+      {/* Non-Scrollable 100% Width Canvas Wrapper (No Horizontal Scrollbar!) */}
+      <div className="relative w-full overflow-visible py-2">
         <div
-          ref={carRef}
-          className="absolute -translate-x-1/2 -translate-y-1/2 text-accent-500"
-          style={{ left: "0%", top: "0%", filter: "drop-shadow(0 0 6px rgba(21,94,239,0.4))" }}
-          aria-hidden="true"
+          ref={containerRef}
+          className="relative mx-auto w-full"
+          style={{ maxWidth: VIEW_W, aspectRatio: `${VIEW_W} / ${VIEW_H}` }}
         >
-          <CarIcon />
-        </div>
+          <svg
+            className="absolute inset-0 h-full w-full"
+            viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+            preserveAspectRatio="xMidYMid meet"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="asphaltGradClean" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#1e293b" />
+                <stop offset="60%" stopColor="#334155" />
+                <stop offset="100%" stopColor="#475569" />
+              </linearGradient>
 
-        {/* start marker */}
-        <div
-          className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-          style={{ left: pct(layout.start.x, VIEW_W), top: pct(layout.start.y, layout.viewH) }}
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-white text-ink shadow">
-            <PinIcon />
-          </span>
-          <span className="mt-1.5 max-w-[130px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-medium text-slate shadow-glass-sm">
-            {startLabel}
-          </span>
-        </div>
+              <filter id="asphaltShadowClean" x="-10%" y="-10%" width="130%" height="130%">
+                <feDropShadow dx="0" dy="12" stdDeviation="10" floodColor="#0f172a" floodOpacity="0.2" />
+              </filter>
+            </defs>
 
-        {/* milestone markers */}
-        {layout.stepPoints.map(({ step, x, y }, i) => {
-          const isCurrent = i === firstNotDoneIdx;
-          const isDone = step.status === "done";
-          return (
-            <div
-              key={step.id}
-              className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-              style={{ left: pct(x, VIEW_W), top: pct(y, layout.viewH) }}
-            >
-              <span
-                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold shadow ${
-                  isDone
-                    ? "border-emerald-500 bg-emerald-500 text-white"
-                    : isCurrent
-                    ? "border-accent-500 bg-surface text-accent-500 shadow-[0_0_14px_rgba(21,94,239,0.35)]"
-                    : "border-line bg-surface text-slate-soft"
-                }`}
-              >
-                {isDone ? <CheckIcon /> : i + 1}
-              </span>
-              <span
-                className={`mt-1.5 max-w-[150px] rounded-md px-2 py-1 text-center text-[11px] font-medium leading-snug shadow-glass-sm ${
-                  isDone
-                    ? "bg-emerald-500/10 text-emerald-700"
-                    : isCurrent
-                    ? "bg-accent-500/10 text-accent-500"
-                    : "bg-surface-raised text-slate-soft"
-                }`}
+            {/* Ambient Shadow Layer */}
+            <path
+              d={smoothCenterD}
+              fill="none"
+              stroke="#0f172a"
+              strokeWidth={ROAD_WIDTH + WHITE_BORDER_OFFSET + 10}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.14"
+              filter="blur(8px)"
+            />
+
+            {/* Smooth Outer White Border Layer */}
+            <path
+              d={smoothCenterD}
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth={ROAD_WIDTH + WHITE_BORDER_OFFSET}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              filter="url(#asphaltShadowClean)"
+            />
+
+            {/* Dark Charcoal Asphalt Core Layer */}
+            <path
+              d={smoothCenterD}
+              fill="none"
+              stroke="url(#asphaltGradClean)"
+              strokeWidth={ROAD_WIDTH}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* Dashed White Center Lane Line */}
+            <path
+              d={smoothCenterD}
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="3.5"
+              strokeDasharray="16 12"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.9"
+            />
+
+            {/* Leader Lines & Blue Edge Dots */}
+            {stepNodes.map(({ nodePt, step, index, isTop }) => {
+              const isDone = step.status === "done";
+              const isCurrent = index === firstNotDoneIdx;
+              const isFocused = activeFocusedId === step.id;
+
+              const targetY = isTop ? nodePt.y - 45 : nodePt.y + 45;
+
+              return (
+                <g key={`node-${step.id}`}>
+                  {/* Vertical Leader Line */}
+                  <line
+                    x1={nodePt.x}
+                    y1={nodePt.y}
+                    x2={nodePt.x}
+                    y2={targetY}
+                    stroke={isDone ? "#10b981" : isCurrent ? "#0ea5e9" : "#94a3b8"}
+                    strokeWidth={isFocused ? "2.5" : "1.8"}
+                    strokeDasharray={isDone || isCurrent ? "none" : "4 4"}
+                  />
+
+                  {/* Blue Indicator Dot Positioned Centered on the White Edge Border */}
+                  <circle
+                    cx={nodePt.x}
+                    cy={nodePt.y}
+                    r={isFocused ? "7.5" : "6"}
+                    className={
+                      isDone
+                        ? "fill-emerald-500 stroke-white"
+                        : isCurrent
+                        ? "fill-sky-400 stroke-white ring-4 ring-sky-300/50"
+                        : "fill-sky-500 stroke-white"
+                    }
+                    strokeWidth="2.5"
+                  />
+
+                  {/* Inner White Center Dot */}
+                  <circle cx={nodePt.x} cy={nodePt.y} r="2" fill="#ffffff" />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Start Banner (Left Foreground) */}
+          <div
+            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-20"
+            style={{ left: `${(startPt.x / VIEW_W) * 100}%`, top: `${(startPt.y / VIEW_H) * 100}%` }}
+          >
+            <div className="min-w-[130px] sm:min-w-[160px] rounded-2xl border border-sky-300 bg-white/95 px-3 py-2 text-center shadow-xl backdrop-blur-md">
+              <span className="text-[9px] font-extrabold tracking-wider text-sky-700 uppercase">START</span>
+              <p className="text-xs font-bold text-slate-800 leading-snug break-words">{startLabel}</p>
+            </div>
+          </div>
+
+          {/* Target Banner (Right Vanishing Point) */}
+          <div
+            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-20"
+            style={{ left: `${(finishPt.x / VIEW_W) * 100}%`, top: `${(finishPt.y / VIEW_H) * 100}%` }}
+          >
+            <div className="min-w-[150px] sm:min-w-[180px] rounded-2xl border border-slate-900 bg-slate-900 px-3.5 py-2 text-center text-white shadow-xl backdrop-blur-md">
+              <span className="text-[9px] font-extrabold tracking-widest text-sky-400 uppercase">TARGET ROLE</span>
+              <p className="text-xs font-extrabold text-white leading-snug break-words">{finishLabel}</p>
+            </div>
+          </div>
+
+          {/* PINPOINTS ON ROAD NODES (Cards closed by default!) */}
+          {stepNodes.map(({ nodePt, step, index, isTop }) => {
+            const isDone = step.status === "done";
+            const isCurrent = index === firstNotDoneIdx;
+            const isFocused = activeFocusedId === step.id;
+
+            const targetY = isTop ? nodePt.y - 45 : nodePt.y + 45;
+
+            return (
+              <div
+                key={step.id}
+                onMouseEnter={() => setHoveredStepId(step.id)}
+                onMouseLeave={() => setHoveredStepId(null)}
+                onClick={() => {
+                  setClickedStepId(clickedStepId === step.id ? null : step.id);
+                  if (onSelectStep) onSelectStep(step.id);
+                }}
+                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all"
                 style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
+                  left: `${(nodePt.x / VIEW_W) * 100}%`,
+                  top: `${(targetY / VIEW_H) * 100}%`,
+                  zIndex: isFocused ? 50 : 20,
                 }}
               >
-                {step.title}
-              </span>
-            </div>
-          );
-        })}
+                {/* Pinpoint Icon */}
+                <PinpointMarker
+                  stepNumber={index + 1}
+                  status={step.status}
+                  isHovered={isFocused}
+                />
 
-        {/* finish */}
-        <div
-          className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-          style={{ left: pct(layout.finish.x, VIEW_W), top: pct(layout.finish.y, layout.viewH) }}
-        >
-          <span className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-accent-600 bg-accent-500 text-white shadow-[0_0_18px_rgba(21,94,239,0.4)]">
-            <TargetIcon />
-          </span>
-          <span className="mt-1.5 max-w-[140px] rounded-md bg-surface-raised px-2 py-1 text-center text-[11px] font-semibold text-ink shadow-glass-sm">
-            {finishLabel}
-          </span>
+                {/* FLOATING HOVER / CLICK DETAIL CARD */}
+                {isFocused && (
+                  <div
+                    className={`absolute left-1/2 -translate-x-1/2 w-56 sm:w-64 rounded-2xl border border-sky-300/80 bg-white/95 p-3.5 shadow-2xl backdrop-blur-md transition-all duration-300 animate-in fade-in zoom-in-95 ${
+                      isTop ? "bottom-full mb-3" : "top-full mt-3"
+                    }`}
+                  >
+                    {/* Header */}
+                    <div className="mb-1.5 flex items-center justify-between border-b border-slate-100 pb-1">
+                      <span className="text-[10px] font-extrabold tracking-wider text-sky-700 uppercase">
+                        STEP 0{index + 1}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                          isDone
+                            ? "bg-emerald-100 text-emerald-800"
+                            : isCurrent
+                            ? "bg-sky-100 text-sky-800"
+                            : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {isDone ? "Completed ✓" : isCurrent ? "Active Focus ⚡" : "Up Next"}
+                      </span>
+                    </div>
+
+                    {/* Step Title */}
+                    <h4 className="font-display text-xs font-bold leading-snug text-slate-900">
+                      {step.title}
+                    </h4>
+
+                    {/* Sub Details */}
+                    {step.details && step.details.length > 0 && (
+                      <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
+                        {step.details.map((detail, dIdx) => (
+                          <li key={dIdx} className="flex items-start gap-1">
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-500" />
+                            <span>{detail}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <p className="mt-3 text-center text-xs text-slate-soft">
-        {allDone
-          ? `You've reached the end, you're ready for ${finishLabel} roles.`
-          : `Scroll to drive the road to ${finishLabel}.`}
-      </p>
+      {/* Floating Bottom Legend */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-sky-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-6 text-xs font-medium text-slate-700">
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-white text-[9px] font-bold">✓</span>
+            <span>Completed Step</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-3.5 rounded-full bg-sky-500 ring-2 ring-sky-200 flex items-center justify-center text-white text-[9px] font-bold">⚡</span>
+            <span>Active Milestone Pin (Hover/Click for details)</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-3.5 rounded-full bg-slate-800 ring-2 ring-white flex items-center justify-center text-white text-[9px] font-bold">1</span>
+            <span>Upcoming Pinpoint</span>
+          </div>
+        </div>
+
+        <p className="text-xs font-semibold text-slate-800">
+          {steps.filter((s) => s.status === "done").length} of {steps.length} Milestones Achieved
+        </p>
+      </div>
     </div>
   );
 }

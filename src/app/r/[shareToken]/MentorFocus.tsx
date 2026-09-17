@@ -63,7 +63,7 @@ export default function MentorFocus({
               <article key={step.id} className="card border-l-4 border-l-accent-500">
                 <div className="flex items-start gap-3">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-500 text-xs font-bold text-white">
-                    {i + 1}
+                    {step.step_order || ordered.findIndex((s) => s.id === step.id) + 1}
                   </span>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-display font-semibold text-ink">
