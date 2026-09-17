@@ -29,10 +29,29 @@ async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
 
     if (res.ok) {
       const data = await res.json();
-      const parts = data.candidates?.[0]?.content?.parts;
-      return Array.isArray(parts)
-        ? parts.map((p: { text?: string }) => p?.text ?? "").join("")
+      const candidate = data.candidates?.[0];
+      const parts = candidate?.content?.parts;
+      // Skip any "thought" parts (thinking models can return them) and keep the
+      // real answer text only, so a reasoning preamble never corrupts the JSON.
+      const text = Array.isArray(parts)
+        ? parts
+            .filter((p: { thought?: boolean }) => !p?.thought)
+            .map((p: { text?: string }) => p?.text ?? "")
+            .join("")
         : "";
+
+      // An empty answer means the model produced no usable output — usually the
+      // response was cut off (finishReason MAX_TOKENS) or blocked (SAFETY).
+      // Surface that reason instead of returning "" and letting a caller throw a
+      // vague "invalid JSON", so production logs say exactly what happened.
+      if (!text.trim()) {
+        const reason =
+          candidate?.finishReason ||
+          data?.promptFeedback?.blockReason ||
+          "empty response";
+        throw new Error(`Gemini returned no usable text (finishReason=${reason}).`);
+      }
+      return text;
     }
 
     if (res.status === 429 && attempt < MAX_RETRIES) {
@@ -43,15 +62,31 @@ async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
   }
 }
 
+// Pull a clean JSON object out of the model's text. responseMimeType already
+// asks Gemini for raw JSON, but this defends against a stray markdown fence or a
+// short preamble slipping in — we strip fences and keep the outermost { ... }.
+function extractJson(text: string): string {
+  let t = text.trim();
+  if (t.startsWith("```")) {
+    t = t.replace(/^```[a-z]*\n?/i, "").replace(/```\s*$/i, "").trim();
+  }
+  const first = t.indexOf("{");
+  const last = t.lastIndexOf("}");
+  if (first !== -1 && last > first) return t.slice(first, last + 1);
+  return t;
+}
+
 // Makes a single JSON-returning call. Used for both role matching and roadmap
 // generation. responseMimeType pins the output to a JSON object, so callers can
 // JSON.parse the returned string exactly as they did with Groq's JSON mode.
+// maxTokens defaults high because a thinking model spends part of the output
+// budget on reasoning — too small a budget truncates the JSON mid-object.
 export async function groqJSON(
   systemPrompt: string,
   userContent: string,
-  maxTokens = 2048
+  maxTokens = 8000
 ): Promise<string> {
-  return geminiGenerate({
+  const text = await geminiGenerate({
     system_instruction: { parts: [{ text: systemPrompt }] },
     contents: [{ role: "user", parts: [{ text: userContent }] }],
     generationConfig: {
@@ -60,6 +95,7 @@ export async function groqJSON(
       responseMimeType: "application/json",
     },
   });
+  return extractJson(text);
 }
 
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
