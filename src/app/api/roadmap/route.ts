@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         title: roadmap.title,
         content: roadmap.overview,
         role: role.label,
-        model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+        model: process.env.GEMINI_CHAT_MODEL || "gemini-2.0-flash",
       })
       .select("id")
       .single();
