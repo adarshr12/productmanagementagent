@@ -58,12 +58,13 @@ export async function POST(req: NextRequest) {
       .map((c, i) => `[${i + 1}] (Source: "${c.document_title}") ${c.content}`)
       .join("\n\n");
 
-    // ONE Groq call for the roadmap — a much more detailed roadmap needs
-    // more room than the 2048-token default.
+    // ONE LLM call for the roadmap — a detailed multi-step roadmap needs plenty
+    // of room, and a thinking model spends part of the budget on reasoning, so
+    // keep this generous to avoid the JSON being truncated mid-object.
     const raw = await groqJSON(
       agent.systemPrompt,
       buildRoadmapUserContent(answers, role, context),
-      6000
+      8000
     );
     const roadmap = parseRoadmap(raw);
 

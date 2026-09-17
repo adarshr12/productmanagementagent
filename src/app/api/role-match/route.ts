@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const raw = await groqJSON(
       agent.systemPrompt,
       buildRoleMatchUserContent(answers, context),
-      3000
+      8000
     );
     const matches = parseMatches(raw);
 

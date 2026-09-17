@@ -40,7 +40,7 @@ export async function pickAgent(
       .filter(Boolean)
       .join("\n\n");
 
-    const raw = await groqJSON(orchestrator.systemPrompt, userContent, 200);
+    const raw = await groqJSON(orchestrator.systemPrompt, userContent, 1024);
     const parsed = JSON.parse(raw);
     const chosen = candidates.find((a) => a.agentKey === parsed?.agent_key);
     return chosen ?? fallback;
