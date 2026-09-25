@@ -72,7 +72,7 @@ async function callModel(
 
 // One call to Gemini's generateContent endpoint, returning the text of the
 // first candidate. Retries temporary errors with backoff; if the main model is
-// still overloaded (503/500) after that, tries FALLBACK_MODEL once.
+// still overloaded or rate-limited (503/500/429) after that, tries FALLBACK_MODEL once.
 async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("Missing GEMINI_API_KEY environment variable.");
@@ -81,9 +81,12 @@ async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
     return await callModel(MODEL, key, body);
   } catch (err) {
     const status = (err as Error & { status?: number }).status;
-    const overloaded = status === 503 || status === 500;
-    if (!overloaded || !FALLBACK_MODEL || FALLBACK_MODEL === MODEL) throw err;
-    console.warn(`Gemini ${MODEL} overloaded (${status}); falling back to ${FALLBACK_MODEL}`);
+    // 503/500 = Google overloaded; 429 = this model's free-tier quota is used
+    // up (5 requests/min on flash). Quotas are per model, so the fallback model
+    // has its own separate budget and usually still has room.
+    const canFallback = status === 503 || status === 500 || status === 429;
+    if (!canFallback || !FALLBACK_MODEL || FALLBACK_MODEL === MODEL) throw err;
+    console.warn(`Gemini ${MODEL} unavailable (${status}); falling back to ${FALLBACK_MODEL}`);
     return callModel(FALLBACK_MODEL, key, body);
   }
 }
