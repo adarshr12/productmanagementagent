@@ -10,18 +10,24 @@
 // named 3.6-flash as its replacement). Override with GEMINI_CHAT_MODEL in the
 // environment to move to a newer one without a code change when this is retired.
 const MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-3.6-flash";
+// Used when the main model stays overloaded (503) after a few retries.
+// "gemini-flash-lite-latest" is Google's alias for the current lite flash
+// model — a different model pool, so it's usually free when the main one isn't.
+const FALLBACK_MODEL =
+  process.env.GEMINI_CHAT_FALLBACK_MODEL || "gemini-flash-lite-latest";
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
-const MAX_RETRIES = 4;
+const MAX_RETRIES = 3;
+// 429 = rate limited, 500/503 = Google-side overload ("high demand").
+// All are temporary, so all are worth a retry with backoff.
+const RETRYABLE = new Set([429, 500, 503]);
 
-// One call to Gemini's generateContent endpoint, returning the text of the
-// first candidate. Retries on 429 with exponential backoff so a brief rate-limit
-// blip doesn't fail the user's request outright.
-async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error("Missing GEMINI_API_KEY environment variable.");
-
+async function callModel(
+  model: string,
+  key: string,
+  body: Record<string, unknown>
+): Promise<string> {
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(`${BASE}/models/${MODEL}:generateContent`, {
+    const res = await fetch(`${BASE}/models/${model}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify(body),
@@ -54,11 +60,31 @@ async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
       return text;
     }
 
-    if (res.status === 429 && attempt < MAX_RETRIES) {
-      await new Promise((r) => setTimeout(r, 2 ** attempt * 2000));
+    if (RETRYABLE.has(res.status) && attempt < MAX_RETRIES) {
+      await new Promise((r) => setTimeout(r, 2 ** attempt * 1500));
       continue;
     }
-    throw new Error(`Gemini error ${res.status}: ${await res.text()}`);
+    const err = new Error(`Gemini error ${res.status}: ${await res.text()}`);
+    (err as Error & { status?: number }).status = res.status;
+    throw err;
+  }
+}
+
+// One call to Gemini's generateContent endpoint, returning the text of the
+// first candidate. Retries temporary errors with backoff; if the main model is
+// still overloaded (503/500) after that, tries FALLBACK_MODEL once.
+async function geminiGenerate(body: Record<string, unknown>): Promise<string> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error("Missing GEMINI_API_KEY environment variable.");
+
+  try {
+    return await callModel(MODEL, key, body);
+  } catch (err) {
+    const status = (err as Error & { status?: number }).status;
+    const overloaded = status === 503 || status === 500;
+    if (!overloaded || !FALLBACK_MODEL || FALLBACK_MODEL === MODEL) throw err;
+    console.warn(`Gemini ${MODEL} overloaded (${status}); falling back to ${FALLBACK_MODEL}`);
+    return callModel(FALLBACK_MODEL, key, body);
   }
 }
 
