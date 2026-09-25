@@ -15,10 +15,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const [reason, setReason] = useState<string | null>(null);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const n = params.get("next");
+    const r = params.get("reason");
     if (n && n.startsWith("/")) setNext(n);
+    if (r) setReason(r);
   }, []);
 
   async function google() {
@@ -71,10 +75,18 @@ export default function LoginPage() {
         </Link>
         <div className="card">
           <h1 className="font-display text-2xl font-semibold text-ink">
-            {mode === "signin" ? "Welcome back" : "Create your account"}
+            {reason === "unlock_roadmap"
+              ? mode === "signin"
+                ? "Sign in to unlock roadmap"
+                : "Create account to unlock roadmap"
+              : mode === "signin"
+              ? "Welcome back"
+              : "Create your account"}
           </h1>
           <p className="mt-1 text-sm text-slate">
-            Save your roadmaps and track your progress.
+            {reason === "unlock_roadmap"
+              ? "Your assessment & personalized roadmap will be linked directly to your account."
+              : "Save your roadmaps and track your progress."}
           </p>
 
           <button

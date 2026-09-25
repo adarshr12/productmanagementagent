@@ -24,6 +24,8 @@ import {
   Zap,
 } from "lucide-react";
 
+import { createBrowserClient } from "@/lib/supabaseClient";
+
 type Phase = "landing" | "intake" | "matching" | "roles" | "generating";
 
 const STATS = [
@@ -78,22 +80,28 @@ export default function Home() {
   const [pickingRole, setPickingRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit(answers: Record<string, string>) {
-    setPhase("matching");
-    try {
-      const res = await fetch("/api/role-match", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Something went wrong.");
-      setMatches(data.matches);
-      setIntakeId(data.intakeId);
-      setPhase("roles");
-    } catch (err: any) {
-      setError(err?.message || "Something went wrong. Please try again.");
-      setPhase("landing");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const pending = sessionStorage.getItem("pending_intake");
+      if (pending) {
+        try {
+          const parsed = JSON.parse(pending);
+          if (parsed?.intakeId && parsed?.matches?.length > 0) {
+            setIntakeId(parsed.intakeId);
+            setMatches(parsed.matches);
+            setPhase("roles");
+          }
+        } catch {
+          // ignore json error
+        }
+      }
+    }
+  }, []);
+
+  function submit(answers: Record<string, string>) {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("pending_answers", JSON.stringify(answers));
+      window.location.href = "/login?next=/r/claim&reason=unlock_roadmap";
     }
   }
 
@@ -102,9 +110,23 @@ export default function Home() {
     setPickingRole(roleId);
     setPhase("generating");
     try {
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("pending_intake", JSON.stringify({ intakeId, roleId }));
+        }
+        router.push(`/login?next=/r/claim&reason=unlock_roadmap`);
+        return;
+      }
+
       const res = await fetch("/api/roadmap", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ intakeId, roleId }),
       });
       const data = await res.json();
