@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Mic, Send, Eye, Compass, Navigation } from "lucide-react";
 import { RobotAvatar } from "@/components/RobotAvatar";
+import { TypingIndicator } from "@/components/TypingIndicator";
 
 type Message = {
   role: "user" | "assistant";
@@ -327,22 +328,7 @@ export function AssistantChat({
           )
         )}
 
-        {sending && (
-          <div className="flex items-start justify-start gap-2.5" role="status" aria-label="Product Mentor is typing">
-            <RobotAvatar size="sm" />
-            <div className="chat-bubble-mentor flex items-center gap-1.5 py-3.5 px-4">
-              <span className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce" />
-              <span
-                className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce"
-                style={{ animationDelay: "0.15s" }}
-              />
-              <span
-                className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce"
-                style={{ animationDelay: "0.3s" }}
-              />
-            </div>
-          </div>
-        )}
+        {sending && <TypingIndicator />}
         <div ref={endRef} />
       </div>
 

@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { Mic, Send, Navigation } from "lucide-react";
 import type { Question } from "@/lib/questions";
 import { RobotAvatar } from "@/components/RobotAvatar";
+import { TypingIndicator } from "@/components/TypingIndicator";
 
 type Turn = { id: string; from: "mentor" | "user"; text: string; at: number };
 
@@ -196,22 +197,7 @@ export function ChatIntake({
           )}
 
           {/* Typing indicator on the LEFT */}
-          {typing && (
-            <div className="flex items-start justify-start gap-3" role="status" aria-label="Product Mentor is typing">
-              <RobotAvatar size="sm" />
-              <div className="chat-bubble-mentor flex items-center gap-1.5 py-3.5 px-4">
-                <span className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce" />
-                <span
-                  className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce"
-                  style={{ animationDelay: "0.15s" }}
-                />
-                <span
-                  className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce"
-                  style={{ animationDelay: "0.3s" }}
-                />
-              </div>
-            </div>
-          )}
+          {typing && <TypingIndicator />}
           <div ref={endRef} />
         </div>
       </div>
