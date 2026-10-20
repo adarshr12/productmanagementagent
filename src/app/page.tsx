@@ -371,7 +371,7 @@ export default function Home() {
                 </div>
               </div>
               <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
-                No résumé required to start. Just a conversation.
+                No resume required to start. Just a conversation.
               </h2>
 
               <p className="mt-4 text-base text-slate sm:text-lg leading-relaxed">
