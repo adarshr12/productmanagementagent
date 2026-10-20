@@ -140,38 +140,23 @@ body {
 }
 
 /* ---- Persona chat (the guided intake + mentor voice) ----
-   Pill-shaped bubbles, evenly rounded on all four corners rather than a
-   directional "tail" — soft light bubble for the mentor, solid near-black
-   for the person, quiet gray timestamp underneath each one. */
+   Matches reference design:
+   - AI / Mentor bubble on LEFT: crisp white, clean border, subtle shadow
+   - User bubble on RIGHT: deep navy blue (#0a3258), white text
+   - Chips & cards for interactive answers */
 .chat-bubble-mentor {
-  @apply max-w-[85%] rounded-[26px] bg-surface-raised px-5 py-3
-    text-sm leading-relaxed text-ink transition-shadow duration-200;
-  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.03), 0 10px 20px -18px rgba(16, 25, 43, 0.14);
+  @apply inline-block w-fit max-w-full rounded-2xl bg-white border border-[#e2e8f0] px-5 py-3
+    text-sm sm:text-[15px] leading-relaxed text-[#1e293b] text-left break-words;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 .chat-bubble-user {
-  @apply max-w-[85%] rounded-[26px] bg-ink px-5 py-3 text-sm leading-relaxed text-white;
-  box-shadow: 0 10px 22px -16px rgba(15, 23, 42, 0.45);
+  @apply inline-block w-fit max-w-full rounded-2xl bg-[#0a3258] px-5 py-2.5
+    text-sm sm:text-[15px] leading-relaxed text-white text-left break-words;
+  box-shadow: 0 4px 14px -2px rgba(10, 50, 88, 0.25);
 }
-/* A small round avatar chip, shared between AssistantChat and ChatIntake so
-   both chat surfaces read as the same conversation with the same mentor,
-   not two differently-branded threads. Default (mentor) framing is a light
-   circle around the app's own robot still, so the character reads clearly
-   against it; the person's own messages get the --user modifier instead,
-   a solid dark chip around a plain person mark. */
-.chat-avatar {
-  @apply flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden
-    rounded-full border border-line bg-white p-1 shadow-sm;
-}
-.chat-avatar img {
-  @apply h-full w-full object-contain;
-}
-.chat-avatar--user {
-  @apply border-0 bg-ink p-0 text-white;
-}
-/* Timestamp caption under a bubble — quiet by default, never competing
-   with the message text for attention. */
+/* Timestamp caption under a bubble */
 .chat-timestamp {
-  @apply mt-1.5 px-1 text-[11px] font-medium text-slate-soft/80;
+  @apply mt-1 px-1 text-[11px] font-medium text-slate-400;
 }
 /* Soft, full-page diagonal wash behind the assistant chat — blue in the
    lower-left, warm cream in the upper-right, violet along the bottom edge,

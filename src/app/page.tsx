@@ -10,6 +10,7 @@ import { ChatIntake } from "@/components/ChatIntake";
 import { SiteNav } from "@/components/SiteNav";
 import { Reveal } from "@/components/Reveal";
 import { PathGraphic } from "@/components/PathGraphic";
+import { RoleScoringLoader } from "@/components/RoleScoringLoader";
 import { HowItWorksShowcase } from "@/components/ui/how-it-works-showcase";
 import { JourneySection } from "@/components/JourneySection";
 import { SearchCardsAnimation } from "@/components/SearchCardsAnimation";
@@ -126,13 +127,17 @@ export default function Home() {
 
   const nav = <SiteNav />;
 
-  // ================= LIVE CHAT INTAKE (full screen, mentor-led) =================
+  // ================= LIVE CHAT INTAKE (full screen) =================
   if (phase === "intake") {
     return (
-      <div className="flex h-screen flex-col">
+      <div className="flex h-screen w-full flex-col bg-[#f8fafc] overflow-hidden">
         {nav}
-        <div className="min-h-0 flex-1">
-          <ChatIntake questions={INTAKE_QUESTIONS} onComplete={submit} />
+        <div className="flex-1 min-h-0 w-full flex flex-col">
+          <ChatIntake
+            questions={INTAKE_QUESTIONS}
+            onComplete={submit}
+            onCancel={() => setPhase("landing")}
+          />
         </div>
         {error && <p className="alert-error mx-6 mb-4">{error}</p>}
       </div>
@@ -511,15 +516,5 @@ export default function Home() {
   }
 
   // ================= MATCHING (brief transition) =================
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-5 text-center">
-      <PathGraphic className="h-32 w-auto" />
-      <h2 className="font-display mt-6 text-2xl font-semibold text-ink">
-        Scoring all 19 roles for you…
-      </h2>
-      <p className="mt-1 text-sm text-slate">
-        This takes a few seconds. Please don&apos;t close the page.
-      </p>
-    </main>
-  );
+  return <RoleScoringLoader />;
 }
