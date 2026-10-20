@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { retrieveChunks } from "@/lib/retrieve";
 import { groqChat, type ChatMessage } from "@/lib/groq";
+import { publicErrorMessage } from "@/lib/publicError";
 import { pickAgent } from "@/lib/orchestrate";
 import { checkAndRecordRateLimit, clientIdentifier } from "@/lib/rateLimit";
 
@@ -8,7 +9,7 @@ import { checkAndRecordRateLimit, clientIdentifier } from "@/lib/rateLimit";
 // holds the conversation and resends it each turn, so there's no server-side
 // session/thread to manage for a v0 feature.
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 90;
 
 const MAX_TURNS = 20; // messages kept from the client-sent history
 const MAX_MESSAGE_LENGTH = 4000;
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     const lastUserMessage = [...history].reverse().find((m) => m.role === "user");
     if (!lastUserMessage) {
-      return NextResponse.json({ error: "No message to respond to." }, { status: 400 });
+      return NextResponse.json({ error: "Please type a message first." }, { status: 400 });
     }
 
     const agent = await pickAgent(history, lastUserMessage.content);
@@ -83,7 +84,12 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Assistant request failed:", err);
     return NextResponse.json(
-      { error: err?.message || "Something went wrong. Please try again." },
+      {
+        error: publicErrorMessage(
+          err,
+          "Your mentor couldn't reply just now. Please send your message again."
+        ),
+      },
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { retrieveChunks } from "@/lib/retrieve";
 import { groqJSON } from "@/lib/groq";
+import { publicErrorMessage } from "@/lib/publicError";
 import { getAgentConfig } from "@/lib/agentConfig";
 import { checkAndRecordRateLimit, clientIdentifier } from "@/lib/rateLimit";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
@@ -14,7 +15,7 @@ import {
 // Step 1 of the flow: take the person's background, score every product role for
 // transition fit, and return the ranked list. Reusable backend API.
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 90;
 
 export async function POST(req: NextRequest) {
   try {
@@ -82,7 +83,12 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Role matching failed:", err);
     return NextResponse.json(
-      { error: err?.message || "Something went wrong scoring roles." },
+      {
+        error: publicErrorMessage(
+          err,
+          "We couldn't analyse your profile right now. Please try again in a minute."
+        ),
+      },
       { status: 500 }
     );
   }

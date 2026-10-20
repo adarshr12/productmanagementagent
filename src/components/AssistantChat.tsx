@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { Mic, Send, Eye, Compass, Navigation } from "lucide-react";
 import { RobotAvatar } from "@/components/RobotAvatar";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { readJson } from "@/lib/readJson";
 
 type Message = {
   role: "user" | "assistant";
@@ -142,7 +143,7 @@ export function AssistantChat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data?.error || "Something went wrong.");
 
       // Contextual follow-up suggestion chips

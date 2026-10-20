@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
+import { readJson } from "@/lib/readJson";
 import { ROLE_CATALOG } from "@/lib/roles";
 import type { RoleMatch } from "@/lib/roleMatch";
 import { RoleScoreGauge } from "@/components/RoleScoreGauge";
@@ -87,7 +88,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data?.error || "Something went wrong.");
       setMatches(data.matches);
       setIntakeId(data.intakeId);
@@ -108,7 +109,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ intakeId, roleId }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data?.error || "Something went wrong.");
       router.push(`/r/${data.shareToken}`);
     } catch (err: any) {

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { retrieveChunks } from "@/lib/retrieve";
 import { groqJSON } from "@/lib/groq";
+import { publicErrorMessage } from "@/lib/publicError";
 import { getAgentConfig } from "@/lib/agentConfig";
 import { getRole } from "@/lib/roles";
 import { buildRoadmapUserContent, roadmapQuery } from "@/lib/roleMatch";
@@ -11,7 +12,7 @@ import { parseRoadmap } from "@/lib/roadmap";
 // Step 2 of the flow: given a saved intake + the chosen role, generate a roadmap.
 // Reusable backend API — a mobile app can call this with { intakeId, roleId }.
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 90;
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
     const role = getRole(roleId);
     if (!intakeId || !role) {
       return NextResponse.json(
-        { error: "Missing or invalid intakeId / roleId." },
+        { error: "Your session has expired. Please fill in the form again." },
         { status: 400 }
       );
     }
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       .eq("id", intakeId)
       .single();
     if (intakeErr || !intake) {
-      return NextResponse.json({ error: "Intake not found." }, { status: 404 });
+      return NextResponse.json({ error: "We couldn't find your answers. Please fill in the form again." }, { status: 404 });
     }
     const answers: Record<string, string> = (intake.answers as any) ?? {};
 
@@ -102,7 +103,12 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Roadmap generation failed:", err);
     return NextResponse.json(
-      { error: err?.message || "Something went wrong generating your roadmap." },
+      {
+        error: publicErrorMessage(
+          err,
+          "We couldn't create your roadmap right now. Please pick your role again in a minute."
+        ),
+      },
       { status: 500 }
     );
   }

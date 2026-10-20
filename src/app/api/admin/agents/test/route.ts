@@ -9,7 +9,7 @@ import { groqJSON } from "@/lib/groq";
 // — instead of round-tripping through the actual end-user flow to check
 // every edit.
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 90;
 
 export async function POST(req: NextRequest) {
   if (!(await verifyAdmin(req))) {
