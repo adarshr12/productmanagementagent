@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { RoadmapStep, StepStatus } from "@/lib/getRoadmap";
+import { RoadmapUnlockOverlay } from "@/components/roadmap/RoadmapUnlockOverlay";
 
 const COLUMNS: { key: StepStatus; label: string; accent: string }[] = [
   { key: "todo", label: "To Do", accent: "border-slate-300" },
@@ -12,15 +13,27 @@ const COLUMNS: { key: StepStatus; label: string; accent: string }[] = [
 export default function KanbanBoard({
   steps,
   move,
+  isAuthenticated = false,
+  shareToken,
+  role,
 }: {
   steps: RoadmapStep[];
   move: (step: RoadmapStep, status: StepStatus) => void;
+  isAuthenticated?: boolean;
+  shareToken?: string;
+  role?: string;
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
 
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-3">
+    <div className="relative min-h-[460px] rounded-2xl">
+      <div
+        className={`grid gap-4 md:grid-cols-3 ${
+          !isAuthenticated
+            ? "filter blur-[6px] select-none pointer-events-none opacity-30"
+            : ""
+        }`}
+      >
         {COLUMNS.map((col) => {
           const colSteps = steps.filter((s) => s.status === col.key);
           return (
@@ -28,11 +41,12 @@ export default function KanbanBoard({
               key={col.key}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => {
+                if (!isAuthenticated) return;
                 const s = steps.find((x) => x.id === dragId);
                 if (s) move(s, col.key);
                 setDragId(null);
               }}
-              className="rounded-2xl bg-paper p-3"
+              className="rounded-2xl bg-paper p-3 border border-line/60"
             >
               <div className="mb-3 flex items-center justify-between px-1">
                 <h2 className="text-sm font-semibold text-slate">
@@ -45,13 +59,12 @@ export default function KanbanBoard({
 
               <div className="space-y-3">
                 {colSteps.map((step) => {
-                  const idx = COLUMNS.findIndex((c) => c.key === step.status);
                   return (
                     <article
                       key={step.id}
-                      draggable
-                      onDragStart={() => setDragId(step.id)}
-                      onDragEnd={() => setDragId(null)}
+                      draggable={isAuthenticated}
+                      onDragStart={() => isAuthenticated && setDragId(step.id)}
+                      onDragEnd={() => isAuthenticated && setDragId(null)}
                       className={`cursor-grab rounded-xl border-l-4 ${col.accent} bg-surface-raised p-3 shadow-glass-sm active:cursor-grabbing`}
                     >
                       <h3
@@ -64,56 +77,31 @@ export default function KanbanBoard({
                         {step.title}
                       </h3>
                       {step.description && (
-                        <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-slate">
+                        <p className="mt-1 line-clamp-2 text-xs text-slate">
                           {step.description}
                         </p>
                       )}
-                      {step.estimated_time && (
-                        <span className="tag mt-2 inline-flex">
-                          ⏱ {step.estimated_time}
-                        </span>
-                      )}
-                      <div className="mt-3 flex items-center justify-between">
-                        <button
-                          onClick={() =>
-                            move(step, COLUMNS[Math.max(0, idx - 1)].key)
-                          }
-                          disabled={idx === 0}
-                          className="min-h-[44px] rounded-md px-3 text-xs font-medium text-slate hover:bg-paper disabled:opacity-30"
-                        >
-                          ◀ Back
-                        </button>
-                        <button
-                          onClick={() =>
-                            move(
-                              step,
-                              COLUMNS[Math.min(COLUMNS.length - 1, idx + 1)].key
-                            )
-                          }
-                          disabled={idx === COLUMNS.length - 1}
-                          className="min-h-[44px] rounded-md px-3 text-xs font-semibold text-accent-500 hover:bg-accent-500/10 disabled:opacity-30"
-                        >
-                          Next ▶
-                        </button>
+                      <div className="mt-2 flex items-center justify-between text-[11px] text-slate-soft">
+                        <span>⏱ {step.estimated_time || "1 week"}</span>
+                        {step.resource_note && <span>📚 Note</span>}
                       </div>
                     </article>
                   );
                 })}
-                {colSteps.length === 0 && (
-                  <p className="px-1 py-6 text-center text-xs text-slate-soft">
-                    Drag steps here
-                  </p>
-                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      <p className="mt-8 text-center text-xs text-slate-soft">
-        Drag cards between columns, or use ◀ / ▶. Bookmark this page to track
-        your progress, anyone with the link can view it.
-      </p>
-    </>
+      {/* Lock overlay when not authenticated */}
+      {!isAuthenticated && shareToken && (
+        <RoadmapUnlockOverlay
+          shareToken={shareToken}
+          role={role}
+          totalSteps={steps.length}
+        />
+      )}
+    </div>
   );
 }

@@ -4,9 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabaseClient";
 
-// Shown on the roadmap page. If the visitor is logged in, it claims the roadmap
-// to their account. If not, it invites them to sign up to save & track progress.
-export default function SaveBar({ shareToken }: { shareToken: string }) {
+export default function SaveBar({
+  shareToken,
+  totalSteps,
+}: {
+  shareToken: string;
+  totalSteps?: number;
+}) {
   const [state, setState] = useState<"checking" | "saved" | "anon">("checking");
 
   useEffect(() => {
@@ -19,7 +23,6 @@ export default function SaveBar({ shareToken }: { shareToken: string }) {
         setState("anon");
         return;
       }
-      // logged in → claim this roadmap (idempotent)
       try {
         await fetch("/api/roadmap/claim", {
           method: "POST",
@@ -40,31 +43,42 @@ export default function SaveBar({ shareToken }: { shareToken: string }) {
 
   if (state === "saved") {
     return (
-      <div className="mb-6 flex items-center justify-between rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3">
-        <span className="text-sm font-medium text-emerald-700">
-          ✓ Saved to your account
-        </span>
-        <Link href="/me" className="text-sm font-semibold text-emerald-700 underline">
-          My roadmaps
+      <div className="mb-6 flex items-center justify-between border-b border-line/60 pb-3 font-mono text-xs text-slate">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="font-semibold text-ink">Synced to your profile</span>
+          <span className="text-slate-soft hidden sm:inline">• All milestones accessible</span>
+        </div>
+        <Link
+          href="/me"
+          className="font-sans font-medium text-accent-500 hover:text-accent-600 hover:underline"
+        >
+          My roadmaps →
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="card mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="text-sm font-bold text-ink">Save your roadmap</p>
-        <p className="text-sm text-slate">
-          Sign up to keep this and track your progress across visits.
-        </p>
+    <div className="mb-6 flex items-center justify-between border-b border-line/60 pb-3 text-xs">
+      <div className="flex items-center gap-2 font-mono">
+        <span className="flex h-2 w-2 rounded-full bg-amber-400" />
+        <span className="font-semibold text-ink">Preview Mode</span>
+        {totalSteps ? (
+          <span className="text-slate-soft hidden sm:inline">
+            • 1 of {totalSteps} milestones active
+          </span>
+        ) : null}
       </div>
-      <Link
-        href={`/login?next=/r/${shareToken}`}
-        className="btn-primary shrink-0"
-      >
-        Sign up / Log in
-      </Link>
+      <div className="flex items-center gap-3">
+        <span className="text-slate hidden sm:inline">Unsaved draft</span>
+        <Link
+          href={`/signup?next=/r/${shareToken}`}
+          className="font-semibold text-ink hover:text-accent-500 transition underline underline-offset-4"
+        >
+          Save to account →
+        </Link>
+      </div>
     </div>
   );
 }

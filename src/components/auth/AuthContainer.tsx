@@ -589,13 +589,13 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
                             Full Name
                           </label>
                           <div className="relative">
-                            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft" />
+                            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft pointer-events-none" />
                             <input
                               id="fullName"
                               type="text"
                               autoComplete="name"
                               placeholder="Alex Morgan"
-                              className="field-input pl-10"
+                              className="field-input !pl-11"
                               value={fullName}
                               onChange={(e) => setFullName(e.target.value)}
                               required
@@ -616,7 +616,7 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
                               id="targetRole"
                               value={targetRole}
                               onChange={(e) => setTargetRole(e.target.value)}
-                              className="field-input pl-10 appearance-none bg-white cursor-pointer"
+                              className="field-input !pl-11 !pr-10 appearance-none bg-white cursor-pointer"
                             >
                               <option value="">Select your preferred role</option>
                               {PM_ROLES.map((role) => (
@@ -636,13 +636,13 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
                           Work or Personal Email
                         </label>
                         <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft" />
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft pointer-events-none" />
                           <input
                             id="email"
                             type="email"
                             autoComplete="email"
                             placeholder="alex@example.com"
-                            className="field-input pl-10"
+                            className="field-input !pl-11"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -672,14 +672,14 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
                             )}
                           </div>
                           <div className="relative">
-                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft" />
+                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft pointer-events-none" />
                             <input
                               id="password"
                               type={showPassword ? "text" : "password"}
                               autoComplete={mode === "signin" ? "current-password" : "new-password"}
                               placeholder="••••••••"
                               minLength={6}
-                              className="field-input pl-10 pr-10"
+                              className="field-input !pl-11 !pr-11"
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               required
@@ -732,14 +732,14 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
                             Confirm Password
                           </label>
                           <div className="relative">
-                            <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft" />
+                            <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-soft pointer-events-none" />
                             <input
                               id="confirmPassword"
                               type={showConfirmPassword ? "text" : "password"}
                               autoComplete="new-password"
                               placeholder="••••••••"
                               minLength={6}
-                              className={`field-input pl-10 pr-10 ${
+                              className={`field-input !pl-11 !pr-11 ${
                                 confirmPassword && password !== confirmPassword
                                   ? "border-rose-300 focus:border-rose-400"
                                   : ""

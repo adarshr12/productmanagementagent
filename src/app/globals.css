@@ -104,17 +104,19 @@ body {
 }
 
 /* ---- Cards / inputs — a real surface, not a flat fill ---- */
-.card {
-  @apply relative rounded-2xl border border-line bg-white p-6 sm:p-7;
-  box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 16px 32px -20px rgba(16, 25, 43, 0.12);
-}
-.field-label {
-  @apply mb-1.5 block text-sm font-medium text-slate;
-}
-.field-input {
-  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink
-    outline-none transition placeholder:text-slate-soft
-    focus:border-accent-500 focus:shadow-[0_0_0_3px_rgba(21,94,239,0.12)];
+@layer components {
+  .card {
+    @apply relative rounded-2xl border border-line bg-white p-6 sm:p-7;
+    box-shadow: 0 1px 2px rgba(16, 25, 43, 0.04), 0 16px 32px -20px rgba(16, 25, 43, 0.12);
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-slate;
+  }
+  .field-input {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink
+      outline-none transition placeholder:text-slate-soft
+      focus:border-accent-500 focus:shadow-[0_0_0_3px_rgba(21,94,239,0.12)];
+  }
 }
 
 /* ---- Small helpers ---- */

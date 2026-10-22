@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { RoadmapStep, StepStatus } from "@/lib/getRoadmap";
 import MentorFocus from "./MentorFocus";
 import KanbanBoard from "./KanbanBoard";
 import { JourneyMap } from "@/components/JourneyMap";
+import { createBrowserClient } from "@/lib/supabaseClient";
 
 type View = "mentor" | "board";
 
@@ -26,12 +27,31 @@ export default function ResultsClient({
   const [steps, setSteps] = useState<RoadmapStep[]>(initialSteps);
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState<View>("mentor");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const done = useMemo(
     () => steps.filter((s) => s.status === "done").length,
     [steps]
   );
   const pct = steps.length ? Math.round((done / steps.length) * 100) : 0;
+  const previewPct = steps.length ? Math.round((1 / steps.length) * 100) : 12;
 
   async function move(step: RoadmapStep, status: StepStatus) {
     if (step.status === status) return;
@@ -64,46 +84,52 @@ export default function ResultsClient({
   }
 
   return (
-    <main className="py-10 sm:py-14">
-      <header className="mb-6">
+    <main className="py-6 sm:py-10">
+      <header className="mb-8">
         {role && (
-          <p className="tag text-accent-500">roadmap · {role}</p>
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-accent-600 mb-1.5">
+            Roadmap · {role}
+          </p>
         )}
-        <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-ink">
           {title}
         </h1>
         {overview && (
-          <p className="mt-3 max-w-3xl whitespace-pre-line leading-relaxed text-slate">
+          <p className="mt-3 max-w-3xl whitespace-pre-line text-sm sm:text-base leading-relaxed text-slate">
             {overview}
           </p>
         )}
       </header>
 
-      {/* progress + share */}
-      <div className="card mb-6">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate">
-            {done} of {steps.length} steps done
+      {/* Progress & Quick Share */}
+      <div className="card mb-8 p-5">
+        <div className="flex items-center justify-between text-xs sm:text-sm font-mono">
+          <span className="text-slate">
+            {isAuthenticated
+              ? `${done} of ${steps.length} milestones complete`
+              : `Milestone 01 active · ${steps.length - 1} queued`}
           </span>
-          <span className="text-sm font-semibold text-accent-500">{pct}%</span>
+          <span className="font-semibold text-ink">
+            {isAuthenticated ? `${pct}%` : `${previewPct}% preview`}
+          </span>
         </div>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line">
+        <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-line">
           <div
-            className="h-full rounded-full bg-accent-500 transition-all"
-            style={{ width: `${pct}%` }}
+            className="h-full rounded-full bg-ink transition-all duration-300"
+            style={{ width: `${isAuthenticated ? pct : previewPct}%` }}
           />
         </div>
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between text-xs">
           <button
             onClick={copyLink}
-            className="text-sm font-medium text-accent-500 hover:text-accent-600"
+            className="font-medium text-slate hover:text-ink transition underline underline-offset-4"
           >
-            {copied ? "✓ Link copied" : "Copy shareable link"}
+            {copied ? "✓ Link copied to clipboard" : "Share roadmap link"}
           </button>
           {view === "board" && (
             <button
               onClick={() => setView("mentor")}
-              className="text-sm font-medium text-slate-soft hover:text-ink"
+              className="font-medium text-slate-soft hover:text-ink transition"
             >
               ← Back to guidance
             </button>
@@ -113,12 +139,12 @@ export default function ResultsClient({
 
       {view === "mentor" ? (
         <>
-          <div className="mb-6">
+          <div className="mb-8">
             <JourneyMap
-              steps={steps.map((s) => ({
+              steps={steps.map((s, idx) => ({
                 id: s.id,
                 title: s.title,
-                status: s.status,
+                status: !isAuthenticated && idx > 0 ? "todo" : s.status,
               }))}
               startLabel={
                 startContext.currentRole ||
@@ -132,10 +158,19 @@ export default function ResultsClient({
             steps={steps}
             move={move}
             onViewBoard={() => setView("board")}
+            isAuthenticated={isAuthenticated}
+            shareToken={shareToken}
+            role={role}
           />
         </>
       ) : (
-        <KanbanBoard steps={steps} move={move} />
+        <KanbanBoard
+          steps={steps}
+          move={move}
+          isAuthenticated={isAuthenticated}
+          shareToken={shareToken}
+          role={role}
+        />
       )}
     </main>
   );

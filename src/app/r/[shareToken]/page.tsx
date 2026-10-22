@@ -18,7 +18,7 @@ export default async function ResultsPage({
     <div className="min-h-screen">
       <SiteNav />
       <div className="mx-auto max-w-5xl px-4 pt-6">
-        <SaveBar shareToken={params.shareToken} />
+        <SaveBar shareToken={params.shareToken} totalSteps={data.steps.length} />
         <ResultsClient
           shareToken={params.shareToken}
           title={data.roadmap.title || "Your Career Roadmap"}
