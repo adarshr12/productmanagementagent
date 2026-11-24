@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabaseClient";
-import { apiUrl } from "@/lib/api";
 
 export default function SaveBar({
   shareToken,
@@ -25,7 +24,7 @@ export default function SaveBar({
         return;
       }
       try {
-        await fetch(apiUrl("/api/roadmap/claim"), {
+        await fetch("/api/roadmap/claim", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

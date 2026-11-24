@@ -6,7 +6,6 @@ import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabaseClient";
 import { ROLE_CATALOG } from "@/lib/roles";
 import { SiteNav } from "@/components/SiteNav";
-import { apiUrl } from "@/lib/api";
 
 type Row = {
   shareToken: string;
@@ -35,7 +34,7 @@ export default function MyRoadmapsPage() {
         return;
       }
       setEmail(session.user.email ?? null);
-      const res = await fetch(apiUrl("/api/my/roadmaps"), {
+      const res = await fetch("/api/my/roadmaps", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       const data = await res.json();

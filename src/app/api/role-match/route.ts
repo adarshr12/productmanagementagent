@@ -6,7 +6,6 @@ import { publicErrorMessage } from "@/lib/publicError";
 import { getAgentConfig } from "@/lib/agentConfig";
 import { checkAndRecordRateLimit, clientIdentifier } from "@/lib/rateLimit";
 import { INTAKE_QUESTIONS } from "@/lib/questions";
-import { verifyUser } from "@/lib/verifyUser";
 import {
   backgroundQuery,
   buildRoleMatchUserContent,
@@ -45,11 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     // save the intake (dedicated columns + full answers blob)
-    const user = await verifyUser(req);
     const intakeRow: Record<string, unknown> = { answers };
-    if (user?.id) {
-      intakeRow.user_id = user.id;
-    }
     for (const q of INTAKE_QUESTIONS) {
       if (q.column) {
         intakeRow[q.column] = String(answers[q.id] ?? "").trim() || null;

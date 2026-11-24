@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createBrowserClient } from "@/lib/supabaseClient";
-import { apiUrl } from "@/lib/api";
 
 type DocRow = {
   id: string;
@@ -75,7 +74,7 @@ export function KnowledgeBasePanel() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    const res = await fetch(apiUrl("/api/ingest"), {
+    const res = await fetch("/api/ingest", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,8 +1,6 @@
-import { Suspense } from "react";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
-import { UserIdAuthHandler } from "@/components/auth/UserIdAuthHandler";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -81,9 +79,6 @@ export default function RootLayout({
     >
       <body className="font-sans">
         <div className="grain-overlay" aria-hidden="true" />
-        <Suspense fallback={null}>
-          <UserIdAuthHandler />
-        </Suspense>
         {children}
       </body>
     </html>
