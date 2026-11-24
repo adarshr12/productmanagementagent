@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabaseClient";
+import { apiUrl } from "@/lib/api";
 
 type CompletionRow = {
   roadmap_id: string;
@@ -29,7 +30,7 @@ export default function CompletionsPage() {
         router.replace("/admin/login");
         return;
       }
-      const res = await fetch("/api/admin/completions", {
+      const res = await fetch(apiUrl("/api/admin/completions"), {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       const data = await res.json();

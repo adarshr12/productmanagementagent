@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { DotLottieReact, DotLottie, setWasmUrl } from "@lottiefiles/dotlottie-react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
+import { assetUrl } from "@/lib/api";
 
 // Same reasoning as SearchCardsAnimation: self-host the WASM render engine
 // instead of letting dotlottie-web fetch it from a CDN at runtime, so the
 // mentor's presence doesn't silently stall on its first frame behind a
 // third-party request.
-setWasmUrl("/animations/dotlottie-player.wasm");
+setWasmUrl(assetUrl("/animations/dotlottie-player.wasm"));
 
 export type MentorState = "idle" | "listening" | "thinking" | "responding";
 
@@ -103,7 +104,7 @@ export function MentorPresence({
           poster, intentionally not run through next/image so it paints as
           soon as the page does. */}
       <img
-        src="/animations/animation-bot-poster.svg"
+        src={assetUrl("/animations/animation-bot-poster.svg")}
         alt=""
         aria-hidden="true"
         className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${
@@ -112,7 +113,7 @@ export function MentorPresence({
       />
 
       <DotLottieReact
-        src="/animations/animation-bot.lottie"
+        src={assetUrl("/animations/animation-bot.lottie")}
         autoplay={!reduceMotion}
         loop={!reduceMotion}
         dotLottieRefCallback={setDotLottie}
