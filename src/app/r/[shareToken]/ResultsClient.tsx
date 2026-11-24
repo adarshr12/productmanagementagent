@@ -6,6 +6,7 @@ import MentorFocus from "./MentorFocus";
 import KanbanBoard from "./KanbanBoard";
 import { JourneyMap } from "@/components/JourneyMap";
 import { createBrowserClient } from "@/lib/supabaseClient";
+import { apiUrl } from "@/lib/api";
 
 type View = "mentor" | "board";
 
@@ -60,7 +61,7 @@ export default function ResultsClient({
       list.map((s) => (s.id === step.id ? { ...s, status } : s))
     );
     try {
-      const res = await fetch("/api/step/move", {
+      const res = await fetch(apiUrl("/api/step/move"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ shareToken, stepId: step.id, status }),

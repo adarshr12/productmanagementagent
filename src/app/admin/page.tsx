@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabaseClient";
 import { AgentPromptsPanel } from "@/components/admin/AgentPromptsPanel";
 import { KnowledgeBasePanel } from "@/components/admin/KnowledgeBasePanel";
+import { apiUrl } from "@/lib/api";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -23,12 +24,12 @@ export default function AdminDashboardPage() {
       }
       // A valid session isn't enough on its own once public sign-up exists —
       // confirm allowlist membership server-side before rendering anything.
-      const res = await fetch("/api/admin/whoami", {
+      const res = await fetch(apiUrl("/api/admin/whoami"), {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (!res.ok) {
-        await supabase.auth.signOut();
-        router.replace("/admin/login");
+        // If logged in as regular user, redirect to their user workspace
+        router.replace(`/user/${session.user.id}`);
         return;
       }
       setReady(true);
