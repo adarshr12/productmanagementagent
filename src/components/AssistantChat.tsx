@@ -6,7 +6,6 @@ import { Mic, Send, Eye, Compass, Navigation } from "lucide-react";
 import { RobotAvatar } from "@/components/RobotAvatar";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { readJson } from "@/lib/readJson";
-import { apiUrl } from "@/lib/api";
 
 type Message = {
   role: "user" | "assistant";
@@ -139,7 +138,7 @@ export function AssistantChat({
     emitMentorPresence("thinking");
 
     try {
-      const res = await fetch(apiUrl("/api/assistant"), {
+      const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next }),

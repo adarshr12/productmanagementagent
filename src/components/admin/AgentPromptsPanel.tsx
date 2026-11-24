@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@/lib/supabaseClient";
-import { apiUrl } from "@/lib/api";
 
 type Agent = {
   agent_key: string;
@@ -34,7 +33,7 @@ export function AgentPromptsPanel() {
         data: { session },
       } = await supabase.auth.getSession();
       try {
-        const res = await fetch(apiUrl("/api/admin/agents"), {
+        const res = await fetch("/api/admin/agents", {
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
         const data = await res.json();
@@ -105,7 +104,7 @@ function AgentCard({
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      const res = await fetch(apiUrl("/api/admin/agents"), {
+      const res = await fetch("/api/admin/agents", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -257,7 +256,7 @@ function PromptPlayground({
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      const res = await fetch(apiUrl("/api/admin/agents/test"), {
+      const res = await fetch("/api/admin/agents/test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

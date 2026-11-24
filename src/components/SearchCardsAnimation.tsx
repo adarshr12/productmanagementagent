@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { DotLottieReact, DotLottie, setWasmUrl } from "@lottiefiles/dotlottie-react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
-import { assetUrl } from "@/lib/api";
 
 // dotlottie-web fetches its WASM render engine from a CDN (jsdelivr, with an
 // unpkg fallback) by default. That's an unnecessary runtime dependency on a
@@ -13,7 +12,7 @@ import { assetUrl } from "@/lib/api";
 // error surfaced anywhere in the UI. Self-hosting the same .wasm file
 // (copied from node_modules/@lottiefiles/dotlottie-web/dist) removes that
 // point of failure entirely.
-setWasmUrl(assetUrl("/animations/dotlottie-player.wasm"));
+setWasmUrl("/animations/dotlottie-player.wasm");
 
 /**
  * Renders the "search cards" illustration from the Lottie source
@@ -63,14 +62,14 @@ export function SearchCardsAnimation({ className = "" }: { className?: string })
           poster, intentionally not run through next/image's optimizer so it
           paints as soon as the page does. */}
       <img
-        src={assetUrl("/animations/search-cards.svg")}
+        src="/animations/search-cards.svg"
         alt="A person searching a stack of candidate cards with a magnifying glass"
         className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${
           isLoaded ? "opacity-0" : "opacity-100"
         }`}
       />
       <DotLottieReact
-        src={assetUrl("/animations/search-cards.lottie")}
+        src="/animations/search-cards.lottie"
         autoplay={true}
         loop={true}
         dotLottieRefCallback={setDotLottie}

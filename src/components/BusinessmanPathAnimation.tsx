@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { DotLottieReact, DotLottie, setWasmUrl } from "@lottiefiles/dotlottie-react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
-import { assetUrl } from "@/lib/api";
 
 // Self-host the WASM engine locally to avoid runtime CDN failures
-setWasmUrl(assetUrl("/animations/dotlottie-player.wasm"));
+setWasmUrl("/animations/dotlottie-player.wasm");
 
 /**
  * Decorative-only illustration (see BusinessmanStaircaseMap, which overlays
@@ -46,7 +45,7 @@ export function BusinessmanPathAnimation({
       {/* Static SVG Poster displayed instantly on first paint while WASM initializes */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={assetUrl("/animations/businessman-path.svg")}
+        src="/animations/businessman-path.svg"
         alt="Businessman climbing career path stairs animation"
         className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-500 ${
           isLoaded ? "opacity-0" : "opacity-100"
@@ -55,7 +54,7 @@ export function BusinessmanPathAnimation({
 
       {/* Live DotLottie 60fps Vector Animation */}
       <DotLottieReact
-        src={assetUrl("/animations/businessman-path.lottie")}
+        src="/animations/businessman-path.lottie"
         autoplay={autoplay}
         loop={loop}
         dotLottieRefCallback={setDotLottie}

@@ -8,7 +8,6 @@ import { getAgentConfig } from "@/lib/agentConfig";
 import { getRole } from "@/lib/roles";
 import { buildRoadmapUserContent, roadmapQuery } from "@/lib/roleMatch";
 import { parseRoadmap } from "@/lib/roadmap";
-import { verifyUser } from "@/lib/verifyUser";
 
 // Step 2 of the flow: given a saved intake + the chosen role, generate a roadmap.
 // Reusable backend API — a mobile app can call this with { intakeId, roleId }.
@@ -31,12 +30,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = await verifyUser(req);
-
     // fetch the saved intake answers
     const { data: intake, error: intakeErr } = await supabaseAdmin
       .from("intake_responses")
-      .select("id, answers, user_id")
+      .select("id, answers")
       .eq("id", intakeId)
       .single();
     if (intakeErr || !intake) {
@@ -83,7 +80,6 @@ export async function POST(req: NextRequest) {
         content: roadmap.overview,
         role: role.label,
         model: process.env.GEMINI_CHAT_MODEL || "gemini-3.6-flash",
-        user_id: user?.id ?? (intake as any)?.user_id ?? null,
       })
       .select("id")
       .single();

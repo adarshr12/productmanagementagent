@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { assetUrl } from "@/lib/api";
 
 export interface RobotAvatarProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -36,7 +35,7 @@ export function RobotAvatar({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={assetUrl("/animations/animation-bot-poster.svg")}
+          src="/animations/animation-bot-poster.svg"
           alt="Product Mentor"
           className="h-full w-full object-contain"
         />
