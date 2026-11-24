@@ -6,6 +6,7 @@ const basePath =
 
 const nextConfig = {
   reactStrictMode: true,
+  optimizeFonts: false,
   basePath: basePath || undefined,
   images: {
     remotePatterns: [
