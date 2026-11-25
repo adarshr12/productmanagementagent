@@ -25,6 +25,7 @@ import {
   Check,
 } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabaseClient";
+import { BASE_PATH, apiUrl } from "@/lib/api";
 
 export type AuthMode = "signin" | "signup" | "forgot";
 
@@ -68,12 +69,25 @@ function friendlyAuthError(error: { message?: string; status?: number }): string
   return message;
 }
 
+function getRedirectTarget(nextUrl: string, userId?: string) {
+  if (nextUrl && nextUrl !== "/" && nextUrl !== "/login" && nextUrl !== "/signup") {
+    if (nextUrl.startsWith("/user/") && userId) {
+      return `/user/${userId}`;
+    }
+    return nextUrl;
+  }
+  if (userId) {
+    return `/user/${userId}`;
+  }
+  return "/";
+}
+
 export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [next, setNext] = useState("/me");
+  const [next, setNext] = useState("/");
 
   // Form Fields
   const [fullName, setFullName] = useState("");
@@ -95,6 +109,16 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
+    const isConfirmed = searchParams.get("confirmed") === "true";
+    if (isConfirmed) {
+      setMode("signin");
+      setSuccessMessage(
+        "Email confirmed successfully! Please sign in with your credentials to continue."
+      );
+      const supabase = createBrowserClient();
+      supabase.auth.signOut();
+      return;
+    }
     const n = searchParams.get("next");
     if (n && n.startsWith("/")) {
       setNext(n);
@@ -111,13 +135,27 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
 
   // Check if user is already logged in
   useEffect(() => {
+    const isConfirmed = searchParams.get("confirmed") === "true";
+    if (isConfirmed) return;
+
     const supabase = createBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        router.replace(next);
+        if (!next || next === "/" || next === "/login") {
+          try {
+            const adminRes = await fetch(apiUrl("/api/admin/whoami"), {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            });
+            if (adminRes.ok) {
+              router.replace("/admin");
+              return;
+            }
+          } catch {}
+        }
+        router.replace(getRedirectTarget(next, session.user.id));
       }
     });
-  }, [next, router]);
+  }, [next, router, searchParams]);
 
   // Password Strength calculation
   const getPasswordStrength = (pass: string) => {
@@ -152,7 +190,7 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}${next}`,
+          redirectTo: `${window.location.origin}${BASE_PATH}/login`,
         },
       });
       if (error) {
@@ -181,7 +219,7 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
       setLoading(true);
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/login?next=/me`,
+          redirectTo: `${window.location.origin}${BASE_PATH}/login?next=/me`,
         });
         setLoading(false);
         if (error) {
@@ -224,7 +262,7 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
               full_name: fullName.trim() || undefined,
               target_role: targetRole || undefined,
             },
-            emailRedirectTo: `${window.location.origin}${next}`,
+            emailRedirectTo: `${window.location.origin}${BASE_PATH}/login?confirmed=true`,
           },
         });
         setLoading(false);
@@ -235,7 +273,7 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
 
         if (data.session) {
           // Auto signed in!
-          router.push(next);
+          router.push(getRedirectTarget(next, data.session.user.id));
         } else {
           // Confirmation email sent
           setSignupComplete(true);
@@ -250,7 +288,7 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
     // Mode: SIGN IN
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -259,7 +297,23 @@ export function AuthContainer({ initialMode = "signin" }: AuthContainerProps) {
         setError(friendlyAuthError(error));
         return;
       }
-      router.push(next);
+      const session = data.session || (await supabase.auth.getSession()).data.session;
+      const userId = data.user?.id || session?.user?.id;
+
+      // If user is admin and not specifically targeting another URL, send them to /admin
+      if (session?.access_token && (!next || next === "/" || next === "/login")) {
+        try {
+          const adminRes = await fetch(apiUrl("/api/admin/whoami"), {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (adminRes.ok) {
+            router.push("/admin");
+            return;
+          }
+        } catch {}
+      }
+
+      router.push(getRedirectTarget(next, userId));
     } catch {
       setLoading(false);
       setError("Sign-in failed. Please check your network and credentials.");

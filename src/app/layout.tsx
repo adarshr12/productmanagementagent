@@ -1,30 +1,7 @@
+import { Suspense } from "react";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-// Bricolage Grotesque for headlines: a variable grotesque with real optical
-// character at display sizes, replacing Space Grotesk — one of the most
-// reached-for "modern tech" fonts in AI-generated sites, which is exactly
-// why it reads as generic rather than distinctive.
-const grotesk = Bricolage_Grotesque({
-  subsets: ["latin"],
-  variable: "--font-grotesk",
-  weight: ["500", "600", "700", "800"],
-});
-
-// Mono for tags/labels/scores — replaces uppercase-tracking-wide sans labels
-// (a very common generic-AI-SaaS tell) with a distinct typographic register.
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500"],
-});
+import { UserIdAuthHandler } from "@/components/auth/UserIdAuthHandler";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const title = "ProductPath: find your best-fit product role";
@@ -73,12 +50,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${jakarta.variable} ${grotesk.variable} ${mono.variable}`}
-    >
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="font-sans">
         <div className="grain-overlay" aria-hidden="true" />
+        <Suspense fallback={null}>
+          <UserIdAuthHandler />
+        </Suspense>
         {children}
       </body>
     </html>

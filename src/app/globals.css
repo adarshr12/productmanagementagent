@@ -6,6 +6,10 @@
    can't reach into the Tailwind theme) still derive from the same three
    values instead of carrying their own hand-typed, driftable copies. */
 :root {
+  --font-jakarta: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-grotesk: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
   --accent-200: #c9dcf7;
   --accent-500: #3f6ddc;
   --accent-teal: #5886f5;
